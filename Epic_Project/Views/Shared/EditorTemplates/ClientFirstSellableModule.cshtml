@@ -1,0 +1,7 @@
+﻿@model Epic_Project.Models.MurabahaViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+                                .DataValueField("FirstSellableModuleValue")
+                                .DataTextField("FirstSellableModuleName")
+                                .BindTo((System.Collections.IEnumerable)ViewData["firstSellableModules"])
+)

@@ -1,0 +1,7 @@
+﻿@model Epic_Project.Models.Module
+
+@(Html.Kendo().DropDownListFor(m => m)
+                            .DataValueField("LocationValue")
+                            .DataTextField("LocationName")
+                            .BindTo((System.Collections.IEnumerable)ViewData["projectLocations"])
+)

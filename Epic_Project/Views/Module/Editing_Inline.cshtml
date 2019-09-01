@@ -1,0 +1,65 @@
+﻿@(Html.Kendo().Grid<Module>()
+                .Name("grid")
+                .Columns(columns =>
+                {
+                    columns.Bound(m => m.ModuleId).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    columns.Bound(m => m.ModuleName).Width(840).HtmlAttributes(new { style = "text-align:left; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    
+                    columns.Command(command => { command.Edit(); }).Width(90);
+                })
+                .ToolBar(toolbar => toolbar.Create())
+                .Editable(editable => editable.Mode(GridEditMode.InLine))
+                .Groupable()
+                .Scrollable()
+                .Resizable(resizable => resizable.Columns(true))
+                .Reorderable(reorderable => reorderable.Columns(true))
+                .HtmlAttributes(new { style = "background-color: Gainsboro" })
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Events(events => events.Error("error_handler"))
+                    .Model(model =>
+                    {
+                        model.Id(m => m.ModuleId);
+                        model.Field(m => m.ModuleId).Editable(false);
+                    })
+                    .Create(update => update.Action("EditingInLine_Create", "Module"))
+                    .Read(read => read.Action("EditingInLine_Read", "Module"))
+                    .Update(update => update.Action("EditingInLine_Update", "Module"))
+                )
+)
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid");
+
+        var minimumAcceptableGridHeight = 300;
+        var windowHeight = $(window).innerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+</script>

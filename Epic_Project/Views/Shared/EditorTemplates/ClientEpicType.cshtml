@@ -1,0 +1,7 @@
+﻿@model Epic_Project.Models.EpicTypeViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+                        .DataValueField("TypeValue")
+                        .DataTextField("TypeName")
+                        .BindTo((System.Collections.IEnumerable)ViewData["types"])
+)

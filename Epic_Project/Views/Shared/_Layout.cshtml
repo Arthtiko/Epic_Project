@@ -1,0 +1,176 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Custom fonts for this template-->
+    <link href="~/admin-temp/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <!-- Page level plugin CSS-->
+    <link href="~/admin-temp/vendor/datatables/dataTables.bootstrap4.css" rel="stylesheet">
+    <!-- Custom styles for this template-->
+    <link href="~/admin-temp/css/sb-admin.css" rel="stylesheet">
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+    </environment>
+    <environment include="Development">
+        <link rel="stylesheet" href="~/lib/kendo-ui/styles/kendo.common-nova.min.css" />
+        <link rel="stylesheet" href="~/lib/kendo-ui/styles/kendo.nova.min.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet"
+              href="https://kendo.cdn.telerik.com/2019.1.115/styles/kendo.common-nova.min.css"
+              asp-fallback-href="~/lib/kendo-ui/styles/kendo.common-nova.min.css"
+              asp-fallback-test-class="k-common-test-class"
+              asp-fallback-test-property="opacity" asp-fallback-test-value="0" />
+
+        <link rel="stylesheet"
+              href="https://kendo.cdn.telerik.com/2019.1.115/styles/kendo.nova.min.css"
+              asp-fallback-href="~/lib/kendo-ui/styles/kendo.nova.min.css"
+              asp-fallback-test-class="k-theme-test-class"
+              asp-fallback-test-property="opacity" asp-fallback-test-value="0" />
+    </environment>
+
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+
+        @* Place Kendo UI scripts after jQuery *@
+        <script src="~/lib/kendo-ui/js/kendo.all.min.js"></script>
+        <script src="~/lib/kendo-ui/js/kendo.aspnetmvc.min.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
+        </script>
+
+        @* Place Kendo UI scripts after jQuery *@
+        <script src="https://kendo.cdn.telerik.com/2019.1.115/js/kendo.all.min.js"
+                asp-fallback-src="~/lib/kendo-ui/js/kendo.all.min.js"
+                asp-fallback-test="window.kendo">
+        </script>
+        <script src="https://kendo.cdn.telerik.com/2019.1.115/js/kendo.aspnetmvc.min.js"
+                asp-fallback-src="~/lib/kendo-ui/js/kendo.aspnetmvc.min.js"
+                asp-fallback-test="kendo.data.transports['aspnetmvc-ajax']">
+        </script>
+        <!-- Bootstrap core JavaScript-->
+        <script src="~/admin-temp/vendor/jquery/jquery.min.js"></script>
+        <script src="~/admin-temp/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="~/admin-temp/vendor/jquery-easing/jquery.easing.min.js"></script>
+        <!-- Page level plugin JavaScript-->
+        <script src="~/admin-temp/vendor/chart.js/Chart.min.js"></script>
+        <script src="~/admin-temp/vendor/datatables/jquery.dataTables.js"></script>
+        <script src="~/admin-temp/vendor/datatables/dataTables.bootstrap4.js"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="~/admin-temp/js/sb-admin.min.js"></script>
+        <!-- Demo scripts for this page-->
+        <script src="~/admin-temp/js/demo/datatables-demo.js"></script>
+        <script src="~/admin-temp/js/demo/chart-area-demo.js"></script>
+    </environment>
+</head>
+<body>
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <ul class="sidebar navbar-nav row">
+            @if (Context.User.Identity.IsAuthenticated)
+            {
+                @if (Context.User.IsInRole("Admin"))
+                {
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/Grid/Editing_Inline">
+                            <span style="font-size: 15px">Epic Base Line</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/MeasurementGrid/Editing_Inline">
+                            <span style="font-size: 15px">Measurement</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/MeasurementGrid/Editing_Inline_Details">
+                            <span style="font-size: 15px">Measurement Details</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/Module/Editing_Inline">
+                            <span style="font-size: 15px">Modules</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/Team/Editing_Inline">
+                            <span style="font-size: 15px">Teams</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/Employee/Editing_Inline">
+                            <span style="font-size: 15px">Employees</span>
+                        </a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item" style="margin-top: 20px;">
+                        <a class="nav-link" href="~/MeasurementGrid/Editing_Inline_Details">
+                            <span style="font-size: 15px">Measurement Details</span>
+                        </a>
+                    </li>
+                }
+            }
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <li class="nav-item" style="margin-top: 120px;">
+                    <a class="nav-link">
+                        <span style="font-size: 15px; color: darkgray;">@UserManager.GetUserName(User)</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px;">
+                    <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">
+                        <span style="font-size: 15px">Register</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px;">
+                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">
+                        <button type="submit" class="btn btn-link">
+                            <span style="font-size: 15px">Logout</span>
+                        </button>
+                    </form>
+                </li>
+            }
+            else
+            {
+                <li class="nav-item" style="margin-top: 20px;">
+                    <a asp-area="Identity" asp-page="/Account/Register">
+                        <span style="font-size: 15px">Register</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px;">
+                    <a asp-area="Identity" asp-page="/Account/Login">
+                        <span style="font-size: 15px">Login</span>
+                    </a>
+                </li>
+
+            }
+        </ul>
+        <div id="content-wrapper" style="font-size: 13px">
+            <div style="margin-left: 230px">@RenderBody()</div>
+        </div>
+    </div>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

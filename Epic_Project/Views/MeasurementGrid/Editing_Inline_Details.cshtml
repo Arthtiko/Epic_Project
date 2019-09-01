@@ -1,0 +1,159 @@
+﻿@model MeasurementSearchModel
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
+
+<form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline_Details" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
+    Year-Month:
+    <select class="k-select" id="form-select" style="width: 200px;" onchange="this.form.submit();" asp-for="YearMonth">
+        <option>@Model.Year-@Model.Month</option>
+    </select>
+</form>
+
+@(Html.Kendo().Grid<MeasurementDetailsViewModel>()
+            .Name("grid")
+            .Columns(columns =>
+            {
+                columns.Bound(m => m.EpicId).Filterable(false).HtmlAttributes(new { style = "text-align:center; height:45px; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(80).Locked(true);
+                columns.Bound(m => m.EpicName).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(175).Locked(true);
+                columns.Bound(m => m.Module.ModuleName).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(175);
+                columns.Bound(m => m.Year).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(100);
+                columns.Bound(m => m.Month).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(100);
+                columns.Bound(m => m.EpicWeight).Filterable(false).Format("{0:0.000000}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(95);
+                columns.Bound(m => m.Estimation).Filterable(false).Format("{0:0.00}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(95);
+                columns.Bound(m => m.Team.TeamName).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
+                columns.Group(g => g.Title("Previous Month").HeaderHtmlAttributes(new { style = "text-align:center; background-color: #FFF2CC" }).Columns(c =>
+                {
+                    c.Bound(m => m.PrevMonthRequirementProgress).Title("Requirement Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(110);
+                    c.Bound(m => m.PrevMonthDesignProgress).Title("Design Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
+                    c.Bound(m => m.PrevMonthDevelopmentProgress).Title("Development Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(110);
+                    c.Bound(m => m.PrevMonthTestProgress).Title("Test Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
+                    c.Bound(m => m.PrevMonthUatProgress).Title("Uat Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
+                    c.Bound(m => m.PrevMonthOverallEpicCompilation).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Width(120).Filterable(false).Title("Overall Epic Compilation").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" });
+                    c.Bound(m => m.PrevMonthWeightedOverallProgress).Title("Weighted Overall Progress").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
+                }));
+                columns.Group(g => g.Title("Current Actual").HeaderHtmlAttributes(new { style = "text-align:center; background-color: #f8cbad" }).Columns(c =>
+                {
+                    c.Bound(m => m.ActualRequirementProgress).Title("Requirement Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(110);
+                    c.Bound(m => m.ActualDesignProgress).Title("Design Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
+                    c.Bound(m => m.ActualDevelopmentProgress).Title("Development Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(110);
+                    c.Bound(m => m.ActualTestProgress).Title("Test Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
+                    c.Bound(m => m.ActualUatProgress).Title("Uat Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
+                    c.Bound(m => m.ActualOverallEpicCompilation).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress2' data-role='progressbar' style='width: 100%;  background-color: White;'></div>").Title("Overall Epic Compilation").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(120);
+                    c.Bound(m => m.ActualWeightedOverallProgress).Title("Weighted Overall Progress").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
+                }));
+                columns.Group(g => g.Title("Current Target").HeaderHtmlAttributes(new { style = "text-align:center; background-color: PowderBlue" }).Columns(c =>
+                {
+                    c.Bound(m => m.TargetRequirementProgress).Title("Requirement Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(110);
+                    c.Bound(m => m.TargetDesignProgress).Title("Design Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
+                    c.Bound(m => m.TargetDevelopmentProgress).Title("Development Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(110);
+                    c.Bound(m => m.TargetTestProgress).Title("Test Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
+                    c.Bound(m => m.TargetUatProgress).Title("Uat Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
+                    c.Bound(m => m.TargetOverallEpicCompilation).ClientTemplate("<div class='progress3' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Title("Overall Epic Compilation").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(120);
+                    c.Bound(m => m.TargetWeightedOverallProgress).Title("Weighted Overall Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
+                }));
+                columns.Bound(m => m.PreviousMonthCumulativeActualEffort).Title("Previous Month Cumulative Actual Effort").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
+                columns.Bound(m => m.ActualEffort).Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(80);
+    //columns.Command(command => { command.Edit(); command.Destroy(); }).Width(210);
+})
+            .ToolBar(tools => tools.Excel())
+            .Groupable()
+            .Scrollable()
+            .Filterable()
+            .Events(e => e.DataBound("dataBound"))
+            .Resizable(resizable => resizable.Columns(true))
+            .Reorderable(reorderable => reorderable.Columns(true))
+            .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+            .Excel(excel => excel.FileName("MeasurementReport " + Model.Year + "-" + Model.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "MeasurementGrid")))
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Events(events => events.Error("error_handler"))
+            .Model(model =>
+            {
+                model.Id(m => m.EpicId);
+            })
+            .Read(read => read.Action("EditingInLineDetails_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month, Model.YearMonth }))
+        )
+)
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+
+    function resizeGrid() {
+
+        var grid = $("#grid");
+        var form = $("#form-id");
+
+        var minimumAcceptableGridHeight = 300;
+
+        var windowHeight = $(window).innerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 35 - 240; // -80; // bunu ekleyince window vertical scroll bar gidiyo
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        
+
+        contentArea.height(finalHeight);
+    //$("#grid").data('kendoGrid')._adjustLockedHorizontalScrollBar();
+    }
+
+    function renderTemplate(ActualOverallEpicCompilation) {
+        return "<div data-role='progress-bar' data-type='percent' data-min='0' data-max='100' data-bind='value: ActualOverallEpicCompilation'></div>";
+    }
+
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+
+    $(document).ready(function () {
+        $.get('selectDates', function (data) {
+            console.log(data)
+            $.each(data, function (index, value) {
+                console.log(index + value)
+                $('<option>').val(value).text(value).appendTo("#form-select");
+            })
+        })
+    })
+
+    $(document).before(function () {
+        $.get('selectDates', function (data) {
+            console.log(data)
+            $.each(data, function (index, value) {
+                console.log(index + value)
+                $('<option>').val(value).text(value).appendTo("#form-select");
+            })
+        })
+    })
+
+    function dataBound() {
+        var grid = this;
+        grid.tbody.find("tr[role='row']").each(function () {
+            var model = grid.dataItem(this);
+            $(this).find(".progress1").kendoProgressBar({
+                value: model.PrevMonthOverallEpicCompilation
+            });
+            $(this).find(".progress2").kendoProgressBar({
+                value: model.ActualOverallEpicCompilation
+            });
+            $(this).find(".progress3").kendoProgressBar({
+                value: model.TargetOverallEpicCompilation
+            });
+        });
+    }
+    
+</script>

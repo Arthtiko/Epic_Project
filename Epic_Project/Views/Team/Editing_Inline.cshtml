@@ -1,0 +1,69 @@
+﻿@(Html.Kendo().Grid<Team>()
+                .Name("grid")
+                .Columns(columns =>
+                {
+                    columns.Bound(t => t.TeamId).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    columns.Bound(t => t.TeamName).Width(380).HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    columns.Bound(t => t.TeamLeader).Groupable(false).ClientTemplate("#=TeamLeader.EmployeeName#").Width(480).HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    columns.Bound(t => t.ProjectManager).Groupable(false).ClientTemplate("#=ProjectManager.EmployeeName#").Width(480).HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    columns.Command(command => { command.Edit(); command.Destroy(); }).Width(210);
+                })
+                .ToolBar(toolbar => toolbar.Create())
+                .Editable(editable => editable.Mode(GridEditMode.InLine))
+                .Groupable()
+                .Scrollable()
+                .Resizable(resizable => resizable.Columns(true))
+                .Reorderable(reorderable => reorderable.Columns(true))
+                .HtmlAttributes(new { style = "background-color: Gainsboro" })
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Events(events => events.Error("error_handler"))
+                    .Model(model =>
+                    {
+                        model.Id(t => t.TeamId);
+                        model.Field(t => t.TeamLeader).DefaultValue(ViewData["defaultTeamLeader"] as Epic_Project.Models.EmployeeViewModel);
+                        model.Field(t => t.ProjectManager).DefaultValue(ViewData["defaultProjectManager"] as Epic_Project.Models.EmployeeViewModel);
+                        model.Field(t => t.TeamId).Editable(false);
+                    })
+                    .Create(update => update.Action("EditingInLine_Create", "Team"))
+                    .Read(read => read.Action("EditingInLine_Read", "Team"))
+                    .Update(update => update.Action("EditingInLine_Update", "Team"))
+                    .Destroy(update => update.Action("EditingInLine_Destroy", "Team"))
+                )
+)
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid");
+
+        var minimumAcceptableGridHeight = 300;
+        var windowHeight = $(window).innerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+</script>

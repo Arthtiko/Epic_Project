@@ -1,0 +1,83 @@
+﻿@(Html.Kendo().Grid<EpicBaseLine>()
+            .Name("grid")
+            .Columns(columns =>
+            {
+                columns.Bound(e => e.EPICId).Width(80).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
+                columns.Bound(e => e.EPICName).Width(220).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
+                columns.Bound(e => e.ModuleName).Groupable(false).ClientTemplate("#=ModuleName.ModuleName#").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.EpicType).Groupable(false).ClientTemplate("#=EpicType.TypeName#").Sortable(false).Width(125).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.ProjectLocation).Groupable(false).ClientTemplate("#=ProjectLocation.LocationName#").Width(160).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.Estimation).Width(95).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.EpicWeight).Width(105).Format("{0:0.0000}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.TeamName).Groupable(false).ClientTemplate("#=TeamName.TeamName#").Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.IsMurabaha).Groupable(false).ClientTemplate("#=IsMurabaha.MurabahaName#").Width(95).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.IsFirstSellableModule).Groupable(false).ClientTemplate("#=IsFirstSellableModule.FirstSellableModuleName#").Width(125).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.DistributedUnmappedEffort).Format("{0:0.00}").Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.ActualEffort).Format("{0:0.00}").Width(110).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.TotalActualEffort).Format("{0:0.00}").Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Command(command => { command.Edit(); command.Destroy();}).Width(210);
+            })
+            .ToolBar(toolbar => toolbar.Create())
+            .Editable(editable => editable.Mode(GridEditMode.InLine))
+            .Groupable()
+            .Scrollable()
+            .Resizable(resizable => resizable.Columns(true))
+            .Reorderable(reorderable => reorderable.Columns(true))
+            .HtmlAttributes(new { style = "background-color: Gainsboro" })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Events(events => events.Error("error_handler"))
+                .Model(model =>
+                {
+                    model.Id(e => e.EPICId);
+                    model.Field(e => e.EpicType).DefaultValue(ViewData["defaultType"] as Epic_Project.Models.EpicTypeViewModel);
+                    model.Field(e => e.ModuleName).DefaultValue(ViewData["defaultModule"] as Epic_Project.Models.Module);
+                    model.Field(e => e.IsMurabaha).DefaultValue(ViewData["defaultMurabaha"] as Epic_Project.Models.MurabahaViewModel);
+                    model.Field(e => e.IsFirstSellableModule).DefaultValue(ViewData["defaultFirstSellableModule"] as Epic_Project.Models.IsFirstSellableModuleViewModel);
+                    model.Field(e => e.ProjectLocation).DefaultValue(ViewData["defaultLocation"] as Epic_Project.Models.ProjectLocationViewModel);
+                    model.Field(e => e.TeamName).DefaultValue(ViewData["defaultTeam"] as Epic_Project.Models.Team);
+                })
+                .Create(update => update.Action("EditingInLine_Create", "Grid"))
+                .Read(read => read.Action("EditingInLine_Read", "Grid"))
+                .Update(update => update.Action("EditingInLine_Update", "Grid"))
+                .Destroy(update => update.Action("EditingInLine_Destroy", "Grid"))
+            )
+)
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid");
+
+        var minimumAcceptableGridHeight = 300;
+
+        var windowHeight = $(window).innerHeight();
+        //var headerHeight = $(window).headerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+</script>

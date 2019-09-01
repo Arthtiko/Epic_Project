@@ -1,0 +1,8 @@
+﻿var grid = $("#grid").data("kendoGrid");
+$("#showColumn").kendoColumnMenu({
+  filterable: false,
+  sortable: false,
+  dataSource: grid.dataSource,
+  columns: grid.columns,
+  owner: grid
+});
