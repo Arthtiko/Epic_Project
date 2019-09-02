@@ -1098,8 +1098,8 @@ namespace Epic_Project.Models
         public List<Measurement> GenerateMeasurementForNextMonth(int year, int month)
         {
             int prevYear = (month == 1 ? year - 1 : year);
-            int prevMonth = (month == 1 ? 12 : month);
-            List<Measurement> CurrentMeasurementList = (List<Measurement>)GetMeasurementAll(0, 2019, 6, null);
+            int prevMonth = (month == 1 ? 12 : month - 1);
+            List<Measurement> CurrentMeasurementList = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null);
             List<Measurement> TempMeasurementList = new List<Measurement>();
             List<Measurement> NextMonthMeasurementList = CurrentMeasurementList;
             for (int i = 0; i < CurrentMeasurementList.Count(); i++)
@@ -1107,8 +1107,8 @@ namespace Epic_Project.Models
                 Measurement temp = new Measurement()
                 {
                     EpicId = CurrentMeasurementList[i].EpicId,
-                    Year = 2019,
-                    Month = 8,
+                    Year = year,
+                    Month = month,
                     Type = CurrentMeasurementList[i].Type,
                     RequirementProgress = CurrentMeasurementList[i].RequirementProgress,
                     DesignProgress = CurrentMeasurementList[i].DesignProgress,

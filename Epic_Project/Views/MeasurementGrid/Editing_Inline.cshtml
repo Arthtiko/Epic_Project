@@ -2,14 +2,19 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
 
-
-<form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
-    Year-Month:
-    <select class="k-select" id="form-select" style="width: 200px;" onchange="this.form.submit();" asp-for="YearMonth">
-        <option>@Model.Year-@Model.Month</option>
-    </select>
-</form>
-
+<div class="row">
+    <div style="margin-left: 15px">
+        <form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
+            Year-Month:
+            <select class="k-select" id="form-select" style="width: 200px;" onchange="this.form.submit();" asp-for="YearMonth">
+                <option>@Model.Year-@Model.Month</option>
+            </select>
+        </form>
+    </div>
+    <div style="margin-left: 15px">
+        <a class="k-button" asp-controller="MeasurementGrid" asp-action="GenerateNextMonth" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear">Create @ViewBag.NextYearMonth Record</a>
+    </div>
+</div>
 @(Html.Kendo().Grid<Measurement>()
                     .Name("grid")
                     .Columns(columns =>

@@ -17,6 +17,10 @@ namespace EPICProject.Controllers
         private readonly IRepository _repository;
         private List<MeasurementDetailsViewModel> MeasurementDetailList = new List<MeasurementDetailsViewModel>();
         private List<Date> DateList = new List<Date>();
+        private int StartMonth;
+        private int StartYear;
+        private int NextMonth;
+        private int NextYear;
         public MeasurementGridController(IRepository repository)
         {
             _repository = repository;
@@ -25,6 +29,25 @@ namespace EPICProject.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Editing_InLine(int epicId, int year, int month, string yearMonth)
         {
+            DateList = _repository.GetDates();
+            if (DateList != null && DateList.Count > 0)
+            {
+                StartMonth = DateList[0].Month;
+                StartYear = DateList[0].Year;
+                int nm = DateList[0].Month;
+                int ny = DateList[0].Year;
+                if (nm >= 12)
+                {
+                    nm = 1;
+                    ny++;
+                }
+                else
+                {
+                    nm++;
+                }
+                NextMonth = nm;
+                NextYear = ny;
+            }
             int m;
             int y;
             PopulateTeams();
@@ -33,8 +56,8 @@ namespace EPICProject.Controllers
             PopulateDates();
             if (yearMonth == null)
             {
-                m = month <= 0 || month > 12 ? DateTime.Today.Month : month;
-                y = year < 2000 || year > 9999 ? DateTime.Today.Year : year;
+                m = month <= 0 || month > 12 ? StartMonth : month;
+                y = year < 2000 || year > 9999 ? StartYear : year;
             }
             else
             {
@@ -43,7 +66,7 @@ namespace EPICProject.Controllers
                 string mText = yearMonth.Split("-")[1];
                 m = Convert.ToInt32(mText);
             }
-            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth };
+            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear };
             return View(model);
         }
 
@@ -154,10 +177,10 @@ namespace EPICProject.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult GenerateNextMonth()
+        public IActionResult GenerateNextMonth(int year, int month)
         {
-            _repository.GenerateMeasurementForNextMonth(new DateTime().Year, new DateTime().Month);
-            return RedirectToAction("index", "home");
+            _repository.GenerateMeasurementForNextMonth(year, month);
+            return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }
 
         [Authorize(Roles = "Admin")]
@@ -242,6 +265,38 @@ namespace EPICProject.Controllers
             for (int i = 0; i < DateList.Count(); i++)
             {
                 selectList.Add(DateList[i].Year.ToString() + "-" + DateList[i].Month.ToString());
+            }
+            if (selectList != null || selectList.Count() > 0)
+            {
+                int m = DateList[0].Month;
+                int y = DateList[0].Year;
+                if (m >= 12)
+                {
+                    m = 1;
+                    y++;
+                }
+                else
+                {
+                    m++;
+                }
+                NextMonth = m;
+                NextYear = y;
+            }
+            else
+            {
+                int m = DateTime.Today.Month;
+                int y = DateTime.Today.Year;
+                if (m >= 12)
+                {
+                    m = 1;
+                    y++;
+                }
+                else
+                {
+                    m++;
+                }
+                NextMonth = m;
+                NextYear = y;
             }
             return Json(selectList);
         }

@@ -68,6 +68,8 @@ namespace Epic_Project.Areas.Identity.Pages.Account
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
 
+            [Display(Name = "Register as Admin")]
+            public bool IsSavedAsAdmin { get; set; }
         }
 
         public void OnGet(string returnUrl = null)
@@ -90,7 +92,14 @@ namespace Epic_Project.Areas.Identity.Pages.Account
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, "User");
+                    if (Input.IsSavedAsAdmin)
+                    {
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "User");
+                    }
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

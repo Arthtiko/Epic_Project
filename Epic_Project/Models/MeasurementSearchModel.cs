@@ -14,5 +14,7 @@ namespace Epic_Project.Models
         [Required]
         public int Month { get; set; }
         public string YearMonth { get; set; }
+        public int NextMonth { get; set; }
+        public int NextYear { get; set; }
     }
 }
