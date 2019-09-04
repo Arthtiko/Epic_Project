@@ -112,7 +112,7 @@
         //var headerHeight = $(window).headerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 55 - 160; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 55 - 160 - 10; // - headerHeight;       header is empty but this calculation makes grid small
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);

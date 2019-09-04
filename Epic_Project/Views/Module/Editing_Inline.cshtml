@@ -23,7 +23,7 @@
                     {
                         model.Id(m => m.ModuleId);
                         model.Field(m => m.ModuleId).Editable(false);
-                        model.Field(m => m.ModuleId).DefaultValue(Model.MaxId);
+                        model.Field(m => m.ModuleId).DefaultValue(ViewBag.MaxModuleId);
                     })
                     .Create(create => { create.Action("EditingInLine_Create", "Module"); })
                     .Read(read => read.Action("EditingInLine_Read", "Module"))

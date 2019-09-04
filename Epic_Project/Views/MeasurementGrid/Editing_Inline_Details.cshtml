@@ -100,7 +100,7 @@
         var windowHeight = $(window).innerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 35 - 240; // -80; // bunu ekleyince window vertical scroll bar gidiyo
+        var calculatedHeight = windowHeight - 35 - 240 - 10; // -80; // bunu ekleyince window vertical scroll bar gidiyo
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         

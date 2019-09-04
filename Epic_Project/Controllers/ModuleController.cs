@@ -24,6 +24,7 @@ namespace Epic_Project.Controllers
         public ActionResult Editing_InLine()
         {
             var model = new MaxIdViewModel(){ MaxId = _repository.GetMaxModuleId() + 1 };
+            ViewBag.MaxModuleId = model.MaxId;
             return View(model);
         }
 
@@ -40,8 +41,12 @@ namespace Epic_Project.Controllers
             if (module != null && ModelState.IsValid)
             {
                 Module m = _repository.InsertModule(module);
-                
+                if (m != null)
+                {
+                    ViewBag.MaxModuleId = _repository.GetMaxModuleId() + 1;
+                }
             }
+
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
         }
 
