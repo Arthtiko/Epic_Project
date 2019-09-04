@@ -23,7 +23,8 @@ namespace Epic_Project.Controllers
         [Authorize(Roles = "Admin")]
         public ActionResult Editing_InLine()
         {
-            return View();
+            var model = new MaxIdViewModel(){ MaxId = _repository.GetMaxModuleId() + 1 };
+            return View(model);
         }
 
         [Authorize(Roles = "Admin")]
@@ -38,9 +39,9 @@ namespace Epic_Project.Controllers
         {
             if (module != null && ModelState.IsValid)
             {
-                _repository.InsertModule(module);
+                Module m = _repository.InsertModule(module);
+                
             }
-
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
         }
 

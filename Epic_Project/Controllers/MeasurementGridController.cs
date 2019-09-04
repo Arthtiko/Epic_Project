@@ -80,12 +80,31 @@ namespace EPICProject.Controllers
         [Authorize]
         public IActionResult Editing_Inline_Details(int epicId, int year, int month, string yearMonth)
         {
+            DateList = _repository.GetDates();
+            if (DateList != null && DateList.Count > 0)
+            {
+                StartMonth = DateList[0].Month;
+                StartYear = DateList[0].Year;
+                int nm = DateList[0].Month;
+                int ny = DateList[0].Year;
+                if (nm >= 12)
+                {
+                    nm = 1;
+                    ny++;
+                }
+                else
+                {
+                    nm++;
+                }
+                NextMonth = nm;
+                NextYear = ny;
+            }
             int m;
             int y;
             if (yearMonth == null)
             {
-                m = month <= 0 || month > 12 ? DateTime.Today.Month : month;
-                y = year < 2000 || year > 9999 ? DateTime.Today.Year : year;
+                m = month <= 0 || month > 12 ? StartMonth : month;
+                y = year < 2000 || year > 9999 ? StartYear : year;
             }
             else
             {
@@ -94,7 +113,7 @@ namespace EPICProject.Controllers
                 string mText = yearMonth.Split("-")[1];
                 m = Convert.ToInt32(mText);
             }
-            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m };
+            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear };
             return View(model);
         }
 
@@ -212,7 +231,7 @@ namespace EPICProject.Controllers
             IEnumerable<Module> moduleList = new List<Module>();
             moduleList = _repository.GetModuleAll();
             ViewData["modules"] = moduleList;
-            ViewData["defaultModule"] = moduleList.First();
+            ViewData["defaultModule"] = new Module() { ModuleId = 0, ModuleName = ""};
         }
         private void PopulateTeams()
         {
@@ -225,7 +244,7 @@ namespace EPICProject.Controllers
                 teamList.Add(temp[i]);
             }
             ViewData["teams"] = teamList;
-            ViewData["defaultTeam"] = teamList.First();
+            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = ""};
         }
 
         private void PopulateDates()

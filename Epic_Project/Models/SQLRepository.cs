@@ -87,6 +87,12 @@ namespace Epic_Project.Models
 
         public Module InsertModule(Module module)
         {
+            List<Module> modules = (List<Module>)GetModuleAll();
+            Module mod = modules.Find(m => m.ModuleName == module.ModuleName);
+            if (mod != null)
+            {
+                return null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -108,6 +114,12 @@ namespace Epic_Project.Models
 
         public Team InsertTeam(Team team)
         {
+            List<Team> teams = (List<Team>)GetTeamAll();
+            Team te = teams.Find(t => t.TeamName == team.TeamName);
+            if (te != null)
+            {
+                return null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -131,6 +143,12 @@ namespace Epic_Project.Models
 
         public Employee InsertEmployee(Employee employee)
         {
+            List<Employee> employees = (List<Employee>)GetEmployeeAll();
+            Employee emp = employees.Find(e => e.EmployeeName == employee.EmployeeName);
+            if (emp != null)
+            {
+                return null;
+            }
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -1152,6 +1170,64 @@ namespace Epic_Project.Models
                 DateList.Add(temp);
             }
             return DateList;
+        }
+
+        public int GetMaxModuleId()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_maxModuleId]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            int id = Convert.ToInt32(dt.Rows[0]["MaxModuleId"]);
+            return id;
+        }
+        public int GetMaxTeamId()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_maxTeamId]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            int id = Convert.ToInt32(dt.Rows[0]["MaxTeamId"]);
+            return id;
+        }
+        public int GetMaxEmployeeId()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_maxEmployeeId]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            int id = Convert.ToInt32(dt.Rows[0]["MaxEmployeeId"]);
+            return id;
         }
     }
 }

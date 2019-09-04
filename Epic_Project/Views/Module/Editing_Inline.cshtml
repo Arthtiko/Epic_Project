@@ -1,10 +1,12 @@
-﻿@(Html.Kendo().Grid<Module>()
+﻿@model MaxIdViewModel
+
+@(Html.Kendo().Grid<Module>()
                 .Name("grid")
                 .Columns(columns =>
                 {
                     columns.Bound(m => m.ModuleId).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                     columns.Bound(m => m.ModuleName).Width(840).HtmlAttributes(new { style = "text-align:left; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                    
+
                     columns.Command(command => { command.Edit(); }).Width(90);
                 })
                 .ToolBar(toolbar => toolbar.Create())
@@ -16,13 +18,14 @@
                 .HtmlAttributes(new { style = "background-color: Gainsboro" })
                 .DataSource(dataSource => dataSource
                     .Ajax()
-                    .Events(events => events.Error("error_handler"))
+                    .Events(events => { events.Error("error_handler"); })
                     .Model(model =>
                     {
                         model.Id(m => m.ModuleId);
                         model.Field(m => m.ModuleId).Editable(false);
+                        model.Field(m => m.ModuleId).DefaultValue(Model.MaxId);
                     })
-                    .Create(update => update.Action("EditingInLine_Create", "Module"))
+                    .Create(create => { create.Action("EditingInLine_Create", "Module"); })
                     .Read(read => read.Action("EditingInLine_Read", "Module"))
                     .Update(update => update.Action("EditingInLine_Update", "Module"))
                 )

@@ -5,11 +5,8 @@ using System.Threading.Tasks;
 
 namespace Epic_Project.Models
 {
-    public class Module
+    public class MaxIdViewModel
     {
-        public int ModuleId { get; set; }
-        public string ModuleName { get; set; }
-        
+        public int MaxId { get; set; }
     }
-    
 }

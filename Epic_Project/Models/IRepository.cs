@@ -60,5 +60,8 @@ namespace Epic_Project.Models
 
         List<Measurement> GenerateMeasurementForNextMonth(int year, int month);
         List<Date> GetDates();
+        int GetMaxModuleId();
+        int GetMaxTeamId();
+        int GetMaxEmployeeId();
     }
 }
