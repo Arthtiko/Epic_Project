@@ -150,7 +150,7 @@ namespace EPICProject.Controllers
             IEnumerable<Team> teamList = new List<Team>();
             teamList = _repository.GetTeamAll();
             ViewData["teams"] = teamList;
-            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "", ProjectManager = new EmployeeViewModel(), TeamLeader = new EmployeeViewModel() };
+            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "", ProjectManager = new EmployeeViewModel() { EmployeeId = 0, EmployeeName = ""}, TeamLeader = new EmployeeViewModel() { EmployeeId = 0, EmployeeName = "" } };
         }
 
     }

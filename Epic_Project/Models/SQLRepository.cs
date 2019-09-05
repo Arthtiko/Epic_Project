@@ -36,7 +36,15 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@EpicType", GetParameterValue("EpicType", epicBaseLine.EpicType.TypeName));
                     sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", epicBaseLine.ProjectLocation.LocationName));
                     sqlCommand.Parameters.AddWithValue("@Estimation", epicBaseLine.Estimation);
-                    sqlCommand.Parameters.AddWithValue("@TeamId", GetTeamIdByName(epicBaseLine.TeamName.TeamName));
+                    if (epicBaseLine.TeamName.TeamName == null)
+                    {
+                        epicBaseLine.TeamName.TeamName = "";
+                        sqlCommand.Parameters.AddWithValue("@TeamId", 0);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", GetTeamIdByName(epicBaseLine.TeamName.TeamName));
+                    }
                     sqlCommand.Parameters.AddWithValue("@IsMurabaha", GetParameterValue("IsMurabaha", epicBaseLine.IsMurabaha.MurabahaName));
                     sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", epicBaseLine.IsFirstSellableModule.FirstSellableModuleName));
                     sqlCommand.Parameters.AddWithValue("@DistributedUnmappedEffort", epicBaseLine.DistributedUnmappedEffort);
