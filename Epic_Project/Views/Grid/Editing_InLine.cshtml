@@ -15,9 +15,9 @@
                 columns.Bound(e => e.DistributedUnmappedEffort).Format("{0:0.00}").Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.ActualEffort).Format("{0:0.00}").Width(110).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.TotalActualEffort).Format("{0:0.00}").Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                columns.Command(command => { command.Edit(); command.Destroy();}).Width(210);
+                columns.Command(command => { command.Edit();/* command.Destroy();*/}).Width(210);
             })
-            .ToolBar(toolbar => toolbar.Create())
+            //.ToolBar(toolbar => toolbar.Create())
             .Editable(editable => editable.Mode(GridEditMode.InLine))
             .Groupable()
             .Scrollable()
@@ -30,6 +30,15 @@
                 .Model(model =>
                 {
                     model.Id(e => e.EPICId);
+                    model.Field(e => e.EPICId).Editable(false);
+                    model.Field(e => e.EPICName).Editable(false);
+                    model.Field(e => e.ModuleName).Editable(false);
+                    model.Field(e => e.EpicType).Editable(false);
+                    model.Field(e => e.Estimation).Editable(false);
+                    model.Field(e => e.EpicWeight).Editable(false);
+                    model.Field(e => e.DistributedUnmappedEffort).Editable(false);
+                    model.Field(e => e.ActualEffort).Editable(false);
+                    model.Field(e => e.TotalActualEffort).Editable(false);
                     model.Field(e => e.EpicType).DefaultValue(ViewData["defaultType"] as Epic_Project.Models.EpicTypeViewModel);
                     model.Field(e => e.ModuleName).DefaultValue(ViewData["defaultModule"] as Epic_Project.Models.Module);
                     model.Field(e => e.IsMurabaha).DefaultValue(ViewData["defaultMurabaha"] as Epic_Project.Models.MurabahaViewModel);
@@ -37,10 +46,10 @@
                     model.Field(e => e.ProjectLocation).DefaultValue(ViewData["defaultLocation"] as Epic_Project.Models.ProjectLocationViewModel);
                     model.Field(e => e.TeamName).DefaultValue(ViewData["defaultTeam"] as Epic_Project.Models.Team);
                 })
-                .Create(update => update.Action("EditingInLine_Create", "Grid"))
+                .Create(update => update.Action("EditingInLine_Create", "Grid", new { User.Identity.Name }))
                 .Read(read => read.Action("EditingInLine_Read", "Grid"))
-                .Update(update => update.Action("EditingInLine_Update", "Grid"))
-                .Destroy(update => update.Action("EditingInLine_Destroy", "Grid"))
+                .Update(update => update.Action("EditingInLine_Update", "Grid", new { User.Identity.Name }))
+                .Destroy(update => update.Action("EditingInLine_Destroy", "Grid", new { User.Identity.Name }))
             )
 )
 <script type="text/javascript">
@@ -70,6 +79,7 @@
         var contentArea = grid.find(".k-grid-content");
 
         var calculatedHeight = windowHeight - 185 - 10; // - headerHeight;       header is empty but this calculation makes grid small
+        calculatedHeight += 75;         // create new record butonu eklenirse burayı commentle
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);

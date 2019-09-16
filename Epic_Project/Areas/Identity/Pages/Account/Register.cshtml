@@ -41,6 +41,11 @@
                 <input asp-for="Input.IsSavedAsAdmin" type="checkbox">
                 <label asp-for="Input.IsSavedAsAdmin"></label>
             </div>
+            <div class="form-group">
+                <label asp-for="Input.EmployeeId"></label>
+                <input asp-for="Input.EmployeeId" class="form-control" />
+                <span asp-validation-for="Input.EmployeeId" class="text-danger"></span>
+            </div>
             <button type="submit" class="btn btn-default">Register</button>
         </form>
     </div>
@@ -49,3 +54,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+

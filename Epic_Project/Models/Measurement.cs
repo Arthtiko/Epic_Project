@@ -28,12 +28,18 @@ namespace Epic_Project.Models
         public float EpicWeight { get; set; }
         [UIHint("clientteam")]
         public Team Team { get; set; }
+        [UIHint("clientpercenttext")]
         public float RequirementProgress { get; set; }
+        [UIHint("clientpercenttext")]
         public float DesignProgress { get; set; }
+        [UIHint("clientpercenttext")]
         public float DevelopmentProgress { get; set; }
+        [UIHint("clientpercenttext")]
         public float TestProgress { get; set; }
+        [UIHint("clientpercenttext")]
         public float UatProgress { get; set; }
         public float PreviousMonthCumulativeActualEffort { get; set; }
+        [UIHint("clientpercenttext")]
         public float ActualEffort { get; set; }
     }
 }

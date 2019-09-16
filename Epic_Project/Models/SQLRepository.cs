@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,7 +11,10 @@ namespace Epic_Project.Models
 {
     public class SQLRepository : IRepository
     {
-        private string connectionString = "server=(localdb)\\MSSQLLocalDB;database=EPICDB;Trusted_Connection=True"; //düzelt
+        private readonly IConfiguration _configuration;
+        private string connectionString;
+        //private string connectionString = "Server=68.183.222.62;Database=EPICDB;User Id=SA;Password=Arch1234;Integrated Security = false;";
+
         private List<Team> TeamList = new List<Team>();
         private List<Module> ModuleList = new List<Module>();
         private List<EpicBaseLine> EpicBaseLineList = new List<EpicBaseLine>();
@@ -18,6 +23,12 @@ namespace Epic_Project.Models
         private List<Parameter> ParameterList = new List<Parameter>();
         private List<Date> DateList = new List<Date>();
 
+
+        public SQLRepository(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            connectionString = _configuration.GetConnectionString("DefaultConnection");
+        }
 
         #region Insert
 
@@ -167,6 +178,7 @@ namespace Epic_Project.Models
                     //sqlCommand.Parameters.AddWithValue("@EmployeeId", employee.EmployeeId);   //identity
                     sqlCommand.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
                     sqlCommand.Parameters.AddWithValue("@EmployeeType", GetParameterValue("EmployeeType", employee.EmployeeType.TypeName));
+                    sqlCommand.Parameters.AddWithValue("@EmployeeLocation", GetParameterValue("ProjectLocation", employee.EmployeeLocation));
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -379,6 +391,62 @@ namespace Epic_Project.Models
             return epicBaseLine;
         }
 
+        public List<int> GetEpicBaseLineIdByLocation(string location)
+        {
+            List<int> list = new List<int>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_EpicBaseLine]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", location));
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                list.Add(Convert.ToInt32(dt.Rows[i]["EPICId"]));
+            }
+            return list;
+        }
+        public List<int> GetEpicBaseLineIdByTeam(string teamName)
+        {
+            List<int> list = new List<int>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_EpicBaseLine]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (teamName == null || teamName == "")
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", 0);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", GetTeamIdByName(teamName));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                list.Add(Convert.ToInt32(dt.Rows[i]["EPICId"]));
+            }
+            return list;
+        }
+
         public IEnumerable<Measurement> GetMeasurementAll()
         {
             float totalEstimation = GetTotalEpicEstimation();
@@ -437,6 +505,8 @@ namespace Epic_Project.Models
             float totalEstimation = GetTotalEpicEstimation();
             MeasurementList = new List<Measurement>();
             DataTable dt = new DataTable();
+            
+            //(using (SqlConnection sqlConnection = new SqlConnection(GetConfiguration().GetSection("ConnectionString").GetSection("EPICDBConnection").Value))
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 string procName = "[sel_Measurement]";
@@ -471,8 +541,16 @@ namespace Epic_Project.Models
                 Measurement temp = new Measurement();
                 temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
                 temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
-                temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
-                temp.Module = GetModuleById(temp.Module.ModuleId);
+                if (Convert.IsDBNull(dt.Rows[i]["ModuleId"]))
+                {
+                    temp.Module.ModuleId = 0;
+                    temp.Module.ModuleName = "";
+                }
+                else
+                {
+                    temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                    temp.Module = GetModuleById(temp.Module.ModuleId);
+                }
                 temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
                 temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
                 temp.Type.TypeName = Convert.ToString(dt.Rows[i]["Type"]);
@@ -705,6 +783,7 @@ namespace Epic_Project.Models
                 temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
                 temp.EmployeeType.TypeName = Convert.ToString(dt.Rows[i]["EmployeeType"]);
                 temp.EmployeeType.TypeId = GetParameterValue("EmployeeType", temp.EmployeeType.TypeName);
+                temp.EmployeeLocation = Convert.ToString(dt.Rows[i]["EmployeeLocation"]);
                 EmployeeList.Add(temp);
             }
             return EmployeeList;
@@ -734,6 +813,7 @@ namespace Epic_Project.Models
                 temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
                 temp.EmployeeType.TypeName = Convert.ToString(dt.Rows[i]["EmployeeType"]);
                 temp.EmployeeType.TypeId = GetParameterValue("EmployeeType", temp.EmployeeType.TypeName);
+                temp.EmployeeLocation = Convert.ToString(dt.Rows[i]["EmployeeLocation"]);
                 EmployeeList.Add(temp);
             }
             return EmployeeList;
@@ -762,6 +842,7 @@ namespace Epic_Project.Models
             employee.EmployeeName = Convert.ToString(dt.Rows[0]["EmployeeName"]);
             employee.EmployeeType.TypeName = Convert.ToString(dt.Rows[0]["EmployeeType"]);
             employee.EmployeeType.TypeId = GetParameterValue("EmployeeType", employee.EmployeeType.TypeName);
+            employee.EmployeeLocation = Convert.ToString(dt.Rows[0]["EmployeeLocation"]);
             return employee;
         }
 
@@ -788,6 +869,7 @@ namespace Epic_Project.Models
             employee.EmployeeName = Convert.ToString(dt.Rows[0]["EmployeeName"]);
             employee.EmployeeType.TypeName = Convert.ToString(dt.Rows[0]["EmployeeType"]);
             employee.EmployeeType.TypeId = GetParameterValue("EmployeeType", employee.EmployeeType.TypeName);
+            employee.EmployeeLocation = Convert.ToString(dt.Rows[0]["EmployeeLocation"]);
             return employee.EmployeeId;
         }
 
@@ -876,6 +958,7 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@EmployeeId", updatedEmployee.EmployeeId);
                     sqlCommand.Parameters.AddWithValue("@EmployeeName", updatedEmployee.EmployeeName);
                     sqlCommand.Parameters.AddWithValue("@EmployeeType", GetParameterValue("EmployeeType", updatedEmployee.EmployeeType.TypeName));
+                    sqlCommand.Parameters.AddWithValue("@EmployeeLocation", GetParameterValue("ProjectLocation", updatedEmployee.EmployeeLocation));
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -1121,30 +1204,37 @@ namespace Epic_Project.Models
             return measurementDetailsList;
         }
 
-        public List<Measurement> GenerateMeasurementForNextMonth(int year, int month)
+        public List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location)
         {
             int prevYear = (month == 1 ? year - 1 : year);
             int prevMonth = (month == 1 ? 12 : month - 1);
+            //location ile alakalı olanlar kaldırıldı
+            //List<int> IdList = new List<int>();
+            //IdList = GetEpicBaseLineIdByLocation(location);
             List<Measurement> CurrentMeasurementList = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null);
             List<Measurement> TempMeasurementList = new List<Measurement>();
             List<Measurement> NextMonthMeasurementList = CurrentMeasurementList;
             for (int i = 0; i < CurrentMeasurementList.Count(); i++)
             {
-                Measurement temp = new Measurement()
-                {
-                    EpicId = CurrentMeasurementList[i].EpicId,
-                    Year = year,
-                    Month = month,
-                    Type = CurrentMeasurementList[i].Type,
-                    RequirementProgress = CurrentMeasurementList[i].RequirementProgress,
-                    DesignProgress = CurrentMeasurementList[i].DesignProgress,
-                    DevelopmentProgress = CurrentMeasurementList[i].DevelopmentProgress,
-                    TestProgress = CurrentMeasurementList[i].TestProgress,
-                    UatProgress = CurrentMeasurementList[i].UatProgress,
-                    PreviousMonthCumulativeActualEffort = CurrentMeasurementList[i].PreviousMonthCumulativeActualEffort + CurrentMeasurementList[i].ActualEffort,
-                    ActualEffort = 0
-                };
-                TempMeasurementList.Add(temp);
+                //int tempId = IdList.Find(id => id == CurrentMeasurementList[i].EpicId);
+                //if (tempId != 0)
+                //{
+                    Measurement temp = new Measurement()
+                    {
+                        EpicId = CurrentMeasurementList[i].EpicId,
+                        Year = year,
+                        Month = month,
+                        Type = CurrentMeasurementList[i].Type,
+                        RequirementProgress = CurrentMeasurementList[i].RequirementProgress,
+                        DesignProgress = CurrentMeasurementList[i].DesignProgress,
+                        DevelopmentProgress = CurrentMeasurementList[i].DevelopmentProgress,
+                        TestProgress = CurrentMeasurementList[i].TestProgress,
+                        UatProgress = CurrentMeasurementList[i].UatProgress,
+                        PreviousMonthCumulativeActualEffort = CurrentMeasurementList[i].PreviousMonthCumulativeActualEffort + CurrentMeasurementList[i].ActualEffort,
+                        ActualEffort = 0
+                    };
+                    TempMeasurementList.Add(temp);
+                //}
             }
             for (int i = 0; i < TempMeasurementList.Count(); i++)
             {
@@ -1236,6 +1326,107 @@ namespace Epic_Project.Models
             }
             int id = Convert.ToInt32(dt.Rows[0]["MaxEmployeeId"]);
             return id;
+        }
+
+        public List<Measurement> GetMeasurementsForGenerate(int month, int year, string location)
+        {
+            float totalEstimation = GetTotalEpicEstimation();
+            MeasurementList = new List<Measurement>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_MeasurementForGenerate]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Measurement temp = new Measurement();
+                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
+                temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                temp.Module = GetModuleById(temp.Module.ModuleId);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.Type.TypeName = Convert.ToString(dt.Rows[i]["Type"]);
+                temp.Type.TypeValue = GetParameterValue("Type", temp.Type.TypeName);
+                float estimation = GetEstimationById(temp.EpicId);
+                temp.EpicWeight = estimation / totalEstimation;
+                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
+                {
+                    temp.Team.TeamId = 0;
+                    temp.Team.TeamName = "";
+                    temp.Team.TeamLeader = new EmployeeViewModel();
+                    temp.Team.ProjectManager = new EmployeeViewModel();
+                }
+                else
+                {
+                    temp.Team = GetTeamById(Convert.ToInt32(dt.Rows[i]["TeamId"]));
+                }
+                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]) * 100;
+                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]) * 100;
+                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]) * 100;
+                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]) * 100;
+                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]) * 100;
+                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
+                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                MeasurementList.Add(temp);
+            }
+            return MeasurementList;
+        }
+
+        public void DeleteLastMonth(int month, int year, string location)
+        {
+            int prevYear = (month == 1 ? year - 1 : year);
+            int prevMonth = (month == 1 ? 12 : month - 1);
+            List<int> IdList = GetEpicBaseLineIdByLocation(location);
+            List<Measurement> LastmonthMeasurement = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null);
+            for (int i = 0; i < LastmonthMeasurement.Count(); i++)
+            {
+                int tempId = IdList.Find(id => id == LastmonthMeasurement[i].EpicId);
+                if (tempId != 0)
+                {
+                    DeleteMeasurement(tempId, prevYear, prevMonth, 1);
+                    DeleteMeasurement(tempId, prevYear, prevMonth, 2);
+                }
+            }
+        }
+        
+        public List<Measurement> SearchMeasurement(int year, int month, string location, string type, string teamName)
+        {
+            List<Measurement> list = new List<Measurement>();
+            List<int> IdListByLocation = GetEpicBaseLineIdByLocation(location);
+            List<int> IdListByTeam = GetEpicBaseLineIdByTeam(teamName);
+            List<Measurement> measurements = (List<Measurement>)GetMeasurementAll(0, year, month, type);
+            for (int i = 0; i < measurements.Count(); i++)
+            {
+                int c1 = IdListByLocation.Find(id => id == measurements[i].EpicId);
+                int c2 = IdListByTeam.Find(id => id == measurements[i].EpicId);
+                if (c1 != 0 && c2 != 0)
+                {
+                    list.Add(measurements[i]);
+                }
+            }
+            return list;
         }
     }
 }

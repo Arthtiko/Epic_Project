@@ -17,6 +17,7 @@ namespace EPICProject.Controllers
         private readonly IRepository _repository;
         private List<MeasurementDetailsViewModel> MeasurementDetailList = new List<MeasurementDetailsViewModel>();
         private List<Date> DateList = new List<Date>();
+        private List<Team> TeamList = new List<Team>();
         private int StartMonth;
         private int StartYear;
         private int NextMonth;
@@ -27,7 +28,7 @@ namespace EPICProject.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public ActionResult Editing_InLine(int epicId, int year, int month, string yearMonth)
+        public ActionResult Editing_InLine(int epicId, int year, int month, string yearMonth, string location, string type, string teamName)
         {
             DateList = _repository.GetDates();
             if (DateList != null && DateList.Count > 0)
@@ -66,7 +67,10 @@ namespace EPICProject.Controllers
                 string mText = yearMonth.Split("-")[1];
                 m = Convert.ToInt32(mText);
             }
-            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear };
+            teamName = teamName == null ? "" : teamName;
+            location = location == null ? "" : location;
+            type = type == null ? "" : type;
+            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, Location = location, Type = type, TeamName = teamName };
             return View(model);
         }
 
@@ -78,7 +82,7 @@ namespace EPICProject.Controllers
         }
 
         [Authorize]
-        public IActionResult Editing_Inline_Details(int epicId, int year, int month, string yearMonth)
+        public IActionResult Editing_Inline_Details(int epicId, int year, int month, string yearMonth, string location, string type, string teamName)
         {
             DateList = _repository.GetDates();
             if (DateList != null && DateList.Count > 0)
@@ -113,7 +117,10 @@ namespace EPICProject.Controllers
                 string mText = yearMonth.Split("-")[1];
                 m = Convert.ToInt32(mText);
             }
-            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear };
+            teamName = teamName == null ? "" : teamName;
+            location = location == null ? "" : location;
+            type = type == null ? "" : type;
+            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, Location = location, Type = type, TeamName = teamName };
             return View(model);
         }
 
@@ -131,10 +138,11 @@ namespace EPICProject.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month)
+        public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month, string location, string type, string teamName)
         {
-            var x = Json(_repository.GetMeasurementAll(epicId, year, month, null).ToDataSourceResult(request));
-            return x;
+            var y = Json(_repository.SearchMeasurement(year, month, location, type, teamName).ToDataSourceResult(request));
+            //var x = Json(_repository.GetMeasurementAll(epicId, year, month, null).ToDataSourceResult(request));
+            return y;
         }
 
         [Authorize(Roles = "Admin")]
@@ -171,6 +179,11 @@ namespace EPICProject.Controllers
             Measurement newMeasurement = new Measurement();
             if (measurement != null && ModelState.IsValid)
             {
+                if (DateTime.Today.Month - measurement.Month >= 2)
+                {
+                    ViewBag.EditErrorMessage = "You can only edit the measurements of previous month!";
+                    return null;
+                }
                 newMeasurement = _repository.UpdateMeasurement(measurement);
                 if (newMeasurement.Team.TeamId == 0)
                 {
@@ -196,9 +209,16 @@ namespace EPICProject.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult GenerateNextMonth(int year, int month)
+        public IActionResult GenerateNextMonth(int year, int month, string location)
         {
-            _repository.GenerateMeasurementForNextMonth(year, month);
+            //location null yapıldı
+            _repository.GenerateMeasurementForNextMonth(year, month, null);
+            return RedirectToAction("Editing_Inline", "MeasurementGrid");
+        }
+        [Authorize(Roles = "Admin")]
+        public IActionResult DeleteLastMonth(int year, int month, string location)
+        {
+            _repository.DeleteLastMonth(year, month, location);
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }
 
@@ -316,6 +336,17 @@ namespace EPICProject.Controllers
                 }
                 NextMonth = m;
                 NextYear = y;
+            }
+            return Json(selectList);
+        }
+        public JsonResult SelectTeams()
+        {
+            TeamList = (List<Team>)_repository.GetTeamAll();
+            List<string> selectList = new List<string>();
+            selectList.Add("");
+            for (int i = 0; i < TeamList.Count(); i++)
+            {
+                selectList.Add(TeamList[i].TeamName);
             }
             return Json(selectList);
         }

@@ -104,7 +104,7 @@
                     </li>
                     <li class="nav-item" style="margin-top: 20px;">
                         <a class="nav-link" href="~/MeasurementGrid/Editing_Inline_Details">
-                            <span style="font-size: 15px">Measurement Details</span>
+                            <span style="font-size: 15px">Measurement Report</span>
                         </a>
                     </li>
                     <li class="nav-item" style="margin-top: 20px;">
@@ -138,6 +138,13 @@
                     <a class="nav-link">
                         <span style="font-size: 15px; color: darkgray;">@UserManager.GetUserName(User)</span>
                     </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px;">
+                    <form asp-area="Identity" asp-page="/Account/Register" method="post" id="registerForm">
+                        <button type="submit" class="btn btn-link">
+                            <span style="font-size: 15px">Register</span>
+                        </button>
+                    </form>
                 </li>
                 <li class="nav-item" style="margin-top: 20px;">
                     <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">

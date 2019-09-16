@@ -16,5 +16,8 @@ namespace Epic_Project.Models
         public string YearMonth { get; set; }
         public int NextMonth { get; set; }
         public int NextYear { get; set; }
+        public string Location { get; set; }
+        public string Type { get; set; }
+        public string TeamName { get; set; }
     }
 }

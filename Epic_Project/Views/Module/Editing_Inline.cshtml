@@ -4,8 +4,8 @@
                 .Name("grid")
                 .Columns(columns =>
                 {
-                    columns.Bound(m => m.ModuleId).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                    columns.Bound(m => m.ModuleName).Width(840).HtmlAttributes(new { style = "text-align:left; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    //columns.Bound(m => m.ModuleId).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                    columns.Bound(m => m.ModuleName).Width(840).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
 
                     columns.Command(command => { command.Edit(); }).Width(90);
                 })

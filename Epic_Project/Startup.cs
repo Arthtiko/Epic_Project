@@ -41,6 +41,7 @@ namespace Epic_Project
                     Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDefaultIdentity<IdentityUser>()
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
+            
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(
                 options => options.Stores.MaxLengthForKeys = 128)
@@ -80,7 +81,7 @@ namespace Epic_Project
                     template: "{controller=MeasurementGrid}/{action=Editing_Inline_Details}/{id?}");
             });
 
-            DummyData.Initialize(context, userManager, roleManager).Wait();
+            //DummyData.Initialize(context, userManager, roleManager).Wait();
         }
     }
 }

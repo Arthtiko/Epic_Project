@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -58,10 +59,13 @@ namespace Epic_Project.Models
 
         List<MeasurementDetailsViewModel> FillMeasurementDetails(int epicId, int year, int month);
 
-        List<Measurement> GenerateMeasurementForNextMonth(int year, int month);
+        List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location);
         List<Date> GetDates();
         int GetMaxModuleId();
         int GetMaxTeamId();
         int GetMaxEmployeeId();
+        List<int> GetEpicBaseLineIdByLocation(string location);
+        void DeleteLastMonth(int month, int year, string location);
+        List<Measurement> SearchMeasurement(int year, int month, string location, string type, string teamName);
     }
 }

@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace Epic_Project.Areas.Identity.Pages.Account
 {
@@ -20,6 +23,8 @@ namespace Epic_Project.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly string connectionStringEpic = "server=(localdb)\\MSSQLLocalDB;database=EPICDB;Trusted_Connection=True";
+        private readonly string connectionString = "Server=(localdb)\\mssqllocaldb;Database=aspnet-Epic_Project-5699E43C-A911-4672-9DD1-E6F31459C896;Trusted_Connection=True;MultipleActiveResultSets=true";
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
@@ -70,24 +75,92 @@ namespace Epic_Project.Areas.Identity.Pages.Account
 
             [Display(Name = "Register as Admin")]
             public bool IsSavedAsAdmin { get; set; }
+            public int EmployeeId { get; set; }
         }
 
         public void OnGet(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
         }
+        public List<Employee> GetEmployeeAll()
+        {
+            List<Employee> EmployeeList = new List<Employee>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionStringEpic))
+            {
+                string procName = "[sel_Employee]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Employee temp = new Employee();
+                temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
+                temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
+                EmployeeList.Add(temp);
+            }
+            return EmployeeList;
+        }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            List<Employee> EmployeeList;
+            List<int> empIdList = new List<int>();
+            EmployeeList = GetEmployeeAll();
+            
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
+                Employee x = EmployeeList.Find(emp => emp.EmployeeId == Input.EmployeeId);
+                if (x == null)
+                {
+                    Console.Write("Employee could not found.");
+                    return null;
+                }
+                else
+                {
+                    DataTable dt = new DataTable();
+                    using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                    {
+                        string procName = "[sel_EmployeeId]";
+                        using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                        {
+                            sqlCommand.CommandType = CommandType.StoredProcedure;
+                            sqlConnection.Open();
+                            using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                            {
+                                sqlDataAdapter.Fill(dt);
+                            }
+                        }
+                    }
+                    for (int i = 0; i < dt.Rows.Count; i++)
+                    {
+                        Employee temp = new Employee();
+                        temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
+                        //temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
+                        empIdList.Add(temp.EmployeeId);
+                    }
+                    int tempId = empIdList.Find(id => id == Input.EmployeeId);
+                    if (tempId > 0)
+                    {
+                        Console.Write("Employee already has an account.");
+                        return null;
+                    }
+                }
                 //var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
                 var user = new ApplicationUser {
                     UserName = Input.Email,
                     Email = Input.Email,
                     FirstName = Input.FirstName,
-                    LastName = Input.LastName
+                    LastName = Input.LastName,
+                    EmployeeId = Input.EmployeeId
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)

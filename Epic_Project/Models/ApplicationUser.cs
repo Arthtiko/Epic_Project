@@ -12,5 +12,6 @@ namespace Epic_Project.Models
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public int EmployeeId { get; set; }
     }
 }

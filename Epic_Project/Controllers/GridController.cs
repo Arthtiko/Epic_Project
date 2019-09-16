@@ -40,7 +40,7 @@ namespace EPICProject.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine)
+        public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine, string name)
         {
             if (epicBaseLine != null && ModelState.IsValid)
             {
@@ -52,7 +52,7 @@ namespace EPICProject.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public ActionResult EditingInLine_Update([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine)
+        public ActionResult EditingInLine_Update([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine, string name)
         {
             if (epicBaseLine != null && ModelState.IsValid)
             {
@@ -65,7 +65,7 @@ namespace EPICProject.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine)
+        public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine, string name)
         {
             if (epicBaseLine != null)
             {

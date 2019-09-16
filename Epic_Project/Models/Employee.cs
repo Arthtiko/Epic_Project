@@ -16,6 +16,7 @@ namespace Epic_Project.Models
         public string EmployeeName { get; set; }
         [UIHint("ClientEmployeeType")]
         public EmployeeTypeViewModel EmployeeType { get; set; }
+        public string EmployeeLocation { get; set; }
     }
 
     public class EmployeeViewModel

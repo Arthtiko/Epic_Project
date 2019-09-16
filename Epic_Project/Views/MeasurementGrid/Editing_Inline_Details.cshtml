@@ -71,7 +71,7 @@
             {
                 model.Id(m => m.EpicId);
             })
-            .Read(read => read.Action("EditingInLineDetails_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month, Model.YearMonth }))
+            .Read(read => read.Action("EditingInLineDetails_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month, Model.YearMonth, Model.Location, Model.TeamName, Model.Type }))
         )
 )
 <script type="text/javascript">
