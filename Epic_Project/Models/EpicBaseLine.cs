@@ -15,22 +15,20 @@ namespace Epic_Project.Models
             IsMurabaha = new MurabahaViewModel();
             IsFirstSellableModule = new IsFirstSellableModuleViewModel();
             ProjectLocation = new ProjectLocationViewModel();
-            TeamName = new Team();
+            Team = new Team();
         }
         [Required]
         public int EPICId { get; set; }
         [Required]
         public string EPICName { get; set; }
-        [UIHint("ClientModule")]
         public Module ModuleName { get; set; }
-        [UIHint("ClientEpicType")]
         public EpicTypeViewModel EpicType { get; set; }
         [UIHint("ClientProjectLocation")]
         public ProjectLocationViewModel ProjectLocation { get; set; }
         public float Estimation { get; set; }
         public float EpicWeight { get; set; }
         [UIHint("ClientTeam")]
-        public Team TeamName { get; set; }
+        public Team Team { get; set; }
         [UIHint("ClientMurabaha")]
         public MurabahaViewModel IsMurabaha { get; set; }
         [UIHint("ClientFirstSellableModule")]
@@ -38,5 +36,29 @@ namespace Epic_Project.Models
         public float DistributedUnmappedEffort { get; set; }
         public float ActualEffort { get; set; }
         public float TotalActualEffort { get; set; }
+    }
+
+    public class EpicTypeViewModel
+    {
+        public int TypeValue { get; set; }
+        public string TypeName { get; set; }
+    }
+
+    public class ProjectLocationViewModel
+    {
+        public int LocationValue { get; set; }
+        public string LocationName { get; set; }
+    }
+
+    public class MurabahaViewModel
+    {
+        public int MurabahaValue { get; set; }
+        public string MurabahaName { get; set; }
+    }
+
+    public class IsFirstSellableModuleViewModel
+    {
+        public int FirstSellableModuleValue { get; set; }
+        public string FirstSellableModuleName { get; set; }
     }
 }

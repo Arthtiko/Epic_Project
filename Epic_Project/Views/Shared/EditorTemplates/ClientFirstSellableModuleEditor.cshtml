@@ -1,0 +1,8 @@
+﻿@model Epic_Project.Models.IsFirstSellableModuleViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+      .DataValueField("FirstSellableModuleValue")
+      .DataTextField("FirstSellableModuleName")
+      .HtmlAttributes(new { data_bind = "value: IsFirstSellableModule" })
+      .BindTo((System.Collections.IEnumerable)ViewData["firstSellableModules"])
+)

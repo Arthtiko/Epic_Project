@@ -14,7 +14,15 @@ namespace Epic_Project
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            //CreateWebHostBuilder(args).Build().Run();
+            var host = new WebHostBuilder()
+                .UseKestrel()
+                .UseStartup<Startup>()
+                .UseIISIntegration()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseUrls("http://*:5050")
+                .Build();
+            host.Run();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

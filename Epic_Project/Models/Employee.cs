@@ -11,12 +11,14 @@ namespace Epic_Project.Models
         public Employee()
         {
             EmployeeType = new EmployeeTypeViewModel();
+            EmployeeLocation = new ProjectLocationViewModel();
         }
         public int EmployeeId { get; set; }
         public string EmployeeName { get; set; }
         [UIHint("ClientEmployeeType")]
         public EmployeeTypeViewModel EmployeeType { get; set; }
-        public string EmployeeLocation { get; set; }
+        [UIHint("ClientEmployeeLocation")]
+        public ProjectLocationViewModel EmployeeLocation { get; set; }
     }
 
     public class EmployeeViewModel

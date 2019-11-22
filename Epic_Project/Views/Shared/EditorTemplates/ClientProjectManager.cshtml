@@ -1,7 +1,0 @@
-﻿@model Epic_Project.Models.EmployeeViewModel
-
-@(Html.Kendo().DropDownListFor(m => m)
-                            .DataValueField("EmployeeId")
-                            .DataTextField("EmployeeName")
-                            .BindTo((System.Collections.IEnumerable)ViewData["projectManagers"])
-)

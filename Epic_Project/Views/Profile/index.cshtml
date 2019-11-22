@@ -1,0 +1,46 @@
+﻿@model IEnumerable<Epic_Project.Models.ProfileModel>
+@using Kendo.Mvc.UI
+
+<div>
+    <table>
+        <tr>
+            <td>
+                <div class="card" style="margin-left: 10px; margin-top: 60px;">
+                    <div class="card-header">
+                        <span style="font-size: 18px; font-weight: bold;">Employee Information</span>
+                    </div>
+                    <div class="card-body m-0 p-0">
+                        <div>
+                            @(Html.Kendo().Grid(Model)
+                                   .Name("grid-employee")
+                                   .Columns(columns =>
+                                   {
+                                       columns.Bound(p => p.TitleName).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
+                                       columns.Bound(p => p.TitleValue).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
+                                   })
+                                   .DataSource(ds => ds
+                                       .Ajax()
+                                       .Read(read => read.Action("Index_Read", "Profile"))
+                                   )
+                                )
+                            </div>
+                        <div>
+                            <form asp-area="Identity" asp-page="/Account/ResetPassword" method="get" id="resetPasswordForm">
+                                <button type="submit" class="btn btn-link">
+                                    <span class="btn btn-primary" style="color: black; background-color: lightgray;">Change Password</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<script>
+    $("grid-employee").ready(function () {
+        $(".k-grid .k-grid-header").hide();
+    });
+    
+</script>

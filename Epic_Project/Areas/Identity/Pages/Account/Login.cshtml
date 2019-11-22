@@ -6,73 +6,44 @@
 }
 
 
-<div class="row" style="margin-left: 20px;">
-    <div class="col-md-4">
-        <h2>@ViewData["Title"]</h2>
-        <section>
+<div class="container">
+    <div class="card card-login mx-auto ml-5 mt-5" style="max-width: 500px;">
+        <div class="card-header">@ViewData["Title"]</div>
+        <div class="card-body">
             <form method="post">
-                <hr />
                 <div asp-validation-summary="All" class="text-danger"></div>
-                <div class="form-group">
-                    <label asp-for="Input.Email"></label>
-                    <input asp-for="Input.Email" class="form-control" />
+                <div class="form-group" style="width: 470px;">
+                    <label asp-for="Input.Email" style="font-size: 16px;"></label>
+                    <input asp-for="Input.Email" class="inputSize form-control"/>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="Input.Password"></label>
-                    <input asp-for="Input.Password" class="form-control" />
+                <div class="form-group" style="width: 470px;">
+                    <label asp-for="Input.Password" style="font-size: 16px;"></label>
+                    <input asp-for="Input.Password" class="inputSize form-control" style="font-size: 20px;"/>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="width: 470px;">
                     <div class="checkbox">
-                        <label asp-for="Input.RememberMe">
+                        <label asp-for="Input.RememberMe" style="font-size: 16px;">
                             <input asp-for="Input.RememberMe" />
                             @Html.DisplayNameFor(m => m.Input.RememberMe)
                         </label>
                     </div>
                 </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-default">Log in</button>
+                <div class="form-group" style="width: 470px;">
+                    <button type="submit" class="btn btn-primary btn-block inputSize">Log in</button>
                 </div>
             </form>
-        </section>
+        </div>
     </div>
-    @{ /*
-      <div class="col-md-6 col-md-offset-2">
-       <section>
-           <h4>Use another service to log in.</h4>
-           <hr />
-           @{
-               if ((Model.ExternalLogins?.Count ?? 0) == 0)
-               {
-                   <div>
-                       <p>
-                           There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
-                           for details on setting up this ASP.NET application to support logging in via external services.
-                       </p>
-                   </div>
-               }
-               else
-               {
-                   <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
-                       <div>
-                           <p>
-                               @foreach (var provider in Model.ExternalLogins)
-                               {
-                                   <button type="submit" class="btn btn-default" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
-                               }
-                           </p>
-                       </div>
-                   </form>
-               }
-           }
-       </section>
-   </div>
-         */
-    }
-
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
+
+<style>
+    .inputSize {
+        height: 50px;
+    }
+</style>

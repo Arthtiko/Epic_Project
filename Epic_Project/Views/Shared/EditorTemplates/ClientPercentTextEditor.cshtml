@@ -1,0 +1,9 @@
+﻿@model float?
+
+@(Html.Kendo().NumericTextBoxFor(m => m)
+      .HtmlAttributes(new { style = "width:100%" })
+      .Min(0)
+      .Max(100)
+      .Spinners(false)
+      .Format("##.00 \\%")
+)

@@ -1,33 +1,35 @@
 ﻿@(Html.Kendo().Grid<Employee>()
-                .Name("grid")
-                .Columns(columns =>
-                {
-                    //columns.Bound(e => e.EmployeeId).Width(100).HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                    columns.Bound(e => e.EmployeeName).Width(720).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                    columns.Bound(e => e.EmployeeType).Width(210).Groupable(false).ClientTemplate("#=EmployeeType.TypeName#").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                    columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180);
-                })
-                .ToolBar(toolbar => toolbar.Create())
-                .Editable(editable => editable.Mode(GridEditMode.InLine))
-                .Groupable()
-                .Scrollable()
-                .Resizable(resizable => resizable.Columns(true))
-                .Reorderable(reorderable => reorderable.Columns(true))
-                .HtmlAttributes(new { style = "background-color: Gainsboro" })
-                .DataSource(dataSource => dataSource
-                    .Ajax()
-                    .Events(events => events.Error("error_handler"))
-                    .Model(model =>
-                    {
-                        model.Id(e => e.EmployeeId);
-                        model.Field(e => e.EmployeeType).DefaultValue(ViewData["defaultEmployeeType"] as Epic_Project.Models.EmployeeTypeViewModel);
-                        model.Field(e => e.EmployeeId).Editable(false);
-                    })
-                    .Create(update => update.Action("EditingInLine_Create", "Employee"))
-                    .Read(read => read.Action("EditingInLine_Read", "Employee"))
-                    .Update(update => update.Action("EditingInLine_Update", "Employee"))
-                    .Destroy(update => update.Action("EditingInLine_Destroy", "Employee"))
-                )
+   .Name("grid")
+   .Columns(columns =>
+   {
+       columns.Bound(e => e.EmployeeName).Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(e => e.EmployeeType.TypeName).Title("Type").Width(180).EditorTemplateName("ClientEmployeeTypeEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(e => e.EmployeeLocation.LocationName).Title("Location").Width(180).EditorTemplateName("ClientEmployeeLocationEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       if (Context.User.IsInRole("ProjectManager") || Context.User.IsInRole("ProgramManager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180); }
+   })
+   .ToolBar(toolbar => toolbar.Create())
+   .Editable(editable => editable.Mode(GridEditMode.InLine))
+   .Groupable()
+   .Scrollable()
+   .Sortable()
+   .Resizable(resizable => resizable.Columns(true))
+   .Reorderable(reorderable => reorderable.Columns(true))
+   .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+   .DataSource(dataSource => dataSource
+       .Ajax()
+       .Events(events => events.Error("error_handler"))
+       .Model(model =>
+       {
+           model.Id(e => e.EmployeeId);
+           model.Field(e => e.EmployeeType).DefaultValue(ViewData["defaultEmployeeType"] as Epic_Project.Models.EmployeeTypeViewModel);
+           model.Field(e => e.EmployeeLocation).DefaultValue(ViewData["defaultEmployeeLocation"] as Epic_Project.Models.ProjectLocationViewModel);
+           model.Field(e => e.EmployeeId).Editable(false);
+       })
+       .Create(update => update.Action("EditingInLine_Create", "Employee"))
+       .Read(read => read.Action("EditingInLine_Read", "Employee"))
+       .Update(update => update.Action("EditingInLine_Update", "Employee"))
+       .Destroy(update => update.Action("EditingInLine_Destroy", "Employee"))
+   )
 )
 <script type="text/javascript">
     function error_handler(e) {
@@ -56,6 +58,7 @@
         var contentArea = grid.find(".k-grid-content");
 
         var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        calculatedHeight = calculatedHeight + 25;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);
@@ -67,3 +70,12 @@
         resizeGrid();
     });
 </script>
+
+<style>
+    .k-grid tbody tr {
+        height: 40px;
+    }
+    .k-grid-toolbar a {
+        float: right;
+    }
+</style>

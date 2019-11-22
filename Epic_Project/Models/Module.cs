@@ -9,7 +9,10 @@ namespace Epic_Project.Models
     {
         public int ModuleId { get; set; }
         public string ModuleName { get; set; }
-        
+        public float Progress { get; set; }
+        public float Weight { get; set; }
+
     }
+    
     
 }

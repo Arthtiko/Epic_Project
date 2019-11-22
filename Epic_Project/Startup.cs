@@ -36,12 +36,15 @@ namespace Epic_Project
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            string conStr = ConnString.IdentityConnectionString;
+
+            //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("Server=68.183.222.62;Database=EPICDB;User Id=SA;Password=Arch1234;"));
+            //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=aspnet-Epic_Project-5699E43C-A911-4672-9DD1-E6F31459C896;Trusted_Connection=True;MultipleActiveResultSets=true"));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(conStr));
+
             //services.AddDefaultIdentity<IdentityUser>()
             //    .AddEntityFrameworkStores<ApplicationDbContext>();
-            
+
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(
                 options => options.Stores.MaxLengthForKeys = 128)
@@ -51,6 +54,7 @@ namespace Epic_Project
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1).AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
             services.AddScoped<IRepository, SQLRepository>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddKendo();
         }
 
@@ -78,7 +82,8 @@ namespace Epic_Project
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=MeasurementGrid}/{action=Editing_Inline_Details}/{id?}");
+                    template: "{controller=Home}/{action=Index}/{id?}");
+                    //template: "{controller=MeasurementGrid}/{action=Editing_Inline_Details}/{id?}");
             });
 
             //DummyData.Initialize(context, userManager, roleManager).Wait();

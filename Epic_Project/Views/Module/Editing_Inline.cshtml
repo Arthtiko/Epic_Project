@@ -1,34 +1,26 @@
-﻿@model MaxIdViewModel
-
-@(Html.Kendo().Grid<Module>()
-                .Name("grid")
-                .Columns(columns =>
-                {
-                    //columns.Bound(m => m.ModuleId).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                    columns.Bound(m => m.ModuleName).Width(840).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-
-                    columns.Command(command => { command.Edit(); }).Width(90);
-                })
-                .ToolBar(toolbar => toolbar.Create())
-                .Editable(editable => editable.Mode(GridEditMode.InLine))
-                .Groupable()
-                .Scrollable()
-                .Resizable(resizable => resizable.Columns(true))
-                .Reorderable(reorderable => reorderable.Columns(true))
-                .HtmlAttributes(new { style = "background-color: Gainsboro" })
-                .DataSource(dataSource => dataSource
-                    .Ajax()
-                    .Events(events => { events.Error("error_handler"); })
-                    .Model(model =>
-                    {
-                        model.Id(m => m.ModuleId);
-                        model.Field(m => m.ModuleId).Editable(false);
-                        model.Field(m => m.ModuleId).DefaultValue(ViewBag.MaxModuleId);
-                    })
-                    .Create(create => { create.Action("EditingInLine_Create", "Module"); })
-                    .Read(read => read.Action("EditingInLine_Read", "Module"))
-                    .Update(update => update.Action("EditingInLine_Update", "Module"))
-                )
+﻿@(Html.Kendo().Grid<Module>()
+      .Name("grid")
+      .Columns(columns =>
+      {
+          columns.Bound(m => m.ModuleName).Width(360).HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal;" });
+          columns.Bound(m => m.Progress).Width(360).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal;" });
+      })
+      .Scrollable()
+      .Sortable()
+      .Groupable()
+      .Events(e => e.DataBound("dataBound"))
+      .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+      .DataSource(dataSource => dataSource
+          .Ajax()
+          .Events(events => { events.Error("error_handler"); })
+          .Model(model =>
+          {
+              model.Id(m => m.ModuleId);
+              model.Field(m => m.ModuleId).Editable(false);
+              model.Field(m => m.ModuleId).DefaultValue(ViewBag.MaxModuleId);
+          })
+          .Read(read => read.Action("EditingInLine_Read", "Module"))
+      )
 )
 <script type="text/javascript">
     function error_handler(e) {
@@ -55,6 +47,7 @@
         var contentArea = grid.find(".k-grid-content");
 
         var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        calculatedHeight = calculatedHeight + 80;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);
@@ -65,4 +58,20 @@
     $(window).ready(function () {
         resizeGrid();
     });
+
+    function dataBound() {
+        var grid = this;
+        grid.tbody.find("tr[role='row']").each(function () {
+            var model = grid.dataItem(this);
+            $(this).find(".progress1").kendoProgressBar({
+                type: "percent",
+                value: model.Progress
+            });
+        });
+    }
 </script>
+<style>
+    .k-grid tbody tr {
+        height: 40px;
+    }
+</style>

@@ -20,20 +20,21 @@ namespace Epic_Project.Controllers
             _repository = repository;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult Editing_InLine()
         {
             PopulateEmployeeTypes();
+            PopulateEmployeeLocations();
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
             return Json(_repository.GetEmployeeAll().ToDataSourceResult(request));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, Employee employee)
         {
@@ -45,7 +46,7 @@ namespace Epic_Project.Controllers
             return Json(new[] { employee }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Update([DataSourceRequest] DataSourceRequest request, Employee employee)
         {
@@ -57,7 +58,7 @@ namespace Epic_Project.Controllers
             return Json(new[] { employee }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, Employee employee)
         {
@@ -69,19 +70,41 @@ namespace Epic_Project.Controllers
             return Json(new[] { employee }.ToDataSourceResult(request, ModelState));
         }
 
+        [Authorize]
         private void PopulateEmployeeTypes()
         {
             List<EmployeeTypeViewModel> typeList = new List<EmployeeTypeViewModel>();
             List<Parameter> parameterList = (List<Parameter>)_repository.GetParameter("EmployeeType");
             for (int i = 0; i < parameterList.Count(); i++)
             {
-                var temp = new EmployeeTypeViewModel();
-                temp.TypeName = parameterList[i].ParameterName;
-                temp.TypeId = parameterList[i].ParameterValue;
+                var temp = new EmployeeTypeViewModel
+                {
+                    TypeName = parameterList[i].ParameterName,
+                    TypeId = parameterList[i].ParameterValue
+                };
                 typeList.Add(temp);
             }
             ViewData["employeeTypes"] = typeList;
             ViewData["defaultEmployeeType"] = typeList.First();
+        }
+
+        [Authorize]
+        private void PopulateEmployeeLocations()
+        {
+            List<ProjectLocationViewModel> employeeLocationList = new List<ProjectLocationViewModel>();
+            List<Parameter> parameterList;
+            parameterList = (List<Parameter>)_repository.GetParameter("ProjectLocation");
+            for (int i = 0; i < parameterList.Count(); i++)
+            {
+                var temp = new ProjectLocationViewModel
+                {
+                    LocationName = parameterList[i].ParameterName,
+                    LocationValue = parameterList[i].ParameterValue
+                };
+                employeeLocationList.Add(temp);
+            }
+            ViewData["employeeLocations"] = employeeLocationList;
+            ViewData["defaultEmployeeLocation"] = employeeLocationList.First();
         }
     }
 }

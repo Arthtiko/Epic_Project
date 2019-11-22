@@ -1343,7 +1343,8 @@ input.k-textbox:active {
 }
 
     .k-grid-header .k-header, .k-grid-header .k-header .k-link, .k-grid-header .k-link, .k-grid-header .k-link:link, .k-pager-info, .k-scheduler-agenda .k-scheduler-header, .k-scheduler-agendaview .k-scheduler-datecolumn {
-        color: #9da2a4
+        color: #6f6f6f;
+        font-weight: bold!important
     }
 
 .k-grid .k-alt {

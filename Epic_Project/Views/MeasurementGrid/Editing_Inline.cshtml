@@ -1,113 +1,129 @@
 ﻿@model MeasurementSearchModel
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
 
-<div class="row">
+
+
+<div class="row" style="position: relative;">
     <div style="margin-left: 15px">
         <form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
-            <div class="row">
-                <div>
-                    <text style="margin-left: 10px;">Year-Month: </text>
-                    <select class="k-select" id="form-select-time" style="width: 200px;" asp-for="YearMonth"></select>
-                </div>
-                <div>
-                    <text style="margin-left: 20px;">Location: </text>
-                    <select class="k-select" id="form-select-location" style="width: 200px;" asp-for="Location">
-                        <option value=""></option>
-                        <option value="Turkey">Turkey</option>
-                        <option value="Egypt">Egypt</option>
-                    </select>
-                </div>
-                <div>
-                    <text style="margin-left: 20px;">Type: </text>
-                    <select class="k-select" id="form-select-type" style="width: 200px;" asp-for="Type">
-                        <option value=""></option>
-                        <option value="Actual">Actual</option>
-                        <option value="Target">Target</option>
-                    </select>
-                </div>
-                <div>
-                    <text style="margin-left: 20px;">Team: </text>
-                    <select class="k-select" id="form-select-team" style="width: 200px;" asp-for="TeamName"></select>
-                </div>
-                <div>
-                    <button style="margin-left: 20px; margin-top: -10px;" class="k-button" type="submit">FILTER</button>
+            <div class="row" style="margin-top: -5px;">
+                <div style="margin-left: 45px">
+                    <text class="text-size">Year-Month: </text>
+                    <select class="k-select select-size" id="form-select-time" asp-for="YearMonth" onchange="submit()"></select>
                 </div>
             </div>
-
         </form>
     </div>
-    <div style="margin-left: 20px">
-        @{ //location ekle
-        }
-        <a class="k-button" asp-controller="MeasurementGrid" asp-action="GenerateNextMonth" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear" >Create New Month</a>
+    <div>
+        <a class="k-button button-size-month" id="showGrid">Show Data</a>
     </div>
-    @{ 
-/*<div style="margin-left: 20px">
-<a class="k-button" asp-controller="MeasurementGrid" asp-action="DeleteLastMonth" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear" asp-route-location="@Model.Location">Delete Last Month</a>
-</div>*/
+    @if (Context.User.IsInRole("ProjectManager") || Context.User.IsInRole("ProgramManager") || Context.User.IsInRole("Admin"))
+    {
+        <div style="position: absolute; right: 0; margin-right: 40px">
+            <a class="k-button button-size-month" asp-controller="MeasurementGrid" asp-action="GenerateNextMonth" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear" onclick="javascript:return ShowMessageCreateNewMonth();">Create New Month</a>
+            <a class="k-button button-size-month" asp-controller="MeasurementGrid" asp-action="DeleteLastMonth" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear" onclick="javascript:return ShowMessageDeleteLastMonth();">Delete Last Month</a>
+        </div>
     }
-    
 </div>
-@(Html.Kendo().Grid<Measurement>()
-                                .Name("grid")
-                                .Columns(columns =>
-                                {
-                                    columns.Bound(m => m.EpicId).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
-                                    columns.Bound(m => m.EpicName).Width(245).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
-                                    columns.Bound(m => m.Module.ModuleName).Width(210).Groupable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    //columns.Bound(m => m.Module).ClientTemplate("#=Module.ModuleName#").Width(210).Groupable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.Year).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.Month).Width(70).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.Type.TypeName).Groupable(false).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    //columns.Bound(m => m.Type).ClientTemplate("#=Type.TypeName#").Groupable(false).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.EpicWeight).Format("{0:0.0000}").Width(105).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.Team.TeamName).Groupable(false).Width(75).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    //columns.Bound(m => m.Team).ClientTemplate("#=Team.TeamName#").Groupable(false).Width(75).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.RequirementProgress).ClientTemplate("#=RequirementProgress#").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.DesignProgress).ClientTemplate("#=DesignProgress#").Format("{0:0.00 \\'%'}").Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.DevelopmentProgress).ClientTemplate("#=DevelopmentProgress#").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.TestProgress).ClientTemplate("#=TestProgress#").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.UatProgress).ClientTemplate("#=UatProgress#").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.PreviousMonthCumulativeActualEffort).Format("{0:0.00}").Width(180).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Bound(m => m.ActualEffort).ClientTemplate("#=ActualEffort#").Filterable(false).Format("{0:0.00}").Width(110).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                                    columns.Command(command => { command.Edit(); }).Width(100);
-                                })
-                                .ToolBar(toolbar => { /*toolbar.Create();*/ toolbar.Excel(); })
-                                .Editable(editable => editable.Mode(GridEditMode.InLine))
-                                .Scrollable()
-                                .Groupable()
-                                .Excel(excel => excel.FileName("Measurement " + Model.Year + "-" + Model.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "MeasurementGrid")))
-                                .Resizable(resizable => resizable.Columns(true))
-                                .Reorderable(reorderable => reorderable.Columns(true))
-                                .HtmlAttributes(new { style = "background-color: Gainsboro" })
-                                .DataSource(dataSource => dataSource
-                                    .Ajax()
-                                    .Events(events => { events.Error("error_handler"); events.RequestEnd("onRequestEnd"); })
-                                    .Model(model =>
-                                    {
-                                        model.Id(m => m.EpicId);
-                                        model.Field(m => m.EpicId).Editable(false);
-                                        model.Field(m => m.Year).DefaultValue(Model.Year);
-                                        model.Field(m => m.Year).Editable(false);
-                                        model.Field(m => m.Month).DefaultValue(Model.Month);
-                                        model.Field(m => m.Month).Editable(false);
-                                        model.Field(m => m.Team).Editable(false);
-                                        model.Field(m => m.Module).Editable(false);
-                                        model.Field(m => m.EpicName).Editable(false);
-                                        model.Field(m => m.EpicWeight).Editable(false);
-                                        model.Field(m => m.Type).Editable(false);
-                                        model.Field(m => m.PreviousMonthCumulativeActualEffort).Editable(false);
-                                        model.Field(m => m.Type).DefaultValue(ViewData["defaultType"] as Epic_Project.Models.MeasurementTypeViewModel);
-                                        model.Field(m => m.Team).DefaultValue(ViewData["defaultTeam"] as Epic_Project.Models.Team);
-                                        model.Field(m => m.Module).DefaultValue(ViewData["defaultModule"] as Epic_Project.Models.Module);
-                            //model.Field(m => m.EpicWeight).DefaultValue("");
-                        })
-                                    .Create(create => create.Action("EditingInLine_Create", "MeasurementGrid"))
-                                    .Read(read => read.Action("EditingInLine_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month, Model.YearMonth, Model.Location, Model.TeamName, Model.Type }))
-                                    .Update(update => update.Action("EditingInLine_Update", "MeasurementGrid"))
-                                    .Destroy(update => update.Action("EditingInLine_Destroy", "MeasurementGrid"))
-                                )
+@(Html.Kendo().Grid<Measurement>
+   ()
+   .Name("grid")
+   .AutoBind(false)
+
+   .Columns(columns =>
+   {
+       columns.Bound(m => m.EpicId).Filterable(ftb => ftb.Multi(true).Search(true)).Title("EPIC Id").Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
+       columns.Bound(m => m.EpicName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Name").Width(270).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
+       columns.Bound(m => m.Module.ModuleName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Module").Width(220).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.Year).Filterable(false).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.Month).Filterable(false).Width(70).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.Type.TypeName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Type").Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.EpicWeight).Title("Weight").Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.0000}").Width(105).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.Team.TeamName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Team").EditorTemplateName("ClientTeamEditor").Width(125).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.IsFirstSellableModule).Filterable(ftb => ftb.Multi(true).Search(true)).Width(175).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.RequirementProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.DesignProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.DevelopmentProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.TestProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.UatProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       //columns.Bound(m => m.WeightedOverallProgress).Title("Deneme").ClientTemplate("<span class='span1'>#=OverallEpicCompilation*EpicWeight#</span>").Width(130).Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.OverallEpicCompilation).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Width(130).Filterable(false).Title("Overall Epic Completion").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.WeightedOverallProgress).Title("Weighted Overall Progress").Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
+       columns.Bound(m => m.PreviousMonthCumulativeActualEffort).Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Width(180).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       columns.Bound(m => m.ActualEffort).Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").EditorTemplateName("ClientNumericTextBoxEditor").ClientTemplate("#=ActualEffort#").Filterable(false).Format("{0:0.00}").Width(110).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+       if ((DateTime.Today.Year == Model.Year && DateTime.Today.Month - Model.Month < 2) || (DateTime.Today.Year - Model.Year == 1 && (DateTime.Today.Month == 1 && Model.Month == 12)))
+       {
+           columns.Command(command => { command.Edit(); }).Width(125);
+       }
+
+       })
+       .ToolBar(toolbar =>
+       {
+           toolbar.Excel();
+       })
+       .Editable(editable => editable.Mode(GridEditMode.InLine))
+       .Scrollable()
+       .Groupable()
+       .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
+       .Filterable()
+       .Events(e => e.DataBound("dataBound"))
+       .Excel(excel => excel.FileName("Measurement " + Model.Year + "-" + Model.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "MeasurementGrid")))
+       .Resizable(resizable => resizable.Columns(true))
+       .Reorderable(reorderable => reorderable.Columns(true))
+       .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+       .DataSource(dataSource => dataSource
+       .Ajax().ServerOperation(false).AutoSync(true)
+       .Aggregates(aggregates =>
+       {
+           aggregates.Add(m => m.EpicWeight).Sum();
+           aggregates.Add(m => m.WeightedOverallProgress).Sum();
+           aggregates.Add(m => m.PreviousMonthCumulativeActualEffort).Sum();
+           aggregates.Add(m => m.ActualEffort).Sum();
+       })
+       .Events(events => { events.Error("error_handler"); events.RequestEnd("onRequestEnd"); })
+       .Model(model =>
+       {
+           model.Id(m => m.EpicId);
+           model.Field(m => m.EpicId).Editable(false);
+           model.Field(m => m.Year).DefaultValue(Model.Year);
+           model.Field(m => m.Year).Editable(false);
+           model.Field(m => m.Month).DefaultValue(Model.Month);
+           model.Field(m => m.Month).Editable(false);
+           model.Field(m => m.Team.TeamName).Editable(false);
+           model.Field(m => m.Module).Editable(false);
+           model.Field(m => m.Module.ModuleName).Editable(false);
+           model.Field(m => m.EpicName).Editable(false);
+           model.Field(m => m.EpicWeight).Editable(false);
+           model.Field(m => m.Type).Editable(false);
+           model.Field(m => m.IsFirstSellableModule).Editable(false);
+           model.Field(m => m.OverallEpicCompilation).Editable(false);
+           model.Field(m => m.WeightedOverallProgress).Editable(false);
+           model.Field(m => m.Type.TypeName).Editable(false);
+           model.Field(m => m.PreviousMonthCumulativeActualEffort).Editable(false);
+           model.Field(m => m.Team).DefaultValue(ViewData["defaultTeam"] as Epic_Project.Models.Team);
+           if (User.IsInRole("Tester"))
+           {
+               model.Field(m => m.RequirementProgress).Editable(false);
+               model.Field(m => m.DesignProgress).Editable(false);
+               model.Field(m => m.DevelopmentProgress).Editable(false);
+               model.Field(m => m.UatProgress).Editable(false);
+               model.Field(m => m.ActualEffort).Editable(false);
+           }
+       })
+       .Create(create => create.Action("EditingInLine_Create", "MeasurementGrid"))
+       .Read(read => read.Action("EditingInLine_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month, Model.YearMonth, Model.Location, Model.TeamName, Model.Type }))
+       .Update(update => update.Action("EditingInLine_Update", "MeasurementGrid"))
+       .Destroy(update => update.Action("EditingInLine_Destroy", "MeasurementGrid"))
+       .Filter(filters =>
+       {
+           filters.Add(m => m.Type.TypeName).Contains("Actual");
+       })
+       )
 )
 
 <script type="text/javascript">
@@ -125,38 +141,64 @@
         }
     }
 
+    function calculateWeightedOverallProgress(data) {
+        return data.EpicWeight * data.OverallEpicCompilation / 100;
+    }
+
     function onRequestEnd() {
         var grid = $("#grid").data("kendoGrid");
         grid.refresh();
     }
 
+    $(document).ready(function () {
+        var url = window.location.href.split("/")[3];
+        if (url == null || url == "") {
+            $.get('MeasurementGrid/selectDates', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-time");
+                    if (value == (@Model.Year + "-" + @Model.Month)) {
+                        document.getElementById("form-select-time").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+            $(document).ready(function () {
+                $.get('MeasurementGrid/SelectTeams', function (data) {
+                    console.log(data)
+                    var i = 0;
+                    $.each(data, function (index, value) {
+                        $('<option>').val(value).text(value).appendTo("#form-select-team");
+                    })
+                })
+            })
+        }
+        else {
+            $.get('selectDates', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-time");
+                    if (value == (@Model.Year + "-" + @Model.Month)) {
+                        document.getElementById("form-select-time").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+            $(document).ready(function () {
+                $.get('SelectTeams', function (data) {
+                    console.log(data)
+                    var i = 0;
+                    $.each(data, function (index, value) {
+                        $('<option>').val(value).text(value).appendTo("#form-select-team");
+                    })
+                })
+            })
+        }
 
-    $(document).ready(function () {
-        $.get('selectDates', function (data) {
-            console.log(data)
-            var i = 0;
-            $.each(data, function (index, value) {
-                $('<option>').val(value).text(value).appendTo("#form-select-time");
-                if (value == (@Model.Year + "-" + @Model.Month)) {
-                    document.getElementById("form-select-time").selectedIndex = i;
-                }
-                i++;
-            })
-        })
     })
-    $(document).ready(function () {
-        $.get('SelectTeams', function (data) {
-            console.log(data)
-            var i = 0;
-            $.each(data, function (index, value) {
-                $('<option>').val(value).text(value).appendTo("#form-select-team");
-                if (value == @Model.TeamName) {
-                    document.getElementById("form-select-team").selectedIndex = i;
-                }
-                i++;
-            })
-        })
-    })
+
 
     function resizeGrid() {
         //Define Elements Needed
@@ -169,7 +211,7 @@
         //var headerHeight = $(window).headerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 55 - 160 - 10; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 50 - 160 - 10 - 50; // - headerHeight;       header is empty but this calculation makes grid small
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);
@@ -181,14 +223,62 @@
         resizeGrid();
     });
 
+    function dataBound() {
+        var grid = this;
+        grid.tbody.find("tr[role='row']").each(function () {
+            var model = grid.dataItem(this);
+            var val = model.RequirementProgress*0.02 + model.DesignProgress*0.23 + model.DevelopmentProgress*0.42 + model.TestProgress*0.19 + model.UatProgress*0.14
+            $(this).find(".progress1").kendoProgressBar({
+                type: "percent",
+                value: val
+            });
+        });
+    }
+
+    function ShowMessageDeleteLastMonth() {
+        var result = confirm("Do you want to delete last month?");
+        if (result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function ShowMessageCreateNewMonth() {
+        var result = confirm("Do you want to create new month?");
+        if (result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    $("#showGrid").click(function () {
+        $("#grid").data("kendoGrid").dataSource.read();
+    });
 
 </script>
-@if (ViewBag.EditErrorMessage != null)
-{
-    <script type="text/javascript">
-        window.onload = function () {
-            alert("@ViewBag.EditErrorMessage");
-        };
-        
-    </script>
-}
+
+
+<style>
+    .k-grid tbody tr {
+        height: 40px;
+    }
+
+    .button-size {
+        margin-left: 24px;
+        margin-top: -5px;
+    }
+
+    .button-size-month {
+        margin-left: 24px;
+    }
+
+    .toolbarSeparater {
+        background-color: transparent;
+        border: none;
+        cursor: default;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>

@@ -20,7 +20,7 @@ namespace Epic_Project.Controllers
             _repository = repository;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult Editing_InLine()
         {
             PopulateTeamLeaders();
@@ -28,13 +28,14 @@ namespace Epic_Project.Controllers
             return View();
         }
         
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(_repository.GetTeamAll().ToDataSourceResult(request));
+            IEnumerable<Team> x = _repository.GetTeamAll(0, null, 0, 0);
+            return Json(x.ToDataSourceResult(request));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, Team team)
         {
@@ -46,7 +47,7 @@ namespace Epic_Project.Controllers
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Update([DataSourceRequest] DataSourceRequest request, Team team)
         {
@@ -58,7 +59,7 @@ namespace Epic_Project.Controllers
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, Team team)
         {
@@ -70,44 +71,38 @@ namespace Epic_Project.Controllers
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
         }
         
-
+        [Authorize]
         private void PopulateTeamLeaders()
         {
-            List<EmployeeViewModel> employeeList = new List<EmployeeViewModel>();
-            // 2 -> Team Leader
-            // 3 -> Project Manager
-            List<Employee> employees = (List<Employee>)_repository.GetEmployeeByType(2);
+            List<TeamLeaderViewModel> employeeList = new List<TeamLeaderViewModel>();
+            int typeId = _repository.GetParameterValue("EmployeeType", "Team Leader");
+            List<Employee> employees = (List<Employee>)_repository.GetEmployeeByType(typeId);
             for (int i = 0; i < employees.Count(); i++)
             {
-                EmployeeViewModel temp = new EmployeeViewModel();
-                temp.EmployeeId = employees[i].EmployeeId;
-                temp.EmployeeName = employees[i].EmployeeName;
+                TeamLeaderViewModel temp = new TeamLeaderViewModel();
+                temp.TeamLeaderId = employees[i].EmployeeId;
+                temp.TeamLeaderName = employees[i].EmployeeName;
                 employeeList.Add(temp);
             }
             ViewData["teamLeaders"] = employeeList;
-            ViewData["defaultTeamLeader"] = new EmployeeViewModel() { EmployeeId = 0, EmployeeName = "" };
+            ViewData["defaultTeamLeader"] = new TeamLeaderViewModel() { TeamLeaderId = 0, TeamLeaderName = "" };
         }
 
+        [Authorize]
         private void PopulateProjectManagers()
         {
-            List<EmployeeViewModel> employeeList = new List<EmployeeViewModel>();
-            // 2 -> Team Leader
-            // 3 -> Project Manager
-            List<Employee> employees = (List<Employee>)_repository.GetEmployeeByType(3);
+            List<ProjectManagerViewModel> employeeList = new List<ProjectManagerViewModel>();
+            int typeId = _repository.GetParameterValue("EmployeeType", "Project Manager");
+            List<Employee> employees = (List<Employee>)_repository.GetEmployeeByType(typeId);
             for (int i = 0; i < employees.Count(); i++)
             {
-                EmployeeViewModel temp = new EmployeeViewModel();
-                temp.EmployeeId = employees[i].EmployeeId;
-                temp.EmployeeName = employees[i].EmployeeName;
+                ProjectManagerViewModel temp = new ProjectManagerViewModel();
+                temp.ProjectManagerId = employees[i].EmployeeId;
+                temp.ProjectManagerName = employees[i].EmployeeName;
                 employeeList.Add(temp);
             }
             ViewData["projectManagers"] = employeeList;
-            ViewData["defaultProjectManager"] = new EmployeeViewModel() { EmployeeId = 0, EmployeeName = "" };
-        }
-
-        public IActionResult Index()
-        {
-            return View();
+            ViewData["defaultProjectManager"] = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = "" };
         }
     }
 }

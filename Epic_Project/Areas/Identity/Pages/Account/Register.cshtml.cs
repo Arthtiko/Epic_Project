@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using System.Data;
 using System.Data.SqlClient;
+using Newtonsoft.Json;
 
 namespace Epic_Project.Areas.Identity.Pages.Account
 {
@@ -23,8 +24,9 @@ namespace Epic_Project.Areas.Identity.Pages.Account
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
-        private readonly string connectionStringEpic = "server=(localdb)\\MSSQLLocalDB;database=EPICDB;Trusted_Connection=True";
-        private readonly string connectionString = "Server=(localdb)\\mssqllocaldb;Database=aspnet-Epic_Project-5699E43C-A911-4672-9DD1-E6F31459C896;Trusted_Connection=True;MultipleActiveResultSets=true";
+
+        private readonly string connectionStringEpic = ConnString.EpicDBConnectionString;
+        private readonly string connectionString = ConnString.IdentityConnectionString;
 
         public RegisterModel(
             UserManager<ApplicationUser> userManager,
@@ -61,20 +63,21 @@ namespace Epic_Project.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
 
-            [Required]
+            //[Required]
             [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.")]
             [DataType(DataType.Text)]
             [Display(Name = "First Name")]
             public string FirstName { get; set; }
 
-            [Required]
+            //[Required]
             [StringLength(50, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.")]
             [DataType(DataType.Text)]
             [Display(Name = "Last Name")]
             public string LastName { get; set; }
 
-            [Display(Name = "Register as Admin")]
-            public bool IsSavedAsAdmin { get; set; }
+            [Display(Name = "Role")]
+            public string Role { get; set; }
+
             public int EmployeeId { get; set; }
         }
 
@@ -82,7 +85,7 @@ namespace Epic_Project.Areas.Identity.Pages.Account
         {
             ReturnUrl = returnUrl;
         }
-        public List<Employee> GetEmployeeAll()
+        public List<Employee> GetEmployeeAll(int id)
         {
             List<Employee> EmployeeList = new List<Employee>();
             DataTable dt = new DataTable();
@@ -92,6 +95,14 @@ namespace Epic_Project.Areas.Identity.Pages.Account
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (id == 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EmployeeId", null);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EmployeeId", id);
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -108,12 +119,57 @@ namespace Epic_Project.Areas.Identity.Pages.Account
             }
             return EmployeeList;
         }
+        
+        public string ListEmployees()
+        {
+            List<Employee> employees = GetEmployeeAll(0);
+            List<string> list = new List<string>();
+            List<int> empIdList = new List<int>();
 
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_EmployeeId]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Employee temp = new Employee();
+                temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
+                empIdList.Add(temp.EmployeeId);
+            }
+            for (int i = 0; i < employees.Count(); i++)
+            {
+                bool isAvailable = true;
+                for (int j = 0; j < empIdList.Count(); j++)
+                {
+                    if (empIdList[j] == employees[i].EmployeeId)
+                    {
+                        isAvailable = false;
+                    }
+                }
+                if (isAvailable)
+                {
+                    list.Add(employees[i].EmployeeId + "-" + employees[i].EmployeeName);
+                }
+            }
+            string listJson = JsonConvert.SerializeObject(list);
+            return listJson;
+        }
+        
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             List<Employee> EmployeeList;
             List<int> empIdList = new List<int>();
-            EmployeeList = GetEmployeeAll();
+            EmployeeList = GetEmployeeAll(0);
             
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
@@ -147,32 +203,26 @@ namespace Epic_Project.Areas.Identity.Pages.Account
                         //temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
                         empIdList.Add(temp.EmployeeId);
                     }
-                    int tempId = empIdList.Find(id => id == Input.EmployeeId);
+                    int tempId = empIdList.Find(empId => empId == Input.EmployeeId);
                     if (tempId > 0)
                     {
                         Console.Write("Employee already has an account.");
                         return null;
                     }
                 }
+                Employee employee = GetEmployeeAll(Input.EmployeeId)[0];
+                string FName = employee.EmployeeName;
                 //var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
                 var user = new ApplicationUser {
                     UserName = Input.Email,
                     Email = Input.Email,
-                    FirstName = Input.FirstName,
-                    LastName = Input.LastName,
+                    FirstName = FName,
                     EmployeeId = Input.EmployeeId
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
-                    if (Input.IsSavedAsAdmin)
-                    {
-                        await _userManager.AddToRoleAsync(user, "Admin");
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "User");
-                    }
+                    await _userManager.AddToRoleAsync(user, Input.Role);
                     _logger.LogInformation("User created a new account with password.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

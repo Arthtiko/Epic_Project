@@ -9,9 +9,7 @@ namespace Epic_Project.Models
     public interface IRepository
     {
         #region Team
-        IEnumerable<Team> GetTeamAll();
-        Team GetTeamById(int id);
-        int GetTeamIdByName(string name);
+        IEnumerable<Team> GetTeamAll(int id, string name, int teamLeaderId, int projectManagerId);
         void DeleteTeam(int id);
         Team InsertTeam(Team team);
         Team UpdateTeam(Team team);
@@ -19,27 +17,25 @@ namespace Epic_Project.Models
 
         #region Module
         IEnumerable<Module> GetModuleAll();
-        Module GetModuleById(int id);
+        List<Module> GetModuleProgress(int year, int month);
         void DeleteModule(int id);
         Module InsertModule(Module module);
         Module UpdateModule(Module module);
         #endregion
 
         #region EpicBaseLine
-        IEnumerable<EpicBaseLine> GetEpicBaseLineAll();
-        EpicBaseLine GetEpicBaseLineById(int id);
-        void DeleteEpicBaseLine(int id);
-        EpicBaseLine InsertEpicBaseLine(EpicBaseLine epicBaseLine);
-        EpicBaseLine UpdateEpicBaseLine(EpicBaseLine epicBaseLine);
+        IEnumerable<EpicBaseLine> GetEpicBaseLineAll(int id);
+        void DeleteEpicBaseLine(int id, string userName, string ipAddress);
+        EpicBaseLine InsertEpicBaseLine(EpicBaseLine epicBaseLine, string userName, string ipAddress);
+        EpicBaseLine UpdateEpicBaseLine(EpicBaseLine epicBaseLine, string userName, string ipAddress);
 
         #endregion
 
         #region Measurement
-        IEnumerable<Measurement> GetMeasurementAll();
         IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type);
-        void DeleteMeasurement(int epicId, int year, int month, int type);
-        Measurement InsertMeasurement(Measurement measurement);
-        Measurement UpdateMeasurement(Measurement measurement);
+        void DeleteMeasurement(int epicId, int year, int month, int type, string userName, string ipAddress);
+        Measurement InsertMeasurement(Measurement measurement, string userName, string ipAddress);
+        Measurement UpdateMeasurement(Measurement measurement, string userName, string ipAddress);
         #endregion
 
         #region Employee
@@ -51,21 +47,32 @@ namespace Epic_Project.Models
         Employee UpdateEmployee(Employee employee);
         #endregion
 
+        #region Parameter
         int GetParameterValue(string columnName, string parameterName);
-
         IEnumerable<Parameter> GetParameter(string name);
-        float GetTotalEpicEstimation();
-        float GetEstimationById(int id);
+        #endregion
 
-        List<MeasurementDetailsViewModel> FillMeasurementDetails(int epicId, int year, int month);
+        #region Progress
+        ProgressModel GetProgress(int year, int month, string location, string isFirstSellableModule);
+        IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule);
+        IEnumerable<LineChartModel> GetLineChartProgress2(string location, string isFirstSellableModule);
+        IEnumerable<HighLevelProgress> GetHighLevelProgress(string location, string isFirstSellableModule, Date date);
+        #endregion
 
-        List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location);
-        List<Date> GetDates();
-        int GetMaxModuleId();
-        int GetMaxTeamId();
-        int GetMaxEmployeeId();
-        List<int> GetEpicBaseLineIdByLocation(string location);
-        void DeleteLastMonth(int month, int year, string location);
+        #region Identity
+        int GetEmployeeId(string userId);
+        #endregion
+
+        #region Measurement Operations
+        List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month);
+        List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location, string userName, string ipAddress);
+        void DeleteLastMonth(int month, int year, string location, string userName, string ipAddress);
         List<Measurement> SearchMeasurement(int year, int month, string location, string type, string teamName);
+        #endregion
+
+        #region Side Operations
+        List<Date> GetDates();
+        float GetEpicWeight(string location, string isFirstSellableModule);
+        #endregion
     }
 }

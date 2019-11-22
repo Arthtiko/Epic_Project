@@ -10,14 +10,27 @@ namespace Epic_Project.Models
     {
         public Team()
         {
-            TeamLeader = new EmployeeViewModel();
-            ProjectManager = new EmployeeViewModel();
+            TeamLeader = new TeamLeaderViewModel();
+            ProjectManager = new ProjectManagerViewModel();
         }
         public int TeamId { get; set; }
         public string TeamName { get; set; }
         [UIHint("ClientTeamLeader")]
-        public EmployeeViewModel TeamLeader { get; set; }
+        public TeamLeaderViewModel TeamLeader { get; set; }
         [UIHint("ClientProjectManager")]
-        public EmployeeViewModel ProjectManager { get; set; }
+        public ProjectManagerViewModel ProjectManager { get; set; }
+        public string TeamLocation { get; set; }
+    }
+
+    public class TeamLeaderViewModel
+    {
+        public int TeamLeaderId { get; set; }
+        public string TeamLeaderName { get; set; }
+    }
+
+    public class ProjectManagerViewModel
+    {
+        public int ProjectManagerId { get; set; }
+        public string ProjectManagerName { get; set; }
     }
 }

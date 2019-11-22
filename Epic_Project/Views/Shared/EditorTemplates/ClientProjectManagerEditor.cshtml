@@ -1,0 +1,8 @@
+﻿@model Epic_Project.Models.ProjectManagerViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+      .DataValueField("ProjectManagerId")
+      .DataTextField("ProjectManagerName")
+      .HtmlAttributes(new { data_bind = "value: ProjectManager"})
+      .BindTo((System.Collections.IEnumerable)ViewData["projectManagers"])
+)

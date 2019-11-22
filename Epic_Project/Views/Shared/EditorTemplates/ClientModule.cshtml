@@ -1,7 +1,7 @@
 ﻿@model Epic_Project.Models.Module
 
 @(Html.Kendo().DropDownListFor(m => m)
-                        .DataValueField("ModuleId")
-                        .DataTextField("ModuleName")
-                        .BindTo((System.Collections.IEnumerable)ViewData["modules"])
+      .DataValueField("ModuleId")
+      .DataTextField("ModuleName")
+      .BindTo((System.Collections.IEnumerable)ViewData["modules"])
 )

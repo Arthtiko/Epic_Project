@@ -12,8 +12,9 @@ namespace Epic_Project.Models
     public class SQLRepository : IRepository
     {
         private readonly IConfiguration _configuration;
-        private string connectionString;
-        //private string connectionString = "Server=68.183.222.62;Database=EPICDB;User Id=SA;Password=Arch1234;Integrated Security = false;";
+
+        private string defConnectionString = ConnString.IdentityConnectionString;
+        private string connectionString = ConnString.EpicDBConnectionString;
 
         private List<Team> TeamList = new List<Team>();
         private List<Module> ModuleList = new List<Module>();
@@ -27,12 +28,13 @@ namespace Epic_Project.Models
         public SQLRepository(IConfiguration configuration)
         {
             _configuration = configuration;
-            connectionString = _configuration.GetConnectionString("DefaultConnection");
+            //connectionString = _configuration.GetConnectionString("EPICDBConnection");
+            //defConnectionString = _configuration.GetConnectionString("DefaultConnection");
         }
 
         #region Insert
 
-        public EpicBaseLine InsertEpicBaseLine(EpicBaseLine epicBaseLine)
+        public EpicBaseLine InsertEpicBaseLine(EpicBaseLine epicBaseLine, string userName, string ipAddress)
         {
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -47,19 +49,21 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@EpicType", GetParameterValue("EpicType", epicBaseLine.EpicType.TypeName));
                     sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", epicBaseLine.ProjectLocation.LocationName));
                     sqlCommand.Parameters.AddWithValue("@Estimation", epicBaseLine.Estimation);
-                    if (epicBaseLine.TeamName.TeamName == null)
+                    if (epicBaseLine.Team.TeamName == null)
                     {
-                        epicBaseLine.TeamName.TeamName = "";
+                        epicBaseLine.Team.TeamName = "";
                         sqlCommand.Parameters.AddWithValue("@TeamId", 0);
                     }
                     else
                     {
-                        sqlCommand.Parameters.AddWithValue("@TeamId", GetTeamIdByName(epicBaseLine.TeamName.TeamName));
+                        sqlCommand.Parameters.AddWithValue("@TeamId", GetTeamIdByName(epicBaseLine.Team.TeamName));
                     }
                     sqlCommand.Parameters.AddWithValue("@IsMurabaha", GetParameterValue("IsMurabaha", epicBaseLine.IsMurabaha.MurabahaName));
                     sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", epicBaseLine.IsFirstSellableModule.FirstSellableModuleName));
                     sqlCommand.Parameters.AddWithValue("@DistributedUnmappedEffort", epicBaseLine.DistributedUnmappedEffort);
                     sqlCommand.Parameters.AddWithValue("@TotalActualEffort", epicBaseLine.TotalActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -70,9 +74,10 @@ namespace Epic_Project.Models
             return epicBaseLine;
         }
 
-        public Measurement InsertMeasurement(Measurement measurement)
+        public Measurement InsertMeasurement(Measurement measurement, string userName, string ipAddress)
         {
-            if (measurement.EpicId != GetEpicBaseLineById(measurement.EpicId).EPICId)
+            List<EpicBaseLine> epic = (List<EpicBaseLine>)GetEpicBaseLineAll(measurement.EpicId);
+            if (measurement.EpicId != epic[0].EPICId)
             {
                 return null;
             }
@@ -94,6 +99,8 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@UatProgress", (double)(measurement.UatProgress / 100.00));
                     sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", measurement.PreviousMonthCumulativeActualEffort);
                     sqlCommand.Parameters.AddWithValue("@ActualEffort", measurement.ActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -119,7 +126,6 @@ namespace Epic_Project.Models
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    //sqlCommand.Parameters.AddWithValue("@ModuleId", module.ModuleId); //identity
                     sqlCommand.Parameters.AddWithValue("@ModuleName", module.ModuleName);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
@@ -133,9 +139,8 @@ namespace Epic_Project.Models
 
         public Team InsertTeam(Team team)
         {
-            List<Team> teams = (List<Team>)GetTeamAll();
-            Team te = teams.Find(t => t.TeamName == team.TeamName);
-            if (te != null)
+            List<Team> teams = (List<Team>)GetTeamAll(0, team.TeamName, team.TeamLeader.TeamLeaderId, team.ProjectManager.ProjectManagerId);
+            if (teams == null || teams.Count() >= 1)
             {
                 return null;
             }
@@ -146,10 +151,9 @@ namespace Epic_Project.Models
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    //sqlCommand.Parameters.AddWithValue("@TeamId", team.TeamId);   //identity
                     sqlCommand.Parameters.AddWithValue("@TeamName", team.TeamName);
-                    sqlCommand.Parameters.AddWithValue("@TeamLeaderId", GetEmployeeIdByName(team.TeamLeader.EmployeeName));
-                    sqlCommand.Parameters.AddWithValue("@ProjectManagerId", GetEmployeeIdByName(team.ProjectManager.EmployeeName));
+                    sqlCommand.Parameters.AddWithValue("@TeamLeaderId", GetEmployeeIdByName(team.TeamLeader.TeamLeaderName));
+                    sqlCommand.Parameters.AddWithValue("@ProjectManagerId", GetEmployeeIdByName(team.ProjectManager.ProjectManagerName));
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -175,10 +179,9 @@ namespace Epic_Project.Models
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    //sqlCommand.Parameters.AddWithValue("@EmployeeId", employee.EmployeeId);   //identity
                     sqlCommand.Parameters.AddWithValue("@EmployeeName", employee.EmployeeName);
                     sqlCommand.Parameters.AddWithValue("@EmployeeType", GetParameterValue("EmployeeType", employee.EmployeeType.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@EmployeeLocation", GetParameterValue("ProjectLocation", employee.EmployeeLocation));
+                    sqlCommand.Parameters.AddWithValue("@EmployeeLocation", GetParameterValue("ProjectLocation", employee.EmployeeLocation.LocationName));
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -192,7 +195,7 @@ namespace Epic_Project.Models
 
         #region Delete
 
-        public void DeleteEpicBaseLine(int id)
+        public void DeleteEpicBaseLine(int id, string userName, string ipAddress)
         {
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -202,6 +205,8 @@ namespace Epic_Project.Models
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.AddWithValue("@EPICId", id);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -211,7 +216,7 @@ namespace Epic_Project.Models
             }
         }
 
-        public void DeleteMeasurement(int epicId, int year, int month, int type)
+        public void DeleteMeasurement(int epicId, int year, int month, int type, string userName, string ipAddress)
         {
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -224,6 +229,8 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@Year", year);
                     sqlCommand.Parameters.AddWithValue("@Month", month);
                     sqlCommand.Parameters.AddWithValue("@Type", type);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -293,9 +300,9 @@ namespace Epic_Project.Models
 
         #region Get
 
-        public IEnumerable<EpicBaseLine> GetEpicBaseLineAll()
+        public IEnumerable<EpicBaseLine> GetEpicBaseLineAll(int id)
         {
-            float TotalEstimation = GetTotalEpicEstimation();
+            EpicBaseLineList.Clear();
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -303,6 +310,14 @@ namespace Epic_Project.Models
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if ( id != 0 )
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EPICId", id);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EPICId", null);
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -315,46 +330,88 @@ namespace Epic_Project.Models
                 EpicBaseLine temp = new EpicBaseLine();
                 temp.EPICId = Convert.ToInt32(dt.Rows[i]["EPICId"]);
                 temp.EPICName = Convert.ToString(dt.Rows[i]["EPICName"]);
+                temp.ModuleName.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
                 temp.ModuleName.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
-                temp.ModuleName.ModuleId = GetModuleIdByName(temp.ModuleName.ModuleName);
+                temp.EpicType.TypeValue = Convert.ToInt32(dt.Rows[i]["EpicTypeId"]);
                 temp.EpicType.TypeName = Convert.ToString(dt.Rows[i]["EpicType"]);
-                temp.EpicType.TypeValue = GetParameterValue("EpicType", temp.EpicType.TypeName);
+                temp.ProjectLocation.LocationValue = Convert.ToInt32(dt.Rows[i]["ProjectLocationId"]);
                 temp.ProjectLocation.LocationName = Convert.ToString(dt.Rows[i]["ProjectLocation"]);
-                temp.ProjectLocation.LocationValue = GetParameterValue("ProjectLocation", temp.ProjectLocation.LocationName);
                 temp.Estimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
-                temp.EpicWeight = temp.Estimation / TotalEstimation;
-                temp.TeamName.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
-                if (temp.TeamName.TeamName != "")
+                temp.EpicWeight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
                 {
-                    int tid = GetTeamIdByName(temp.TeamName.TeamName);
-                    temp.TeamName = GetTeamById(tid);
+                    temp.Team = new Team()
+                    {
+                        TeamId = 0,
+                        TeamName = "",
+                        TeamLeader = new TeamLeaderViewModel()
+                        {
+                            TeamLeaderId = 0,
+                            TeamLeaderName = ""
+                        },
+                        ProjectManager = new ProjectManagerViewModel()
+                        {
+                            ProjectManagerId = 0,
+                            ProjectManagerName = ""
+                        },
+                        TeamLocation = temp.ProjectLocation.LocationName
+                    };
                 }
                 else
                 {
-                    temp.TeamName = new Team() { TeamId = 0, TeamName = "", TeamLeader = new EmployeeViewModel(), ProjectManager = new EmployeeViewModel() };
+                    temp.Team.TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]);
+                    temp.Team.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
+                    temp.Team.ProjectManager = new ProjectManagerViewModel()
+                    {
+                        ProjectManagerId = Convert.ToInt32(dt.Rows[i]["ProjectManagerId"]),
+                        ProjectManagerName = Convert.ToString(dt.Rows[i]["ProjectManagerName"])
+                    };
+                    temp.Team.TeamLeader = new TeamLeaderViewModel()
+                    {
+                        TeamLeaderId = Convert.ToInt32(dt.Rows[i]["TeamLeaderId"]),
+                        TeamLeaderName = Convert.ToString(dt.Rows[i]["TeamLeaderName"])
+                    };
                 }
+                temp.IsMurabaha.MurabahaValue = Convert.ToInt32(dt.Rows[i]["IsMurabahaId"]);
                 temp.IsMurabaha.MurabahaName = Convert.ToString(dt.Rows[i]["IsMurabaha"]);
-                temp.IsMurabaha.MurabahaValue = GetParameterValue("IsMurabaha", temp.IsMurabaha.MurabahaName);
+                temp.IsFirstSellableModule.FirstSellableModuleValue = Convert.ToInt32(dt.Rows[i]["IsFirstSellableModuleId"]);
                 temp.IsFirstSellableModule.FirstSellableModuleName = Convert.ToString(dt.Rows[i]["IsFirstSellableModule"]);
-                temp.IsFirstSellableModule.FirstSellableModuleValue = GetParameterValue("IsFirstSellableModule", temp.IsFirstSellableModule.FirstSellableModuleName);
                 temp.DistributedUnmappedEffort = (float)Convert.ToDouble(dt.Rows[i]["DistributedUnmappedEffort"]);
+                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
                 temp.TotalActualEffort = (float)Convert.ToDouble(dt.Rows[i]["TotalActualEffort"]);
-                temp.ActualEffort = temp.TotalActualEffort - temp.DistributedUnmappedEffort;
                 EpicBaseLineList.Add(temp);
             }
             return EpicBaseLineList;
         }
-
-        public EpicBaseLine GetEpicBaseLineById(int id)
+        
+        public IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type)
         {
+            MeasurementList = new List<Measurement>();
             DataTable dt = new DataTable();
+            
+            //(using (SqlConnection sqlConnection = new SqlConnection(GetConfiguration().GetSection("ConnectionString").GetSection("EPICDBConnection").Value))
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                string procName = "[sel_EpicBaseLine]";
+                string procName = "[sel_Measurement]";
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EPICId", id);
+                    if (epicId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    if (type != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -362,35 +419,431 @@ namespace Epic_Project.Models
                     }
                 }
             }
-            EpicBaseLine epicBaseLine = new EpicBaseLine();
-            epicBaseLine.EPICId = Convert.ToInt32(dt.Rows[0]["EPICId"]);
-            epicBaseLine.EPICName = Convert.ToString(dt.Rows[0]["EPICName"]);
-            epicBaseLine.ModuleName.ModuleName = Convert.ToString(dt.Rows[0]["ModuleName"]);
-            epicBaseLine.ModuleName.ModuleId = GetModuleIdByName(epicBaseLine.ModuleName.ModuleName);
-            epicBaseLine.EpicType.TypeName = Convert.ToString(dt.Rows[0]["EpicType"]);
-            epicBaseLine.EpicType.TypeValue = GetParameterValue("EpicType", epicBaseLine.EpicType.TypeName);
-            epicBaseLine.ProjectLocation.LocationName = Convert.ToString(dt.Rows[0]["ProjectLocation"]);
-            epicBaseLine.ProjectLocation.LocationValue = GetParameterValue("ProjectLocation", epicBaseLine.ProjectLocation.LocationName);
-            epicBaseLine.Estimation = Convert.ToInt32(dt.Rows[0]["Estimation"]);
-            epicBaseLine.TeamName.TeamName = Convert.ToString(dt.Rows[0]["TeamName"]);
-            if (epicBaseLine.TeamName.TeamName != "")
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
-                int tid = GetTeamIdByName(epicBaseLine.TeamName.TeamName);
-                epicBaseLine.TeamName = GetTeamById(tid);
+                Measurement temp = new Measurement();
+                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
+                temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                temp.Module.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.Type.TypeValue = Convert.ToInt32(dt.Rows[i]["TypeId"]);
+                temp.Type.TypeName = Convert.ToString(dt.Rows[i]["TypeName"]);
+                temp.EpicWeight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
+                {
+                    temp.Team.TeamId = 0;
+                    temp.Team.TeamName = "";
+                    temp.Team.TeamLeader = new TeamLeaderViewModel()
+                    {
+                        TeamLeaderId = 0,
+                        TeamLeaderName = ""
+                    };
+                    temp.Team.ProjectManager = new ProjectManagerViewModel()
+                    {
+                        ProjectManagerId = 0,
+                        ProjectManagerName = ""
+                    };
+                }
+                else
+                {
+                    temp.Team.TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]);
+                    temp.Team.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
+                    temp.Team.ProjectManager = new ProjectManagerViewModel()
+                    {
+                        ProjectManagerId = Convert.ToInt32(dt.Rows[i]["ProjectManagerId"]),
+                        ProjectManagerName = Convert.ToString(dt.Rows[i]["ProjectManagerName"])
+                    };
+                    temp.Team.TeamLeader = new TeamLeaderViewModel()
+                    {
+                        TeamLeaderId = Convert.ToInt32(dt.Rows[i]["TeamLeaderId"]),
+                        TeamLeaderName = Convert.ToString(dt.Rows[i]["TeamLeaderName"])
+                    };
+                }
+                temp.IsFirstSellableModule = Convert.ToString(dt.Rows[i]["IsFirstSellableModule"]);
+                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
+                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
+                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
+                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
+                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
+                temp.OverallEpicCompilation = (float)Convert.ToDouble(dt.Rows[i]["OverallEpicCompilation"]);
+                temp.WeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["WeightedOverallProgress"]);
+                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
+                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                MeasurementList.Add(temp);
             }
-            else
-            {
-                epicBaseLine.TeamName = new Team() { TeamId = 0, TeamName = "", TeamLeader = new EmployeeViewModel(), ProjectManager = new EmployeeViewModel() };
-            }
-            epicBaseLine.IsMurabaha.MurabahaName = Convert.ToString(dt.Rows[0]["IsMurabaha"]);
-            epicBaseLine.IsMurabaha.MurabahaValue = GetParameterValue("IsMurabaha", epicBaseLine.IsMurabaha.MurabahaName);
-            epicBaseLine.IsFirstSellableModule.FirstSellableModuleName = Convert.ToString(dt.Rows[0]["IsFirstSellableModule"]);
-            epicBaseLine.IsFirstSellableModule.FirstSellableModuleValue = GetParameterValue("IsFirstSellableModule", epicBaseLine.IsFirstSellableModule.FirstSellableModuleName); ;
-            epicBaseLine.DistributedUnmappedEffort = (float)Convert.ToDouble(dt.Rows[0]["DistributedUnmappedEffort"]);
-            epicBaseLine.TotalActualEffort = (float)Convert.ToDouble(dt.Rows[0]["TotalActualEffort"]);
-            return epicBaseLine;
+            return MeasurementList;
         }
 
+        public IEnumerable<Module> GetModuleAll()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Module]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Module temp = new Module();
+                temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                temp.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                temp.Progress = 0;
+                temp.Weight = 0;
+                ModuleList.Add(temp);
+            }
+            return ModuleList;
+        }
+        
+        public IEnumerable<Team> GetTeamAll(int id, string name, int teamLeaderId, int projectManagerId)
+        {
+            List<Employee> empList = (List<Employee>)GetEmployeeAll();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Team]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (id != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", id);
+                    }
+                    if (name != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamName", name);
+                    }
+                    if (teamLeaderId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamLeaderId", teamLeaderId);
+                    }
+                    if (projectManagerId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@ProjectManagerId", projectManagerId);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Team temp = new Team();
+                temp.TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]);
+                temp.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
+                temp.TeamLeader.TeamLeaderId = Convert.ToInt32(dt.Rows[i]["TeamLeaderId"]);
+                temp.TeamLeader.TeamLeaderName = Convert.ToString(dt.Rows[i]["TeamLeader"]);
+                temp.ProjectManager.ProjectManagerId = Convert.ToInt32(dt.Rows[i]["ProjectManagerId"]);
+                temp.ProjectManager.ProjectManagerName = Convert.ToString(dt.Rows[i]["ProjectManager"]);
+                //temp.TeamLocation = Convert.ToString(dt.Rows[i]["TeamLocation"]);
+                Employee tempEmp = empList.Find(emp => emp.EmployeeName == temp.TeamLeader.TeamLeaderName);
+                temp.TeamLocation = tempEmp.EmployeeLocation.LocationName;
+                TeamList.Add(temp);
+            }
+            return TeamList;
+        }
+        
+        public IEnumerable<Employee> GetEmployeeAll()
+        {
+            EmployeeList.Clear();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Employee]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Employee temp = new Employee();
+                temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
+                temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
+                temp.EmployeeType.TypeName = Convert.ToString(dt.Rows[i]["EmployeeType"]);
+                temp.EmployeeType.TypeId = GetParameterValue("EmployeeType", temp.EmployeeType.TypeName);
+                temp.EmployeeLocation.LocationName = Convert.ToString(dt.Rows[i]["EmployeeLocation"]);
+                temp.EmployeeLocation.LocationValue = GetParameterValue("ProjectLocation", temp.EmployeeLocation.LocationName);
+                EmployeeList.Add(temp);
+            }
+            return EmployeeList;
+        }
+
+        public IEnumerable<Employee> GetEmployeeByType(int type)
+        {
+            EmployeeList.Clear();
+            List<Employee> emps = new List<Employee>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Employee]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@EmployeeType", type);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Employee temp = new Employee();
+                temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
+                temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
+                temp.EmployeeType.TypeName = Convert.ToString(dt.Rows[i]["EmployeeType"]);
+                temp.EmployeeType.TypeId = GetParameterValue("EmployeeType", temp.EmployeeType.TypeName);
+                //temp.EmployeeLocation = Convert.ToString(dt.Rows[i]["EmployeeLocation"]);
+                EmployeeList.Add(temp);
+            }
+            if (type == 3)
+            {
+                emps = (List<Employee>)GetEmployeeByType(1);
+            }
+            if (emps != null && emps.Count() > 0)
+            {
+                for (int i = 0; i < dt.Rows.Count; i++)
+                {
+                    Employee temp = emps[i];
+                    EmployeeList.Add(temp);
+                }
+            }
+            return EmployeeList;
+        }
+
+        public Employee GetEmployeeById(int id)
+        {
+            EmployeeList.Clear();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Employee]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@EmployeeId", id);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            Employee employee = new Employee();
+            employee.EmployeeId = Convert.ToInt32(dt.Rows[0]["EmployeeId"]);
+            employee.EmployeeName = Convert.ToString(dt.Rows[0]["EmployeeName"]);
+            employee.EmployeeType.TypeName = Convert.ToString(dt.Rows[0]["EmployeeType"]);
+            employee.EmployeeType.TypeId = GetParameterValue("EmployeeType", employee.EmployeeType.TypeName);
+            employee.EmployeeLocation.LocationName = Convert.ToString(dt.Rows[0]["EmployeeLocation"]);
+            return employee;
+        }
+        
+        public IEnumerable<Parameter> GetParameter(string name)
+        {
+            ParameterList.Clear();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Parameter]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@ColumnName", name);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Parameter temp = new Parameter();
+                temp.ParameterValue = Convert.ToInt32(dt.Rows[i]["ParameterValue"]);
+                temp.ParameterName = Convert.ToString(dt.Rows[i]["ParameterName"]);
+                ParameterList.Add(temp);
+            }
+            return ParameterList;
+        }
+
+        public int GetParameterValue(string columnName, string parameterName)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Parameter]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@ColumnName", columnName);
+                    sqlCommand.Parameters.AddWithValue("@ParameterName", parameterName);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            int value = Convert.ToInt32(dt.Rows[0]["ParameterValue"]);
+            return value;
+        }
+
+        #endregion
+
+        #region Update
+
+        public Employee UpdateEmployee(Employee updatedEmployee)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_Employee]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@EmployeeId", updatedEmployee.EmployeeId);
+                    sqlCommand.Parameters.AddWithValue("@EmployeeName", updatedEmployee.EmployeeName);
+                    sqlCommand.Parameters.AddWithValue("@EmployeeType", GetParameterValue("EmployeeType", updatedEmployee.EmployeeType.TypeName));
+                    sqlCommand.Parameters.AddWithValue("@EmployeeLocation", GetParameterValue("ProjectLocation", updatedEmployee.EmployeeLocation.LocationName));
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return updatedEmployee;
+        }
+
+        public EpicBaseLine UpdateEpicBaseLine(EpicBaseLine updatedEpicBaseLine, string userName, string ipAddress)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_EpicBaseLine]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@EPICId", updatedEpicBaseLine.EPICId);
+                    sqlCommand.Parameters.AddWithValue("@EPICName", updatedEpicBaseLine.EPICName);
+                    sqlCommand.Parameters.AddWithValue("@ModuleId", updatedEpicBaseLine.ModuleName.ModuleId);
+                    sqlCommand.Parameters.AddWithValue("@EpicType", GetParameterValue("EpicType", updatedEpicBaseLine.EpicType.TypeName));
+                    sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", updatedEpicBaseLine.ProjectLocation.LocationName));
+                    sqlCommand.Parameters.AddWithValue("@Estimation", updatedEpicBaseLine.Estimation);
+                    sqlCommand.Parameters.AddWithValue("@TeamId", updatedEpicBaseLine.Team.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@IsMurabaha", GetParameterValue("IsMurabaha", updatedEpicBaseLine.IsMurabaha.MurabahaName));
+                    sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", updatedEpicBaseLine.IsFirstSellableModule.FirstSellableModuleName));
+                    sqlCommand.Parameters.AddWithValue("@DistributedUnmappedEffort", updatedEpicBaseLine.DistributedUnmappedEffort);
+                    sqlCommand.Parameters.AddWithValue("@TotalActualEffort", updatedEpicBaseLine.TotalActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return updatedEpicBaseLine;
+
+        }
+
+        public Measurement UpdateMeasurement(Measurement updatedMeasurement, string userName, string ipAddress)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_Measurement]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@EpicId", updatedMeasurement.EpicId);
+                    sqlCommand.Parameters.AddWithValue("@Year", updatedMeasurement.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", updatedMeasurement.Month);
+                    sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", updatedMeasurement.Type.TypeName));
+                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", updatedMeasurement.RequirementProgress / 100);
+                    sqlCommand.Parameters.AddWithValue("@DesignProgress", updatedMeasurement.DesignProgress / 100);
+                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", updatedMeasurement.DevelopmentProgress / 100);
+                    sqlCommand.Parameters.AddWithValue("@TestProgress", updatedMeasurement.TestProgress / 100);
+                    sqlCommand.Parameters.AddWithValue("@UatProgress", updatedMeasurement.UatProgress / 100);
+                    sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", updatedMeasurement.PreviousMonthCumulativeActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@ActualEffort", updatedMeasurement.ActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return updatedMeasurement;
+        }
+
+        public Module UpdateModule(Module updatedModule)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_Module]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@ModuleId", updatedModule.ModuleId);
+                    sqlCommand.Parameters.AddWithValue("@ModuleName", updatedModule.ModuleName);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return updatedModule;
+        }
+
+        public Team UpdateTeam(Team updatedTeam)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_Team]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@TeamId", updatedTeam.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@TeamName", updatedTeam.TeamName);
+                    sqlCommand.Parameters.AddWithValue("@TeamLeaderId", updatedTeam.TeamLeader.TeamLeaderId);
+                    sqlCommand.Parameters.AddWithValue("@ProjectManagerId", updatedTeam.ProjectManager.ProjectManagerId);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return updatedTeam;
+        }
+        #endregion
+
+        #region Self
         public List<int> GetEpicBaseLineIdByLocation(string location)
         {
             List<int> list = new List<int>();
@@ -446,189 +899,6 @@ namespace Epic_Project.Models
             }
             return list;
         }
-
-        public IEnumerable<Measurement> GetMeasurementAll()
-        {
-            float totalEstimation = GetTotalEpicEstimation();
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Measurement]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Measurement temp = new Measurement();
-                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
-                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
-                temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
-                temp.Module.ModuleName = GetModuleById(temp.Module.ModuleId).ModuleName;
-                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
-                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
-                temp.Type.TypeName = Convert.ToString(dt.Rows[i]["Type"]);
-                temp.Type.TypeValue = GetParameterValue("Type", temp.Type.TypeName);
-                float estimation = GetEstimationById(temp.EpicId);
-                temp.EpicWeight = estimation / totalEstimation;
-                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
-                {
-                    temp.Team.TeamId = 0;
-                    temp.Team.TeamName = "";
-                    temp.Team.TeamLeader = new EmployeeViewModel();
-                    temp.Team.ProjectManager = new EmployeeViewModel();
-                }
-                else
-                {
-                    temp.Team = GetTeamById(Convert.ToInt32(dt.Rows[i]["TeamId"]));
-                }
-                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]) * 100;
-                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]) * 100;
-                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]) * 100;
-                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]) * 100;
-                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]) * 100;
-                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
-                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
-                MeasurementList.Add(temp);
-            }
-            return MeasurementList;
-        }
-
-        public IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type)
-        {
-            float totalEstimation = GetTotalEpicEstimation();
-            MeasurementList = new List<Measurement>();
-            DataTable dt = new DataTable();
-            
-            //(using (SqlConnection sqlConnection = new SqlConnection(GetConfiguration().GetSection("ConnectionString").GetSection("EPICDBConnection").Value))
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Measurement]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    if (epicId != 0)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
-                    }
-                    if (year != 0)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Year", year);
-                    }
-                    if (month != 0)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Month", month);
-                    }
-                    if (type != null)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
-                    }
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Measurement temp = new Measurement();
-                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
-                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
-                if (Convert.IsDBNull(dt.Rows[i]["ModuleId"]))
-                {
-                    temp.Module.ModuleId = 0;
-                    temp.Module.ModuleName = "";
-                }
-                else
-                {
-                    temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
-                    temp.Module = GetModuleById(temp.Module.ModuleId);
-                }
-                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
-                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
-                temp.Type.TypeName = Convert.ToString(dt.Rows[i]["Type"]);
-                temp.Type.TypeValue = GetParameterValue("Type", temp.Type.TypeName);
-                float estimation = GetEstimationById(temp.EpicId);
-                temp.EpicWeight = estimation / totalEstimation;
-                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
-                {
-                    temp.Team.TeamId = 0;
-                    temp.Team.TeamName = "";
-                    temp.Team.TeamLeader = new EmployeeViewModel();
-                    temp.Team.ProjectManager = new EmployeeViewModel();
-                }
-                else
-                {
-                    temp.Team = GetTeamById(Convert.ToInt32(dt.Rows[i]["TeamId"]));
-                }
-                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]) * 100;
-                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]) * 100;
-                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]) * 100;
-                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]) * 100;
-                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]) * 100;
-                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
-                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
-                MeasurementList.Add(temp);
-            }
-            return MeasurementList;
-        }
-
-        public IEnumerable<Module> GetModuleAll()
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Module]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Module temp = new Module();
-                temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
-                temp.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
-                ModuleList.Add(temp);
-            }
-            return ModuleList;
-        }
-
-        public Module GetModuleById(int id)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Module]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@ModuleId", id);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            Module module = new Module();
-            module.ModuleId = Convert.ToInt32(dt.Rows[0]["ModuleId"]);
-            module.ModuleName = Convert.ToString(dt.Rows[0]["ModuleName"]);
-            return module;
-        }
-
         public int GetModuleIdByName(string name)
         {
             DataTable dt = new DataTable();
@@ -650,93 +920,6 @@ namespace Epic_Project.Models
             module.ModuleId = Convert.ToInt32(dt.Rows[0]["ModuleId"]);
             return module.ModuleId;
         }
-
-        public IEnumerable<Team> GetTeamAll()
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Team]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Team temp = new Team();
-                temp.TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]);
-                temp.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
-                temp.TeamLeader.EmployeeName = Convert.ToString(dt.Rows[i]["TeamLeader"]);
-                if (temp.TeamLeader.EmployeeName != "")
-                {
-                    temp.TeamLeader.EmployeeId = GetEmployeeIdByName(temp.TeamLeader.EmployeeName);
-                }
-                else
-                {
-                    temp.TeamLeader.EmployeeId = 0;
-                }
-                temp.ProjectManager.EmployeeName = Convert.ToString(dt.Rows[i]["ProjectManager"]);
-                if (temp.ProjectManager.EmployeeName != "")
-                {
-                    temp.ProjectManager.EmployeeId = GetEmployeeIdByName(temp.ProjectManager.EmployeeName);
-                }
-                else
-                {
-                    temp.ProjectManager.EmployeeId = 0;
-                }
-                TeamList.Add(temp);
-            }
-            return TeamList;
-        }
-
-        public Team GetTeamById(int id)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Team]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@TeamId", id);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            Team team = new Team();
-            team.TeamId = Convert.ToInt32(dt.Rows[0]["TeamId"]);
-            team.TeamName = Convert.ToString(dt.Rows[0]["TeamName"]);
-            team.TeamLeader.EmployeeName = Convert.ToString(dt.Rows[0]["TeamLeader"]);
-            if (team.TeamLeader.EmployeeName != "")
-            {
-                team.TeamLeader.EmployeeId = GetEmployeeIdByName(team.TeamLeader.EmployeeName);
-            }
-            else
-            {
-                team.TeamLeader.EmployeeId = 0;
-            }
-            team.ProjectManager.EmployeeName = Convert.ToString(dt.Rows[0]["ProjectManager"]);
-            if (team.ProjectManager.EmployeeName != "")
-            {
-                team.ProjectManager.EmployeeId = GetEmployeeIdByName(team.ProjectManager.EmployeeName);
-            }
-            else
-            {
-                team.ProjectManager.EmployeeId = 0;
-            }
-            
-            return team;
-        }
-
         public int GetTeamIdByName(string name)
         {
             DataTable dt = new DataTable();
@@ -755,97 +938,13 @@ namespace Epic_Project.Models
                 }
             }
             Team team = new Team();
-            team.TeamId = Convert.ToInt32(dt.Rows[0]["TeamId"]);
-            return team.TeamId;
+            if (dt.Rows.Count > 0)
+            {
+                team.TeamId = Convert.ToInt32(dt.Rows[0]["TeamId"]);
+                return team.TeamId;
+            }
+            return 0;
         }
-
-        public IEnumerable<Employee> GetEmployeeAll()
-        {
-            EmployeeList.Clear();
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Employee]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Employee temp = new Employee();
-                temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
-                temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
-                temp.EmployeeType.TypeName = Convert.ToString(dt.Rows[i]["EmployeeType"]);
-                temp.EmployeeType.TypeId = GetParameterValue("EmployeeType", temp.EmployeeType.TypeName);
-                temp.EmployeeLocation = Convert.ToString(dt.Rows[i]["EmployeeLocation"]);
-                EmployeeList.Add(temp);
-            }
-            return EmployeeList;
-        }
-        public IEnumerable<Employee> GetEmployeeByType(int type)
-        {
-            EmployeeList.Clear();
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Employee]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EmployeeType", type);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Employee temp = new Employee();
-                temp.EmployeeId = Convert.ToInt32(dt.Rows[i]["EmployeeId"]);
-                temp.EmployeeName = Convert.ToString(dt.Rows[i]["EmployeeName"]);
-                temp.EmployeeType.TypeName = Convert.ToString(dt.Rows[i]["EmployeeType"]);
-                temp.EmployeeType.TypeId = GetParameterValue("EmployeeType", temp.EmployeeType.TypeName);
-                temp.EmployeeLocation = Convert.ToString(dt.Rows[i]["EmployeeLocation"]);
-                EmployeeList.Add(temp);
-            }
-            return EmployeeList;
-        }
-
-        public Employee GetEmployeeById(int id)
-        {
-            EmployeeList.Clear();
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Employee]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EmployeeId", id);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            Employee employee = new Employee();
-            employee.EmployeeId = Convert.ToInt32(dt.Rows[0]["EmployeeId"]);
-            employee.EmployeeName = Convert.ToString(dt.Rows[0]["EmployeeName"]);
-            employee.EmployeeType.TypeName = Convert.ToString(dt.Rows[0]["EmployeeType"]);
-            employee.EmployeeType.TypeId = GetParameterValue("EmployeeType", employee.EmployeeType.TypeName);
-            employee.EmployeeLocation = Convert.ToString(dt.Rows[0]["EmployeeLocation"]);
-            return employee;
-        }
-
         public int GetEmployeeIdByName(string name)
         {
             EmployeeList.Clear();
@@ -869,21 +968,28 @@ namespace Epic_Project.Models
             employee.EmployeeName = Convert.ToString(dt.Rows[0]["EmployeeName"]);
             employee.EmployeeType.TypeName = Convert.ToString(dt.Rows[0]["EmployeeType"]);
             employee.EmployeeType.TypeId = GetParameterValue("EmployeeType", employee.EmployeeType.TypeName);
-            employee.EmployeeLocation = Convert.ToString(dt.Rows[0]["EmployeeLocation"]);
+            //employee.EmployeeLocation = Convert.ToString(dt.Rows[0]["EmployeeLocation"]);
             return employee.EmployeeId;
         }
+        #endregion
 
-        public IEnumerable<Parameter> GetParameter(string name)
+        
+        public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month)
         {
-            ParameterList.Clear();
+            int prevYear = month == 1 ? year - 1 : year;
+            int prevMonth = month == 1 ? 12 : month - 1;
+            List<MeasurementDetailsViewModel> MeasurementDetailsList = new List<MeasurementDetailsViewModel>();
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                string procName = "[sel_Parameter]";
+                string procName = "[sel_MeasurementReport]";
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@ColumnName", name);
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@PrevYear", prevYear);
+                    sqlCommand.Parameters.AddWithValue("@Month", month);
+                    sqlCommand.Parameters.AddWithValue("@PrevMonth", prevMonth);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -891,320 +997,102 @@ namespace Epic_Project.Models
                     }
                 }
             }
+
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                Parameter temp = new Parameter();
-                temp.ParameterValue = Convert.ToInt32(dt.Rows[i]["ParameterValue"]);
-                temp.ParameterName = Convert.ToString(dt.Rows[i]["ParameterName"]);
-                ParameterList.Add(temp);
-            }
-            return ParameterList;
-        }
-
-        public float GetTotalEpicEstimation()
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_TotalEpicEstimation]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                MeasurementDetailsViewModel temp = new MeasurementDetailsViewModel();
+                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
+                temp.Module.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.Location = Convert.ToString(dt.Rows[i]["ProjectLocation"]);
+                temp.EpicWeight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                temp.Estimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
+                if (Convert.IsDBNull(dt.Rows[i]["TeamName"]))
                 {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            float TotalEstimation = (float)Convert.ToDouble(dt.Rows[0]["TotalEstimation"]);
-            return TotalEstimation;
-        }
-
-        public float GetEstimationById(int id)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_EpicEstimationById]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EPICId", id);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            float Estimation = (float)Convert.ToDouble(dt.Rows[0]["Estimation"]);
-            return Estimation;
-        }
-
-        #endregion
-
-        #region Update
-
-        public Employee UpdateEmployee(Employee updatedEmployee)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[upd_Employee]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EmployeeId", updatedEmployee.EmployeeId);
-                    sqlCommand.Parameters.AddWithValue("@EmployeeName", updatedEmployee.EmployeeName);
-                    sqlCommand.Parameters.AddWithValue("@EmployeeType", GetParameterValue("EmployeeType", updatedEmployee.EmployeeType.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@EmployeeLocation", GetParameterValue("ProjectLocation", updatedEmployee.EmployeeLocation));
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            return updatedEmployee;
-        }
-
-        public EpicBaseLine UpdateEpicBaseLine(EpicBaseLine updatedEpicBaseLine)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[upd_EpicBaseLine]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EPICId", updatedEpicBaseLine.EPICId);
-                    sqlCommand.Parameters.AddWithValue("@EPICName", updatedEpicBaseLine.EPICName);
-                    sqlCommand.Parameters.AddWithValue("@ModuleId", updatedEpicBaseLine.ModuleName.ModuleId);
-                    sqlCommand.Parameters.AddWithValue("@EpicType", GetParameterValue("EpicType", updatedEpicBaseLine.EpicType.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", updatedEpicBaseLine.ProjectLocation.LocationName));
-                    sqlCommand.Parameters.AddWithValue("@Estimation", updatedEpicBaseLine.Estimation);
-                    sqlCommand.Parameters.AddWithValue("@TeamId", updatedEpicBaseLine.TeamName.TeamId);
-                    sqlCommand.Parameters.AddWithValue("@IsMurabaha", GetParameterValue("IsMurabaha", updatedEpicBaseLine.IsMurabaha.MurabahaName));
-                    sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", updatedEpicBaseLine.IsFirstSellableModule.FirstSellableModuleName));
-                    sqlCommand.Parameters.AddWithValue("@DistributedUnmappedEffort", updatedEpicBaseLine.DistributedUnmappedEffort);
-                    sqlCommand.Parameters.AddWithValue("@TotalActualEffort", updatedEpicBaseLine.TotalActualEffort);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            return updatedEpicBaseLine;
-
-        }
-
-        public Measurement UpdateMeasurement(Measurement updatedMeasurement)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[upd_Measurement]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@EpicId", updatedMeasurement.EpicId);
-                    sqlCommand.Parameters.AddWithValue("@Year", updatedMeasurement.Year);
-                    sqlCommand.Parameters.AddWithValue("@Month", updatedMeasurement.Month);
-                    sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", updatedMeasurement.Type.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", updatedMeasurement.RequirementProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@DesignProgress", updatedMeasurement.DesignProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", updatedMeasurement.DevelopmentProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@TestProgress", updatedMeasurement.TestProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@UatProgress", updatedMeasurement.UatProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", updatedMeasurement.PreviousMonthCumulativeActualEffort);
-                    sqlCommand.Parameters.AddWithValue("@ActualEffort", updatedMeasurement.ActualEffort);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            return updatedMeasurement;
-        }
-
-        public Module UpdateModule(Module updatedModule)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[upd_Module]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@ModuleId", updatedModule.ModuleId);
-                    sqlCommand.Parameters.AddWithValue("@ModuleName", updatedModule.ModuleName);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            return updatedModule;
-        }
-
-        public Team UpdateTeam(Team updatedTeam)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[upd_Team]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@TeamId", updatedTeam.TeamId);
-                    sqlCommand.Parameters.AddWithValue("@TeamName", updatedTeam.TeamName);
-                    sqlCommand.Parameters.AddWithValue("@TeamLeader", updatedTeam.TeamLeader);
-                    sqlCommand.Parameters.AddWithValue("@ProjectManager", GetParameterValue("ProjectManagerId", updatedTeam.ProjectManager.EmployeeName));
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            return updatedTeam;
-        }
-        #endregion
-
-        public int GetParameterValue(string columnName, string parameterName)
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_Parameter]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@ColumnName", columnName);
-                    sqlCommand.Parameters.AddWithValue("@ParameterName", parameterName);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            int value = Convert.ToInt32(dt.Rows[0]["ParameterValue"]);
-            return value;
-        }
-
-        public List<MeasurementDetailsViewModel> FillMeasurementDetails(int epicId, int year, int month)
-        {
-
-            List<MeasurementDetailsViewModel> measurementDetailsList;
-            List<Measurement> currentTarget;
-            List<Measurement> currentActual;
-            List<Measurement> prevActual;
-            List<MeasurementSearchModel> searchList;
-            float totalEstimation;
-            float estimation;
-
-
-            measurementDetailsList = new List<MeasurementDetailsViewModel>();
-            currentTarget = (List<Measurement>)GetMeasurementAll(epicId, year, month, "Target");
-            currentActual = (List<Measurement>)GetMeasurementAll(epicId, year, month, "Actual");
-            prevActual = (List<Measurement>)GetMeasurementAll(epicId, year, month - 1, "Actual");
-            searchList = new List<MeasurementSearchModel>();
-            totalEstimation = GetTotalEpicEstimation();
-
-            for (int i = 0; i < currentActual.Count(); i++)
-            {
-                MeasurementSearchModel temp = new MeasurementSearchModel();
-                temp.EpicId = currentActual[i].EpicId;
-                temp.Year = currentActual[i].Year;
-                temp.Month = currentActual[i].Month;
-                searchList.Add(temp);
-            }
-            for (int i = 0; i < currentTarget.Count(); i++)
-            {
-                MeasurementSearchModel temp = new MeasurementSearchModel();
-                temp.EpicId = currentTarget[i].EpicId;
-                temp.Year = currentTarget[i].Year;
-                temp.Month = currentTarget[i].Month;
-                var x = searchList.Find(m => m.EpicId == temp.EpicId && m.Year == temp.Year && m.Month == temp.Month);
-                if (x == null)
-                {
-                    searchList.Add(temp);
-                }
-            }
-            for (int i = 0; i < searchList.Count(); i++)
-            {
-                MeasurementDetailsViewModel detailTemp = new MeasurementDetailsViewModel();
-                Measurement temp = currentActual.Find(m => (m.EpicId == searchList[i].EpicId || searchList[i].EpicId == 0) && (m.Year == searchList[i].Year || searchList[i].Year == 0) && (m.Month == searchList[i].Month || searchList[i].Month == 0));
-                if (temp == null)
-                {
-                    temp = currentTarget.Find(m => (m.EpicId == searchList[i].EpicId || searchList[i].EpicId == 0) && (m.Year == searchList[i].Year || searchList[i].Year == 0) && (m.Month == searchList[i].Month || searchList[i].Month == 0));
-                    
-                    detailTemp.ActualRequirementProgress = 0;
-                    detailTemp.ActualDesignProgress = 0;
-                    detailTemp.ActualDevelopmentProgress = 0;
-                    detailTemp.ActualTestProgress = 0;
-                    detailTemp.ActualUatProgress = 0;
+                    temp.Team.TeamName = "";
                 }
                 else
                 {
-                    detailTemp.ActualRequirementProgress = temp.RequirementProgress;
-                    detailTemp.ActualDesignProgress = temp.DesignProgress;
-                    detailTemp.ActualDevelopmentProgress = temp.DevelopmentProgress;
-                    detailTemp.ActualTestProgress = temp.TestProgress;
-                    detailTemp.ActualUatProgress = temp.UatProgress;
+                    temp.Team.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
                 }
-                detailTemp.EpicId = temp.EpicId;
-                detailTemp.EpicName = temp.EpicName;
-                detailTemp.Module = temp.Module;
-                detailTemp.Year = temp.Year;
-                detailTemp.Month = temp.Month;
-                estimation = GetEstimationById(detailTemp.EpicId);
-                detailTemp.Estimation = estimation;
-                detailTemp.EpicWeight = estimation / totalEstimation;
-                detailTemp.Team = temp.Team;
-                detailTemp.ActualOverallEpicCompilation = (float)(detailTemp.ActualRequirementProgress * 0.02 +
-                    detailTemp.ActualDesignProgress * 0.23 + detailTemp.ActualDevelopmentProgress * 0.42 +
-                    detailTemp.ActualTestProgress * 0.19 + detailTemp.ActualUatProgress * 0.14);
-                detailTemp.ActualOverallEpicCompilation = (float)Math.Round(detailTemp.ActualOverallEpicCompilation, 2);
-                detailTemp.ActualWeightedOverallProgress = detailTemp.EpicWeight * detailTemp.ActualOverallEpicCompilation;
-                detailTemp.PreviousMonthCumulativeActualEffort = temp.PreviousMonthCumulativeActualEffort;
-                detailTemp.ActualEffort = temp.ActualEffort;
-                temp = currentTarget.Find(m => (m.EpicId == searchList[i].EpicId || searchList[i].EpicId == 0) && (m.Year == searchList[i].Year || searchList[i].Year == 0) && (m.Month == searchList[i].Month || searchList[i].Month == 0));
-                detailTemp.TargetRequirementProgress = temp.RequirementProgress;
-                detailTemp.TargetDesignProgress = temp.DesignProgress;
-                detailTemp.TargetDevelopmentProgress = temp.DevelopmentProgress;
-                detailTemp.TargetTestProgress = temp.TestProgress;
-                detailTemp.TargetUatProgress = temp.UatProgress;
-                detailTemp.TargetOverallEpicCompilation = (float)(detailTemp.TargetRequirementProgress * 0.02 +
-                    detailTemp.TargetDesignProgress * 0.23 + detailTemp.TargetDevelopmentProgress * 0.42 +
-                    detailTemp.TargetTestProgress * 0.19 + detailTemp.TargetUatProgress * 0.14);
-                detailTemp.TargetOverallEpicCompilation = (float)Math.Round(detailTemp.TargetOverallEpicCompilation, 2);
-                detailTemp.TargetWeightedOverallProgress = detailTemp.EpicWeight * detailTemp.TargetOverallEpicCompilation;
-                temp = prevActual.Find(m => (m.EpicId == searchList[i].EpicId || searchList[i].EpicId == 0) && (m.Year == searchList[i].Year || searchList[i].Year == 0) && (m.Month == searchList[i].Month || searchList[i].Month == 0));
-                if (temp != null)
+                temp.IsFirstSellableModule = Convert.ToString(dt.Rows[i]["IsFirstSellableModule"]);
+                if (Convert.IsDBNull(dt.Rows[i]["PreviousMonthRequirementProgress"]))
                 {
-                    detailTemp.PrevMonthRequirementProgress = temp.RequirementProgress;
-                    detailTemp.PrevMonthDesignProgress = temp.DesignProgress;
-                    detailTemp.PrevMonthDevelopmentProgress = temp.DevelopmentProgress;
-                    detailTemp.PrevMonthTestProgress = temp.TestProgress;
-                    detailTemp.PrevMonthUatProgress = temp.UatProgress;
-                    detailTemp.PrevMonthOverallEpicCompilation = (float)(detailTemp.PrevMonthRequirementProgress * 0.02 +
-                        detailTemp.PrevMonthDesignProgress * 0.23 + detailTemp.PrevMonthDevelopmentProgress * 0.42 +
-                        detailTemp.PrevMonthTestProgress * 0.19 + detailTemp.PrevMonthUatProgress * 0.14);
-                    detailTemp.PrevMonthOverallEpicCompilation = (float)Math.Round(detailTemp.PrevMonthOverallEpicCompilation, 2);
-                    detailTemp.PrevMonthWeightedOverallProgress = detailTemp.EpicWeight * detailTemp.PrevMonthOverallEpicCompilation;
+                    temp.PrevMonthRequirementProgress = 0;
+                    temp.PrevMonthDesignProgress = 0;
+                    temp.PrevMonthDevelopmentProgress = 0;
+                    temp.PrevMonthTestProgress = 0;
+                    temp.PrevMonthUatProgress = 0;
+                    temp.PrevMonthOverallEpicCompilation = 0;
+                    temp.PrevMonthWeightedOverallProgress = 0;
                 }
-                measurementDetailsList.Add(detailTemp);
+                else
+                {
+                    temp.PrevMonthRequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthRequirementProgress"]);
+                    temp.PrevMonthDesignProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthDesignProgress"]);
+                    temp.PrevMonthDevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthDevelopmentProgress"]);
+                    temp.PrevMonthTestProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthTestProgress"]);
+                    temp.PrevMonthUatProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthUatProgress"]);
+                    temp.PrevMonthOverallEpicCompilation = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthOverallEpicCompilation"]);
+                    temp.PrevMonthWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthWeightedOverallProgress"]);
+                }
+                
+                if (Convert.IsDBNull(dt.Rows[i]["ActualRequirementProgress"]))
+                {
+                    temp.ActualRequirementProgress = 0;
+                    temp.ActualDesignProgress = 0;
+                    temp.ActualDevelopmentProgress = 0;
+                    temp.ActualTestProgress = 0;
+                    temp.ActualUatProgress = 0;
+                    temp.ActualOverallEpicCompilation = 0;
+                    temp.ActualWeightedOverallProgress = 0;
+                }
+                else
+                {
+                    temp.ActualRequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualRequirementProgress"]);
+                    temp.ActualDesignProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualDesignProgress"]);
+                    temp.ActualDevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualDevelopmentProgress"]);
+                    temp.ActualTestProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualTestProgress"]);
+                    temp.ActualUatProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualUatProgress"]);
+                    temp.ActualOverallEpicCompilation = (float)Convert.ToDouble(dt.Rows[i]["ActualOverallEpicCompilation"]);
+                    temp.ActualWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualWeightedOverallProgress"]);
+                }
+
+                if (Convert.IsDBNull(dt.Rows[i]["ActualRequirementProgress"]))
+                {
+                    temp.TargetRequirementProgress = 0;
+                    temp.TargetDesignProgress = 0;
+                    temp.TargetDevelopmentProgress = 0;
+                    temp.TargetTestProgress = 0;
+                    temp.TargetUatProgress = 0;
+                    temp.TargetOverallEpicCompilation = 0;
+                    temp.TargetWeightedOverallProgress = 0;
+                }
+                else
+                {
+                    temp.TargetRequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetRequirementProgress"]);
+                    temp.TargetDesignProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetDesignProgress"]);
+                    temp.TargetDevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetDevelopmentProgress"]);
+                    temp.TargetTestProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetTestProgress"]);
+                    temp.TargetUatProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetUatProgress"]);
+                    temp.TargetOverallEpicCompilation = (float)Convert.ToDouble(dt.Rows[i]["TargetOverallEpicCompilation"]);
+                    temp.TargetWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetWeightedOverallProgress"]);
+                }
+
+                
+
+                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
+                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+
+                MeasurementDetailsList.Add(temp);
             }
-            return measurementDetailsList;
+            
+            return MeasurementDetailsList;
         }
 
-        public List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location)
+        public List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location, string userName, string ipAddress)
         {
             int prevYear = (month == 1 ? year - 1 : year);
             int prevMonth = (month == 1 ? 12 : month - 1);
@@ -1238,7 +1126,7 @@ namespace Epic_Project.Models
             }
             for (int i = 0; i < TempMeasurementList.Count(); i++)
             {
-                InsertMeasurement(TempMeasurementList[i]);
+                InsertMeasurement(TempMeasurementList[i], userName, ipAddress);
                 NextMonthMeasurementList.Add(TempMeasurementList[i]);
             }
             return NextMonthMeasurementList;
@@ -1269,145 +1157,16 @@ namespace Epic_Project.Models
             }
             return DateList;
         }
-
-        public int GetMaxModuleId()
+        
+        public void DeleteLastMonth(int month, int year, string location, string userName, string ipAddress)
         {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_maxModuleId]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            int id = Convert.ToInt32(dt.Rows[0]["MaxModuleId"]);
-            return id;
-        }
-        public int GetMaxTeamId()
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_maxTeamId]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            int id = Convert.ToInt32(dt.Rows[0]["MaxTeamId"]);
-            return id;
-        }
-        public int GetMaxEmployeeId()
-        {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_maxEmployeeId]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            int id = Convert.ToInt32(dt.Rows[0]["MaxEmployeeId"]);
-            return id;
-        }
-
-        public List<Measurement> GetMeasurementsForGenerate(int month, int year, string location)
-        {
-            float totalEstimation = GetTotalEpicEstimation();
-            MeasurementList = new List<Measurement>();
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
-            {
-                string procName = "[sel_MeasurementForGenerate]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
-                {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    if (year != 0)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Year", year);
-                    }
-                    if (month != 0)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Month", month);
-                    }
-                    if (location != null)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
-                    }
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
-                    {
-                        sqlDataAdapter.Fill(dt);
-                    }
-                }
-            }
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                Measurement temp = new Measurement();
-                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
-                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
-                temp.Module.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
-                temp.Module = GetModuleById(temp.Module.ModuleId);
-                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
-                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
-                temp.Type.TypeName = Convert.ToString(dt.Rows[i]["Type"]);
-                temp.Type.TypeValue = GetParameterValue("Type", temp.Type.TypeName);
-                float estimation = GetEstimationById(temp.EpicId);
-                temp.EpicWeight = estimation / totalEstimation;
-                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
-                {
-                    temp.Team.TeamId = 0;
-                    temp.Team.TeamName = "";
-                    temp.Team.TeamLeader = new EmployeeViewModel();
-                    temp.Team.ProjectManager = new EmployeeViewModel();
-                }
-                else
-                {
-                    temp.Team = GetTeamById(Convert.ToInt32(dt.Rows[i]["TeamId"]));
-                }
-                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]) * 100;
-                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]) * 100;
-                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]) * 100;
-                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]) * 100;
-                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]) * 100;
-                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
-                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
-                MeasurementList.Add(temp);
-            }
-            return MeasurementList;
-        }
-
-        public void DeleteLastMonth(int month, int year, string location)
-        {
-            int prevYear = (month == 1 ? year - 1 : year);
-            int prevMonth = (month == 1 ? 12 : month - 1);
-            List<int> IdList = GetEpicBaseLineIdByLocation(location);
+            List<Date> dates = GetDates();
+            int prevYear = dates[0].Year;
+            int prevMonth = dates[0].Month;
             List<Measurement> LastmonthMeasurement = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null);
             for (int i = 0; i < LastmonthMeasurement.Count(); i++)
             {
-                int tempId = IdList.Find(id => id == LastmonthMeasurement[i].EpicId);
-                if (tempId != 0)
-                {
-                    DeleteMeasurement(tempId, prevYear, prevMonth, 1);
-                    DeleteMeasurement(tempId, prevYear, prevMonth, 2);
-                }
+                DeleteMeasurement(LastmonthMeasurement[i].EpicId, prevYear, prevMonth, LastmonthMeasurement[i].Type.TypeValue, userName, ipAddress);
             }
         }
         
@@ -1420,13 +1179,346 @@ namespace Epic_Project.Models
             for (int i = 0; i < measurements.Count(); i++)
             {
                 int c1 = IdListByLocation.Find(id => id == measurements[i].EpicId);
-                int c2 = IdListByTeam.Find(id => id == measurements[i].EpicId);
-                if (c1 != 0 && c2 != 0)
+                if (teamName == null)
                 {
-                    list.Add(measurements[i]);
+                    if (c1 != 0)
+                    {
+                        list.Add(measurements[i]);
+                    }
                 }
+                else
+                {
+                    int c2 = IdListByTeam.Find(id => id == measurements[i].EpicId);
+                    if (c1 != 0 && c2 != 0)
+                    {
+                        list.Add(measurements[i]);
+                    }
+                }
+                
             }
             return list;
         }
+
+        public int GetEmployeeId(string userId)
+        {
+            int empId = 0;
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(defConnectionString))
+            {
+                string procName = "[sel_EmployeeId]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Id", userId);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+                if (!Convert.IsDBNull(dt.Rows))
+                {
+                    empId = Convert.ToInt32(dt.Rows[0]["EmployeeId"]); 
+                }
+            }
+            return empId;
+        }
+
+        public ProgressModel GetProgress(int year, int month, string location, string isFirstSellableModule)
+        {
+            ProgressModel model = new ProgressModel() { ActualEffort = 0, Completed = 0, Variance = 0, Total = 0};
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_CompletedProgress]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@Month", month);
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
+                    }
+                    if (isFirstSellableModule != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", isFirstSellableModule));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            if (dt.Rows.Count <= 0)
+            {
+                return null;
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                model.Completed = model.Completed + (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
+                model.ActualEffort = model.ActualEffort + (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                model.Variance = model.Variance + (float)Convert.ToDouble(dt.Rows[i]["Variance"]);
+            }
+            return model;
+        }
+
+        public float GetEpicWeight(string location, string isFirstSellableModule)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_EpicWeight]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
+                    }
+                    if (isFirstSellableModule != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", isFirstSellableModule));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            float sum = 0;
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                sum = sum + (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+            }
+            return sum;
+        }
+
+        public List<Module> GetModuleProgress(int year, int month)
+        {
+            List<Module> modules = (List<Module>)GetModuleAll();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_ModuleProgress]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@Month", month);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Module temp = new Module();
+                temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                temp.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                temp.Progress = (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
+                temp.Weight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                for (int j = 0; j < modules.Count(); j++)
+                {
+                    if (modules[j].ModuleId == temp.ModuleId)
+                    {
+                        modules[j].Progress = modules[j].Progress + temp.Progress;
+                        modules[j].Weight = modules[j].Weight + temp.Weight;
+                    }
+                }
+            }
+            for (int i = 0; i < modules.Count(); i++)
+            {
+                modules[i].Progress = (float)Math.Round(modules[i].Progress / modules[i].Weight, 2);
+            }
+            return modules;
+        }
+
+        public IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule)
+        {
+            List<Date> dates = GetDates();
+            List<LineChartModel> models = new List<LineChartModel>();
+            List<ProgressModel> tempModels = new List<ProgressModel>();
+
+            LineChartModel tempModel = new LineChartModel();
+
+            for (int i = 0; i < dates.Count(); i++)
+            {
+                tempModels.Add(GetProgress(dates[i].Year, dates[i].Month, location, isFirstSellableModule));
+            }
+            
+            for (int i = tempModels.Count() - 1; i >= 0; i--)
+            {
+                tempModel = new LineChartModel();
+                tempModel.ActualEffort = tempModels[i].ActualEffort;
+                tempModel.OverallCompilation = tempModels[i].Completed;
+                tempModel.Variance = tempModels[i].Variance;
+                tempModel.Category = dates[i].Year + " - " + dates[i].Month;
+                models.Add(tempModel);
+            }
+            models.Last().ActualEffort = null;
+            models.Last().Variance = null;
+
+            return models;
+        }
+
+        public IEnumerable<LineChartModel> GetLineChartProgress2(string location, string isFirstSellableModule)
+        {
+            List<Date> dates = GetDates();
+            List<LineChartModel> models = new List<LineChartModel>();
+            List<ProgressModel> tempModels = new List<ProgressModel>();
+
+            LineChartModel tempModel = new LineChartModel();
+
+            for (int i = 0; i < dates.Count(); i++)
+            {
+                tempModels.Add(GetProgress(dates[i].Year, dates[i].Month, location, isFirstSellableModule));
+            }
+
+            bool control = true;
+            for (int i = tempModels.Count() - 1; i > 0; i--)
+            {
+                tempModel = new LineChartModel();
+                tempModel.ActualEffort = tempModels[i].ActualEffort;
+                tempModel.OverallCompilation = tempModels[i].Completed;
+                if (!(tempModels[i].ActualEffort == tempModels[i - 1].ActualEffort || tempModels[i].Completed == tempModels[i - 1].Completed) && control)
+                {
+                    tempModel.Variance = tempModels[i].Variance;
+                }
+                else
+                {
+                    if (control)
+                    {
+                        tempModel.Variance = tempModels[i].Variance;
+                    }
+                    else
+                    {
+                        tempModel.Variance = null;
+                    }
+                    control = false;
+                }
+                tempModel.Category = dates[i].Year + " - " + dates[i].Month;
+                models.Add(tempModel);
+            }
+            tempModel = new LineChartModel();
+            tempModel.ActualEffort = tempModels[0].ActualEffort;
+            tempModel.OverallCompilation = tempModels[0].Completed;
+            if (!(tempModels[0].ActualEffort == tempModels[1].ActualEffort || tempModels[0].Completed == tempModels[1].Completed) && control)
+            {
+                tempModel.Variance = tempModels[0].Variance;
+            }
+            else
+            {
+                if (control)
+                {
+                    tempModel.Variance = tempModels[0].Variance;
+                }
+                else
+                {
+                    tempModel.Variance = null;
+                    control = false;
+                }
+            }
+            tempModel.Category = dates[0].Year + " - " + dates[0].Month;
+            models.Add(tempModel);
+
+            return models;
+        }
+
+        public IEnumerable<HighLevelProgress> GetHighLevelProgress(string location, string isFirstSellableModule, Date date)
+        {
+            List<HighLevelProgress> highLevelProgresses = new List<HighLevelProgress>();
+            HighLevelProgress requirement = new HighLevelProgress();
+            HighLevelProgress design = new HighLevelProgress();
+            HighLevelProgress development = new HighLevelProgress();
+            HighLevelProgress test = new HighLevelProgress();
+            HighLevelProgress uat = new HighLevelProgress();
+
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_HighLevelProgress]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", date.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", date.Month);
+                    sqlCommand.Parameters.AddWithValue("@Type", 2);
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
+                    }
+                    if (isFirstSellableModule != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", isFirstSellableModule));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            if (dt != null && dt.Rows != null && dt.Rows.Count > 0)
+            {
+                highLevelProgresses = new List<HighLevelProgress>();
+                requirement = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Requirement",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["RequirementInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["RequirementInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["RequirementFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(requirement);
+
+                design = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Design",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["DesignInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["DesignInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["DesignFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(design);
+
+                development = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Development",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["DevelopmentInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["DevelopmentInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["DevelopmentFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(development);
+
+                test = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Test",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["TestInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["TestInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["TestFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(test);
+
+                uat = new HighLevelProgress()
+                {
+                    TaskBreakdown = "UAT",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["UatInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["UatInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["UatFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(uat);
+            }
+
+            return highLevelProgresses;
+        }
+
     }
 }

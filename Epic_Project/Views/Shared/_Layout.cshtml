@@ -21,29 +21,16 @@
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
-              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
-              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     </environment>
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/kendo-ui/styles/kendo.common-nova.min.css" />
         <link rel="stylesheet" href="~/lib/kendo-ui/styles/kendo.nova.min.css" />
     </environment>
     <environment exclude="Development">
-        <link rel="stylesheet"
-              href="https://kendo.cdn.telerik.com/2019.1.115/styles/kendo.common-nova.min.css"
-              asp-fallback-href="~/lib/kendo-ui/styles/kendo.common-nova.min.css"
-              asp-fallback-test-class="k-common-test-class"
-              asp-fallback-test-property="opacity" asp-fallback-test-value="0" />
-
-        <link rel="stylesheet"
-              href="https://kendo.cdn.telerik.com/2019.1.115/styles/kendo.nova.min.css"
-              asp-fallback-href="~/lib/kendo-ui/styles/kendo.nova.min.css"
-              asp-fallback-test-class="k-theme-test-class"
-              asp-fallback-test-property="opacity" asp-fallback-test-value="0" />
+        <link rel="stylesheet" href="~/lib/kendo-ui/styles/kendo.common-nova.min.css" />
+        <link rel="stylesheet" href="~/lib/kendo-ui/styles/kendo.nova.min.css" />
     </environment>
-
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
 
@@ -52,122 +39,188 @@
         <script src="~/lib/kendo-ui/js/kendo.aspnetmvc.min.js"></script>
     </environment>
     <environment exclude="Development">
-        <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
-                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
-                asp-fallback-test="window.jQuery"
-                crossorigin="anonymous"
-                integrity="sha384-K+ctZQ+LL8q6tP7I94W+qzQsfRV2a+AfHIi9k8z8l9ggpc8X+Ytst4yBo/hH+8Fk">
-        </script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
 
         @* Place Kendo UI scripts after jQuery *@
-        <script src="https://kendo.cdn.telerik.com/2019.1.115/js/kendo.all.min.js"
-                asp-fallback-src="~/lib/kendo-ui/js/kendo.all.min.js"
-                asp-fallback-test="window.kendo">
-        </script>
-        <script src="https://kendo.cdn.telerik.com/2019.1.115/js/kendo.aspnetmvc.min.js"
-                asp-fallback-src="~/lib/kendo-ui/js/kendo.aspnetmvc.min.js"
-                asp-fallback-test="kendo.data.transports['aspnetmvc-ajax']">
-        </script>
-        <!-- Bootstrap core JavaScript-->
-        <script src="~/admin-temp/vendor/jquery/jquery.min.js"></script>
-        <script src="~/admin-temp/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-        <!-- Core plugin JavaScript-->
-        <script src="~/admin-temp/vendor/jquery-easing/jquery.easing.min.js"></script>
-        <!-- Page level plugin JavaScript-->
-        <script src="~/admin-temp/vendor/chart.js/Chart.min.js"></script>
-        <script src="~/admin-temp/vendor/datatables/jquery.dataTables.js"></script>
-        <script src="~/admin-temp/vendor/datatables/dataTables.bootstrap4.js"></script>
-        <!-- Custom scripts for all pages-->
-        <script src="~/admin-temp/js/sb-admin.min.js"></script>
-        <!-- Demo scripts for this page-->
-        <script src="~/admin-temp/js/demo/datatables-demo.js"></script>
-        <script src="~/admin-temp/js/demo/chart-area-demo.js"></script>
+        <script src="~/lib/kendo-ui/js/kendo.all.min.js"></script>
+        <script src="~/lib/kendo-ui/js/kendo.aspnetmvc.min.js"></script>
     </environment>
 </head>
 <body>
     <div id="wrapper">
-        <!-- Sidebar -->
-        <ul class="sidebar navbar-nav row">
-            @if (Context.User.Identity.IsAuthenticated)
-            {
-                @if (Context.User.IsInRole("Admin"))
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <!-- Sidebar -->
+        <div class="row" style="height: 57px; top: 0; left: 0; position: fixed; height: 100%; z-index: 1;">
+            <div id="sidenav" class="sidebar navbar-nav row" style="width: 235px; display: none; z-index: 1;" onmouseleave="closeNav()">
+                <a style="margin-top: 18px!important; margin-bottom: 18px!important;" asp-controller="Home" asp-action="Index">
+                    <img src="~/Icons/logo.png" style="margin-left: 24px" />
+                </a><br>
+                @if (Context.User.Identity.IsAuthenticated)
                 {
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/Grid/Editing_Inline">
-                            <span style="font-size: 15px">Epic Base Line</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/MeasurementGrid/Editing_Inline">
-                            <span style="font-size: 15px">Measurement</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/MeasurementGrid/Editing_Inline_Details">
-                            <span style="font-size: 15px">Measurement Report</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/Module/Editing_Inline">
-                            <span style="font-size: 15px">Modules</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/Team/Editing_Inline">
-                            <span style="font-size: 15px">Teams</span>
-                        </a>
-                    </li>
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/Employee/Editing_Inline">
-                            <span style="font-size: 15px">Employees</span>
-                        </a>
-                    </li>
+                    <a class="nav-link anchor-style" href="~/Grid/Editing_Inline">
+                        <img id="img_epic" src="~/Icons/epic base line.svg" width="24" height="24" class="svg-bottom-margin" />
+                        <span id="span_epic" style="font-size: 16px">Epic Base Line</span>
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline">
+                        <img id="img_measurement" src="~/Icons/measurement.svg" width="24" height="24" class="svg-bottom-margin" />
+                        <span id="span_measurement" style="font-size: 16px">Measurement</span>
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline_Details">
+                        <img id="img_report" src="~/Icons/measurement report.svg" width="24" height="24" class="svg-bottom-margin" />
+                        <span id="span_report" style="font-size: 16px">Measurement Report</span>
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/Module/Editing_Inline">
+                        <img id="img_module" src="~/Icons/modules.svg" width="24" height="24" class="svg-bottom-margin" />
+                        <span id="span_module" style="font-size: 16px">Modules</span>
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/Team/Editing_Inline">
+                        <img id="img_team" src="~/Icons/teams.svg" width="24" height="24" class="svg-bottom-margin" />
+                        <span id="span_team" style="font-size: 16px">Teams</span>
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/Employee/Editing_Inline">
+                        <img id="img_employee" src="~/Icons/employees.svg" width="24" height="24" class="svg-bottom-margin" />
+                        <span id="span_employee" style="font-size: 16px">Employees</span>
+                    </a><br>
                 }
-                else
+                <div style="position: absolute; bottom: 0;">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        if (User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager"))
+                        {
+                            <a class="nav-link anchor-style" href="~/Profile/Index">
+                                <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
+                                <span id="span_profile" style="font-size: 16px">Profile</span>
+                            </a><br>
+                            <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Register">
+                                <img src="~/Icons/register.svg" width="24" height="24" class="svg-bottom-margin" />
+                                <span class="btn-span">Create a New User</span>
+                            </a><br>
+                        }
+                        else
+                        {
+                            <a class="nav-link" href="~/Profile/Index">
+                                <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
+                                <span id="span_profile" style="font-size: 16px">Profile</span>
+                            </a><br>
+                        }
+                        <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                            <img src="~/Icons/logout.svg" width="24" height="24" class="svg-bottom-margin" />
+                            <span class="btn-span">Logout</span>
+                        </a><br>
+                    }
+                </div>
+            </div>
+            <div id="sidenav_mini" class="sidebar navbar-nav row" style="width: 48px!important; z-index: 1;" onmouseover="openNav()">
+                <a class="nav-link anchor-style" href="~/Grid/Editing_Inline" style="margin-top: 22px; margin-bottom: 6px;">
+                    <img id="img_home" src="~/Icons/home.svg" width="24" height="24" class="svg-bottom-margin"/>
+                </a><br>
+                @if (Context.User.Identity.IsAuthenticated)
                 {
-                    <li class="nav-item" style="margin-top: 20px;">
-                        <a class="nav-link" href="~/MeasurementGrid/Editing_Inline_Details">
-                            <span style="font-size: 15px">Measurement Details</span>
-                        </a>
-                    </li>
+                    <a class="nav-link anchor-style" href="~/Grid/Editing_Inline">
+                        <img id="img_epic" src="~/Icons/epic base line.svg" width="24" height="24" class="svg-bottom-margin" />
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline">
+                        <img id="img_measurement" src="~/Icons/measurement.svg" width="24" height="24" class="svg-bottom-margin" />
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline_Details">
+                        <img id="img_report" src="~/Icons/measurement report.svg" width="24" height="24" class="svg-bottom-margin" />
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/Module/Editing_Inline">
+                        <img id="img_module" src="~/Icons/modules.svg" width="24" height="24" class="svg-bottom-margin" />
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/Team/Editing_Inline">
+                        <img id="img_team" src="~/Icons/teams.svg" width="24" height="24" class="svg-bottom-margin" />
+                    </a><br>
+                    <a class="nav-link anchor-style" href="~/Employee/Editing_Inline">
+                        <img id="img_employee" src="~/Icons/employees.svg" width="24" height="24" class="svg-bottom-margin" />
+                    </a><br>
                 }
+                <div style="position: absolute; bottom: 0;">
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        if (User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager"))
+                        {
+                            <a class="nav-link anchor-style" href="~/Profile/Index">
+                                <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
+                            </a><br>
+                            <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Register">
+                                <img src="~/Icons/register.svg" width="24" height="24" class="svg-bottom-margin" />
+                            </a><br>
+                        }
+                        else
+                        {
+                            <a class="nav-link" href="~/Profile/Index">
+                                <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
+                            </a><br>
+                        }
+                        <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                            <img src="~/Icons/logout.svg" width="24" height="24" class="svg-bottom-margin" />
+                        </a><br>
+                    }
+                </div>
+            </div>
+            @*<div style="width: 57px; height: 57px; z-index: 1;">
+                <a id="toggle-button" class="k-button" style="width: 57px; height: 57px; background-color: #212529; margin-left: 15px; border-radius: 0; border: hidden;" onmouseover="openNav()">
+                    <img id="img_menu" src="~/Icons/menu.svg" width="48" height="48" />
+                </a><br>
+            </div><br>*@
+        </div>
             }
-            @if (SignInManager.IsSignedIn(User))
-            {
-                <li class="nav-item" style="margin-top: 120px;">
-                    <a class="nav-link">
-                        <span style="font-size: 15px; color: darkgray;">@UserManager.GetUserName(User)</span>
-                    </a>
-                </li>
-                <li class="nav-item" style="margin-top: 20px;">
-                    <form asp-area="Identity" asp-page="/Account/Register" method="post" id="registerForm">
-                        <button type="submit" class="btn btn-link">
-                            <span style="font-size: 15px">Register</span>
-                        </button>
-                    </form>
-                </li>
-                <li class="nav-item" style="margin-top: 20px;">
-                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">
-                        <button type="submit" class="btn btn-link">
-                            <span style="font-size: 15px">Logout</span>
-                        </button>
-                    </form>
-                </li>
-            }
-            else
-            {
-                <li class="nav-item" style="margin-top: 20px;">
-                    <a asp-area="Identity" asp-page="/Account/Login">
-                        <span style="font-size: 15px">Login</span>
-                    </a>
-                </li>
-
-            }
-        </ul>
-        <div id="content-wrapper" style="font-size: 13px">
-            <div style="margin-left: 230px">@RenderBody()</div>
+        <div id="content-wrapper" style="margin-left: 0">
+            <div id="body-id" class="bodyMargin">@RenderBody()</div>
         </div>
     </div>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
+<script type="text/javascript">
+    function openNav() {
+        document.getElementById("sidenav").style.display = "";
+        document.getElementById("sidenav_mini").style.display = "none";
+        //document.getElementById("toggle-button").style.marginLeft = "173px";
+        //document.getElementById("toggle-button").style.display = "none";
+    }
+    function closeNav() {
+        document.getElementById("sidenav").style.display = "none";
+        document.getElementById("sidenav_mini").style.display = "";
+        //document.getElementById("toggle-button").style.marginLeft = "15px";
+        //document.getElementById("toggle-button").style.display = "";
+    }
+</script>
+
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <style>
+        .bodyMargin {
+            /*margin-left: 200px;*/
+            margin-left: 36px;
+            margin-right: 5px;
+        }
+        .svg-bottom-margin {
+            margin-bottom: 4px;
+        }
+        .btn-span {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+        }
+        .anchor-style {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            /*margin: 6px!important;*/
+            margin-left: 16px!important;
+        }
+        .header {
+            padding: 10px 16px;
+            background: #555;
+            color: #f1f1f1;
+        }
+        .sticky {
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+    </style>
+}

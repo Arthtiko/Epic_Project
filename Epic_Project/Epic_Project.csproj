@@ -16,4 +16,19 @@
     <Folder Include="Areas\Identity\Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Icons\employees.svg" />
+    <None Include="wwwroot\Icons\epic base line.svg" />
+    <None Include="wwwroot\Icons\measurement report.svg" />
+    <None Include="wwwroot\Icons\measurement.svg" />
+    <None Include="wwwroot\Icons\modules.svg" />
+    <None Include="wwwroot\Icons\teams.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

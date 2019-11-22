@@ -20,37 +20,32 @@ namespace Epic_Project.Controllers
             _repository = repository;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult Editing_InLine()
         {
-            var model = new MaxIdViewModel(){ MaxId = _repository.GetMaxModuleId() + 1 };
-            ViewBag.MaxModuleId = model.MaxId;
-            return View(model);
+            return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(_repository.GetModuleAll().ToDataSourceResult(request));
+            Date date = _repository.GetDates()[0];
+            return Json(_repository.GetModuleProgress(date.Year, date.Month).ToDataSourceResult(request));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, Module module)
         {
             if (module != null && ModelState.IsValid)
             {
                 Module m = _repository.InsertModule(module);
-                if (m != null)
-                {
-                    ViewBag.MaxModuleId = _repository.GetMaxModuleId() + 1;
-                }
             }
 
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Update([DataSourceRequest] DataSourceRequest request, Module module)
         {
@@ -62,7 +57,7 @@ namespace Epic_Project.Controllers
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, Module module)
         {
@@ -72,12 +67,6 @@ namespace Epic_Project.Controllers
             }
 
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
-        }
-
-
-        public IActionResult Index()
-        {
-            return View();
         }
     }
 }

@@ -8,6 +8,11 @@ namespace Epic_Project.Models
 {
     public class MeasurementDetailsViewModel
     {
+        public MeasurementDetailsViewModel()
+        {
+            Module = new Module();
+            Team = new Team();
+        }
         [Required]
         public int EpicId { get; set; }
         public string EpicName { get; set; }
@@ -16,9 +21,11 @@ namespace Epic_Project.Models
         public int Year { get; set; }
         [Required]
         public int Month { get; set; }
+        public string Location { get; set; }
         public float EpicWeight { get; set; }
         public float Estimation { get; set; }
         public Team Team { get; set; }
+        public string IsFirstSellableModule { get; set; }
         public float PrevMonthRequirementProgress { get; set; }
         public float PrevMonthDesignProgress { get; set; }
         public float PrevMonthDevelopmentProgress { get; set; }
