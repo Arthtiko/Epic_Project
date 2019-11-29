@@ -12,18 +12,18 @@
                     <div class="card-body m-0 p-0">
                         <div>
                             @(Html.Kendo().Grid(Model)
-                                   .Name("grid-employee")
-                                   .Columns(columns =>
-                                   {
-                                       columns.Bound(p => p.TitleName).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
-                                       columns.Bound(p => p.TitleValue).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
-                                   })
-                                   .DataSource(ds => ds
-                                       .Ajax()
-                                       .Read(read => read.Action("Index_Read", "Profile"))
-                                   )
-                                )
-                            </div>
+                                                   .Name("grid-employee")
+                                                   .Columns(columns =>
+                                                   {
+                                                       columns.Bound(p => p.TitleName).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
+                                                       columns.Bound(p => p.TitleValue).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
+                                                   })
+                                                   .DataSource(ds => ds
+                                                       .Ajax()
+                                                       .Read(read => read.Action("Index_Read", "Profile"))
+                                                   )
+                            )
+                        </div>
                         <div>
                             <form asp-area="Identity" asp-page="/Account/ResetPassword" method="get" id="resetPasswordForm">
                                 <button type="submit" class="btn btn-link">

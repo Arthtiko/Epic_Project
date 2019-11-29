@@ -88,6 +88,10 @@
                     {
                         if (User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager"))
                         {
+                            <a class="nav-link anchor-style" href="~/LineChartPanel/index">
+                                <img src="~/Icons/chart.svg" width="24" height="24" class="svg-bottom-margin" />
+                                <span style="font-size: 16px">Chart Panel</span>
+                            </a><br>
                             <a class="nav-link anchor-style" href="~/Profile/Index">
                                 <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
                                 <span id="span_profile" style="font-size: 16px">Profile</span>
@@ -99,72 +103,83 @@
                         }
                         else
                         {
-                            <a class="nav-link" href="~/Profile/Index">
+                            <a class="nav-link anchor-style" href="~/Profile/Index">
                                 <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
                                 <span id="span_profile" style="font-size: 16px">Profile</span>
                             </a><br>
                         }
-                        <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                            <img src="~/Icons/logout.svg" width="24" height="24" class="svg-bottom-margin" />
-                            <span class="btn-span">Logout</span>
-                        </a><br>
+                        <div style="margin-left: 4px;">
+                            <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">
+                                <button type="submit" class="btn btn-link">
+                                    <img src="~/Icons/logout.svg" width="24" height="24" class="svg-bottom-margin" />
+                                    <span class="btn-span">Logout</span>
+                                </button>
+                            </form>
+                        </div>
                     }
                 </div>
             </div>
-            <div id="sidenav_mini" class="sidebar navbar-nav row" style="width: 48px!important; z-index: 1;" onmouseover="openNav()">
-                <a class="nav-link anchor-style" href="~/Grid/Editing_Inline" style="margin-top: 22px; margin-bottom: 6px;">
-                    <img id="img_home" src="~/Icons/home.svg" width="24" height="24" class="svg-bottom-margin"/>
+            @*<div id="sidenav_mini" class="sidebar navbar-nav row" style="width: 48px!important; z-index: 1;" onmouseover="openNav()">
+            <a class="nav-link anchor-style" href="~/Grid/Editing_Inline" style="margin-top: 22px; margin-bottom: 6px;">
+                <img id="img_home" src="~/Icons/home.svg" width="24" height="24" class="svg-bottom-margin"/>
+            </a><br>
+            @if (Context.User.Identity.IsAuthenticated)
+            {
+                <a class="nav-link anchor-style" href="~/Grid/Editing_Inline">
+                    <img id="img_epic" src="~/Icons/epic base line.svg" width="24" height="24" class="svg-bottom-margin" />
                 </a><br>
-                @if (Context.User.Identity.IsAuthenticated)
-                {
-                    <a class="nav-link anchor-style" href="~/Grid/Editing_Inline">
-                        <img id="img_epic" src="~/Icons/epic base line.svg" width="24" height="24" class="svg-bottom-margin" />
-                    </a><br>
-                    <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline">
-                        <img id="img_measurement" src="~/Icons/measurement.svg" width="24" height="24" class="svg-bottom-margin" />
-                    </a><br>
-                    <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline_Details">
-                        <img id="img_report" src="~/Icons/measurement report.svg" width="24" height="24" class="svg-bottom-margin" />
-                    </a><br>
-                    <a class="nav-link anchor-style" href="~/Module/Editing_Inline">
-                        <img id="img_module" src="~/Icons/modules.svg" width="24" height="24" class="svg-bottom-margin" />
-                    </a><br>
-                    <a class="nav-link anchor-style" href="~/Team/Editing_Inline">
-                        <img id="img_team" src="~/Icons/teams.svg" width="24" height="24" class="svg-bottom-margin" />
-                    </a><br>
-                    <a class="nav-link anchor-style" href="~/Employee/Editing_Inline">
-                        <img id="img_employee" src="~/Icons/employees.svg" width="24" height="24" class="svg-bottom-margin" />
-                    </a><br>
-                }
-                <div style="position: absolute; bottom: 0;">
-                    @if (SignInManager.IsSignedIn(User))
-                    {
-                        if (User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager"))
+                <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline">
+                    <img id="img_measurement" src="~/Icons/measurement.svg" width="24" height="24" class="svg-bottom-margin" />
+                </a><br>
+                <a class="nav-link anchor-style" href="~/MeasurementGrid/Editing_Inline_Details">
+                    <img id="img_report" src="~/Icons/measurement report.svg" width="24" height="24" class="svg-bottom-margin" />
+                </a><br>
+                <a class="nav-link anchor-style" href="~/Module/Editing_Inline">
+                    <img id="img_module" src="~/Icons/modules.svg" width="24" height="24" class="svg-bottom-margin" />
+                </a><br>
+                <a class="nav-link anchor-style" href="~/Team/Editing_Inline">
+                    <img id="img_team" src="~/Icons/teams.svg" width="24" height="24" class="svg-bottom-margin" />
+                </a><br>
+                <a class="nav-link anchor-style" href="~/Employee/Editing_Inline">
+                    <img id="img_employee" src="~/Icons/employees.svg" width="24" height="24" class="svg-bottom-margin" />
+                </a><br>
+            }
+                    <div style="position: absolute; bottom: 0;">
+                        @if (SignInManager.IsSignedIn(User))
                         {
-                            <a class="nav-link anchor-style" href="~/Profile/Index">
-                                <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
-                            </a><br>
-                            <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Register">
-                                <img src="~/Icons/register.svg" width="24" height="24" class="svg-bottom-margin" />
-                            </a><br>
+                            if (User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager"))
+                            {
+                                <a class="nav-link anchor-style" href="~/LineChartPanel/index">
+                                    <img src="~/Icons/chart.svg" width="24" height="24" class="svg-bottom-margin" />
+                                </a><br>
+                                <a class="nav-link anchor-style" href="~/Profile/Index">
+                                    <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
+                                </a><br>
+                                <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Register">
+                                    <img src="~/Icons/register.svg" width="24" height="24" class="svg-bottom-margin" />
+                                </a><br>
+                            }
+                            else
+                            {
+                                <a class="nav-link anchor-style" href="~/Profile/Index">
+                                    <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
+                                </a><br>
+                            }
+                            <div style="margin-left: 4px;">
+                                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">
+                                    <button type="submit" class="btn btn-link">
+                                        <img src="~/Icons/logout.svg" width="24" height="24" class="svg-bottom-margin" />
+                                    </button>
+                                </form>
+                            </div>
                         }
-                        else
-                        {
-                            <a class="nav-link" href="~/Profile/Index">
-                                <img id="img_profile" src="~/Icons/profile.svg" width="24" height="24" class="svg-bottom-margin" />
-                            </a><br>
-                        }
-                        <a class="nav-link anchor-style" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                            <img src="~/Icons/logout.svg" width="24" height="24" class="svg-bottom-margin" />
-                        </a><br>
-                    }
-                </div>
-            </div>
-            @*<div style="width: 57px; height: 57px; z-index: 1;">
+                    </div>
+        </div>*@
+            <div style="width: 57px; height: 57px; z-index: 1;">
                 <a id="toggle-button" class="k-button" style="width: 57px; height: 57px; background-color: #212529; margin-left: 15px; border-radius: 0; border: hidden;" onmouseover="openNav()">
                     <img id="img_menu" src="~/Icons/menu.svg" width="48" height="48" />
                 </a><br>
-            </div><br>*@
+            </div><br>
         </div>
             }
         <div id="content-wrapper" style="margin-left: 0">
@@ -178,15 +193,15 @@
 <script type="text/javascript">
     function openNav() {
         document.getElementById("sidenav").style.display = "";
-        document.getElementById("sidenav_mini").style.display = "none";
-        //document.getElementById("toggle-button").style.marginLeft = "173px";
-        //document.getElementById("toggle-button").style.display = "none";
+        //document.getElementById("sidenav_mini").style.display = "none";
+        document.getElementById("toggle-button").style.marginLeft = "173px";
+        document.getElementById("toggle-button").style.display = "none";
     }
     function closeNav() {
         document.getElementById("sidenav").style.display = "none";
-        document.getElementById("sidenav_mini").style.display = "";
-        //document.getElementById("toggle-button").style.marginLeft = "15px";
-        //document.getElementById("toggle-button").style.display = "";
+        //document.getElementById("sidenav_mini").style.display = "";
+        document.getElementById("toggle-button").style.marginLeft = "15px";
+        document.getElementById("toggle-button").style.display = "";
     }
 </script>
 
@@ -196,7 +211,7 @@
     <style>
         .bodyMargin {
             /*margin-left: 200px;*/
-            margin-left: 36px;
+            /*margin-left: 36px;*/
             margin-right: 5px;
         }
         .svg-bottom-margin {

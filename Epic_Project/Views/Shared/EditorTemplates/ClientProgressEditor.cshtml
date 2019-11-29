@@ -1,0 +1,8 @@
+﻿@model Epic_Project.Models.ProgressViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+          .DataValueField("ProgressId")
+          .DataTextField("ProgressName")
+          .HtmlAttributes(new { data_bind = "value: Progress" })
+          .BindTo((System.Collections.IEnumerable)ViewData["progresses"])
+)

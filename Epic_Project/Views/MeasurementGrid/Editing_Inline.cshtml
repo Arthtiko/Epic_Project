@@ -9,10 +9,10 @@
 
 
 <div class="row" style="position: relative;">
-    <div style="margin-left: 15px">
+    <div style="margin-left: 65px">
         <form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
             <div class="row" style="margin-top: -5px;">
-                <div style="margin-left: 45px">
+                <div style="margin-left: 4px">
                     <text class="text-size">Year-Month: </text>
                     <select class="k-select select-size" id="form-select-time" asp-for="YearMonth" onchange="submit()"></select>
                 </div>
@@ -22,7 +22,7 @@
     <div>
         <a class="k-button button-size-month" id="showGrid">Show Data</a>
     </div>
-    @if (Context.User.IsInRole("ProjectManager") || Context.User.IsInRole("ProgramManager") || Context.User.IsInRole("Admin"))
+    @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
     {
         <div style="position: absolute; right: 0; margin-right: 40px">
             <a class="k-button button-size-month" asp-controller="MeasurementGrid" asp-action="GenerateNextMonth" asp-route-month="@Model.NextMonth" asp-route-year="@Model.NextYear" onclick="javascript:return ShowMessageCreateNewMonth();">Create New Month</a>
@@ -51,7 +51,6 @@
        columns.Bound(m => m.DevelopmentProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(m => m.TestProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(m => m.UatProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-       //columns.Bound(m => m.WeightedOverallProgress).Title("Deneme").ClientTemplate("<span class='span1'>#=OverallEpicCompilation*EpicWeight#</span>").Width(130).Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(m => m.OverallEpicCompilation).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Width(130).Filterable(false).Title("Overall Epic Completion").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(m => m.WeightedOverallProgress).Title("Weighted Overall Progress").Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
        columns.Bound(m => m.PreviousMonthCumulativeActualEffort).Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Width(180).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
@@ -60,7 +59,6 @@
        {
            columns.Command(command => { command.Edit(); }).Width(125);
        }
-
        })
        .ToolBar(toolbar =>
        {
@@ -77,7 +75,7 @@
        .Reorderable(reorderable => reorderable.Columns(true))
        .HtmlAttributes(new { style = "background-color: Gainsboro;" })
        .DataSource(dataSource => dataSource
-       .Ajax().ServerOperation(false).AutoSync(true)
+       .Ajax().ServerOperation(false)
        .Aggregates(aggregates =>
        {
            aggregates.Add(m => m.EpicWeight).Sum();

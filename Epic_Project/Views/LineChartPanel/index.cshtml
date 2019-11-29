@@ -1,0 +1,48 @@
+﻿<div style="margin-top: 50px">
+    @(Html.Kendo().Grid<DateControl>()
+          .Name("grid-date-control")
+          .Columns(columns =>
+          {
+              columns.Bound(d => d.Year).Filterable(ftb => ftb.Multi(true).Search(true)).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+              columns.Bound(d => d.Month).Filterable(ftb => ftb.Multi(true).Search(true)).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+              columns.Bound(d => d.DateControlType.TypeName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Table Name").EditorTemplateName("ClientDateControlTypeEditor").Width(360).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+              columns.Bound(d => d.Effort.EffortName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Effort").EditorTemplateName("ClientEffortEditor").Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+              columns.Bound(d => d.Progress.ProgressName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Progress").EditorTemplateName("ClientProgressEditor").Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+              columns.Bound(d => d.Variance.VarianceName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Variance").EditorTemplateName("ClientVarianceEditor").Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+              columns.Command(c => c.Edit());
+          })
+          .Editable(editable => editable.Mode(GridEditMode.InLine))
+          .HtmlAttributes(new { style = "background-color: Gainsboro" })
+          .Filterable()
+          .DataSource(ds => ds
+              .Ajax()
+              .Events(events => events.Error("error_handler"))
+              .Model(model =>
+              {
+                  model.Id(m => m.Year);
+                  model.Id(m => m.Month);
+                  model.Field(m => m.Year).Editable(false);
+                  model.Field(m => m.Month).Editable(false);
+                  model.Field(m => m.DateControlType.TypeName).Editable(false);
+              })
+              .Read(read => read.Action("DateControl_Read", "LineChartPanel"))
+              .Update(update => update.Action("DateControl_Update", "LineChartPanel"))
+          )
+)
+</div>
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function() {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+</script>

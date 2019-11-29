@@ -1,0 +1,8 @@
+﻿@model Epic_Project.Models.EffortViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+          .DataValueField("EffortId")
+          .DataTextField("EffortName")
+          .HtmlAttributes(new { data_bind = "value: Effort" })
+          .BindTo((System.Collections.IEnumerable)ViewData["efforts"])
+)

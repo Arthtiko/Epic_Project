@@ -25,7 +25,7 @@ namespace Epic_Project.Models
     public class LineChartModel
     {
         public float? ActualEffort { get; set; }
-        public float OverallCompilation { get; set; }
+        public float? OverallCompilation { get; set; }
         public float? Variance { get; set; }
         public string Category { get; set; }
         public LineChartModel()

@@ -1,0 +1,8 @@
+﻿@model Epic_Project.Models.VarianceViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+          .DataValueField("VarianceId")
+          .DataTextField("VarianceName")
+          .HtmlAttributes(new { data_bind = "value: Variance" })
+          .BindTo((System.Collections.IEnumerable)ViewData["variances"])
+)

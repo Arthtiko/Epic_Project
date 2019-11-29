@@ -68,7 +68,55 @@ namespace Epic_Project.Controllers
                 string mText = yearMonth.Split("-")[1];
                 m = Convert.ToInt32(mText);
             }
-            var model = new MeasurementSearchModel() {Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, LastMonth = DateList[0].Month, LastYear = DateList[0].Year};
+            bool isAllShowedTurkeyO = true;
+            bool isAllShowedTurkeyFSM = true;
+            bool isAllShowedEgyptO = true;
+            bool isAllShowedEgyptFSM = true;
+            bool isAllShowedTotalO = true;
+            bool isAllShowedTotalFSM = true;
+            List<DateControl> dateControlList = (List<DateControl>)_repository.GetDateControl(y, m, null);
+            for (int i = 0; i < dateControlList.Count(); i++)
+            {
+                if (dateControlList[i].DateControlType.TypeId == 1 && dateControlList[i].Effort.EffortName == "FALSE")
+                {
+                    isAllShowedTurkeyO = false;
+                }
+                else if (dateControlList[i].DateControlType.TypeId == 2 && dateControlList[i].Effort.EffortName == "FALSE")
+                {
+                    isAllShowedTurkeyFSM = false;
+                }
+                else if (dateControlList[i].DateControlType.TypeId == 3 && dateControlList[i].Effort.EffortName == "FALSE")
+                {
+                    isAllShowedEgyptO = false;
+                }
+                else if (dateControlList[i].DateControlType.TypeId == 4 && dateControlList[i].Effort.EffortName == "FALSE")
+                {
+                    isAllShowedEgyptFSM = false;
+                }
+                else if (dateControlList[i].DateControlType.TypeId == 5 && dateControlList[i].Effort.EffortName == "FALSE")
+                {
+                    isAllShowedTotalO = false;
+                }
+                else if (dateControlList[i].DateControlType.TypeId == 6 && dateControlList[i].Effort.EffortName == "FALSE")
+                {
+                    isAllShowedTotalFSM = false;
+                }
+            }
+            var model = new MeasurementSearchModel() {
+                Year = y,
+                Month = m,
+                YearMonth = yearMonth,
+                NextMonth = NextMonth,
+                NextYear = NextYear,
+                LastMonth = DateList[0].Month,
+                LastYear = DateList[0].Year,
+                IsAllShowedTurkeyO = isAllShowedTurkeyO,
+                IsAllShowedTurkeyFSM = isAllShowedTurkeyFSM,
+                IsAllShowedEgyptO = isAllShowedEgyptO,
+                IsAllShowedEgyptFSM = isAllShowedEgyptFSM,
+                IsAllShowedTotalO = isAllShowedTotalO,
+                IsAllShowedTotalFSM = isAllShowedTotalFSM
+            };
             return View(model);
         }
 
@@ -245,7 +293,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetTurkeyLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Turkey", null);
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Turkey", null, "Turkey Overall Progress");
             return Json(model);
         }
 
@@ -253,7 +301,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetEgyptLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Egypt", null);
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Egypt", null, "Egypt Overall Progress");
             return Json(model);
         }
 
@@ -261,7 +309,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetTotalLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress(null, null);
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress(null, null, "Total Overall Progress");
             return Json(model);
         }
 
@@ -269,7 +317,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetTurkeyFirstSellableLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Turkey", "TRUE");
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Turkey", "TRUE", "Turkey FSM Progress");
             return Json(model);
         }
 
@@ -277,7 +325,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetEgyptFirstSellableLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Egypt", "TRUE");
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Egypt", "TRUE", "Egypt FSM Progress");
             return Json(model);
         }
 
@@ -285,7 +333,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetTotalFirstSellableLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress(null, "TRUE");
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress(null, "TRUE", "Total FSM Progress");
             return Json(model);
         }
         #endregion

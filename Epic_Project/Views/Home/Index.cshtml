@@ -2,7 +2,7 @@
 <div class="row">
     <form class="k-form" asp-controller="Home" asp-action="Index" method="post" style="height: 40px; margin-left: 35px; margin-top: 10px;">
         <div class="row">
-            <div style="margin-left: 35px">
+            <div style="margin-left: 44px">
                 <text class="text-size">Year-Month: </text>
                 <select class="k-select select-size" id="form-select-time" style="width: 200px;" asp-for="YearMonth"></select>
             </div>
@@ -38,7 +38,7 @@
                                            .Series(series =>
                                            {
                                                series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-                                               if (!(Model.Year == Model.LastYear && Model.Month == Model.LastMonth))
+                                               if (Model.IsAllShowedTurkeyO)
                                                {
                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
                                                    series.Column(model => model.Variance).Name("Variance").Color("#f44747");
@@ -80,7 +80,7 @@
                                                             {
                                                                 series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
 
-                                                                if (!(Model.Year == Model.LastYear && Model.Month == Model.LastMonth))
+                                                                if (Model.IsAllShowedEgyptO)
                                                                 {
                                                                     series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
                                                                     series.Column(model => model.Variance).Name("Variance").Color("#f44747");
@@ -122,7 +122,7 @@
                                                             {
                                                                 series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
 
-                                                                if (!(Model.Year == Model.LastYear && Model.Month == Model.LastMonth))
+                                                                if (Model.IsAllShowedTotalO)
                                                                 {
                                                                     series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
                                                                     series.Column(model => model.Variance).Name("Variance").Color("#f44747");
@@ -312,7 +312,7 @@
                                             {
                                                 series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
 
-                                                if (!(Model.Year == Model.LastYear && Model.Month == Model.LastMonth))
+                                                if (Model.IsAllShowedTurkeyFSM)
                                                 {
                                                     series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
                                                     series.Column(model => model.Variance).Name("Variance").Color("#f44747");
@@ -354,7 +354,7 @@
                                                                             {
                                                                                 series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
 
-                                                                                if (!(Model.Year == Model.LastYear && Model.Month == Model.LastMonth))
+                                                                                if (Model.IsAllShowedEgyptFSM)
                                                                                 {
                                                                                     series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
                                                                                     series.Column(model => model.Variance).Name("Variance").Color("#f44747");
@@ -395,7 +395,7 @@
                                                                             {
                                                                                 series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
 
-                                                                                if (!(Model.Year == Model.LastYear && Model.Month == Model.LastMonth))
+                                                                                if (Model.IsAllShowedTotalFSM)
                                                                                 {
                                                                                     series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
                                                                                     series.Column(model => model.Variance).Name("Variance").Color("#f44747");

@@ -94,43 +94,222 @@ namespace Epic_Project.Data
             //    }
             //    adminId1 = user.Id;
             //}
-            if (await userManager.FindByNameAsync("test@test.test") == null)
+            if (await userManager.FindByNameAsync("Nashwa.Rashed@its.ws") == null)
             {
                 var user = new ApplicationUser
                 {
-                    UserName = "test@test.test",
-                    Email = "test@test.test",
-                    FirstName = "Test Tester Turkey",
-                    LastName = "Test Tester Turkey",
-                    EmployeeId = 1003
+                    UserName = "Nashwa.Rashed@its.ws",
+                    Email = "Nashwa.Rashed@its.ws",
+                    FirstName = "Nashwa Tawfik Nasr Rashed",
+                    LastName = "Nashwa Tawfik Nasr Rashed",
+                    EmployeeId = 4
                 };
 
                 var result = await userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     await userManager.AddPasswordAsync(user, password);
-                    await userManager.AddToRoleAsync(user, "Tester");
+                    await userManager.AddToRoleAsync(user, "Team Leader");
                 }
             }
-            if (await userManager.FindByNameAsync("etest@etest.etest") == null)
+            if (await userManager.FindByNameAsync("moataz.mohamed@its.ws") == null)
             {
                 var user = new ApplicationUser
                 {
-                    UserName = "etest@etest.etest",
-                    Email = "etest@etest.etest",
-                    FirstName = "Test Tester Egypt",
-                    LastName = "Test Tester Egypt",
-                    EmployeeId = 2003
+                    UserName = "moataz.mohamed@its.ws",
+                    Email = "moataz.mohamed@its.ws",
+                    FirstName = "Moataz Mohamed Anwar Gaafar",
+                    LastName = "Moataz Mohamed Anwar Gaafar",
+                    EmployeeId = 2
                 };
 
                 var result = await userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     await userManager.AddPasswordAsync(user, password);
-                    await userManager.AddToRoleAsync(user, "Tester");
+                    await userManager.AddToRoleAsync(user, "Team Leader");
                 }
             }
+            if (await userManager.FindByNameAsync("hisham.nassef@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "hisham.nassef@its.ws",
+                    Email = "hisham.nassef@its.ws",
+                    FirstName = "Hisham Nassef",
+                    LastName = "Hisham Nassef",
+                    EmployeeId = 28
+                };
 
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("mohamed.konswa@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "mohamed.konswa@its.ws",
+                    Email = "mohamed.konswa@its.ws",
+                    FirstName = "Mohamed Konswa",
+                    LastName = "Mohamed Konswa",
+                    EmployeeId = 29
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("Sayed.Hussein@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "Sayed.Hussein@its.ws",
+                    Email = "Sayed.Hussein@its.ws",
+                    FirstName = "Sayed Hussein Sayed",
+                    LastName = "Sayed Hussein Sayed",
+                    EmployeeId = 30
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("Fayza.Mahfouz@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "Fayza.Mahfouz@its.ws",
+                    Email = "Fayza.Mahfouz@its.ws",
+                    FirstName = "Fayza Ahmed Mahfouz",
+                    LastName = "Fayza Ahmed Mahfouz",
+                    EmployeeId = 31
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("may.hassan@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "may.hassan@its.ws",
+                    Email = "may.hassan@its.ws",
+                    FirstName = "May Hassan",
+                    LastName = "May Hassan",
+                    EmployeeId = 32
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("mohammad.alsayed@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "mohammad.alsayed@its.ws",
+                    Email = "mohammad.alsayed@its.ws",
+                    FirstName = "Mohammad AlSayed",
+                    LastName = "Mohammad AlSayed",
+                    EmployeeId = 33
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("ahmed.elsalakawy@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "ahmed.elsalakawy@its.ws",
+                    Email = "ahmed.elsalakawy@its.ws",
+                    FirstName = "Ahmed Salakawy",
+                    LastName = "Ahmed Salakawy",
+                    EmployeeId = 34
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("Wessam.tohamy@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "Wessam.tohamy@its.ws",
+                    Email = "Wessam.tohamy@its.ws",
+                    FirstName = "Wessam Salah",
+                    LastName = "Wessam Salah",
+                    EmployeeId = 35
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("rafeek.inani@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "rafeek.inani@its.ws",
+                    Email = "rafeek.inani@its.ws",
+                    FirstName = "Rafeek Inani",
+                    LastName = "Rafeek Inani",
+                    EmployeeId = 36
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Team Leader");
+                }
+            }
+            if (await userManager.FindByNameAsync("Mohamed.elkhattab@its.ws") == null)
+            {
+                var user = new ApplicationUser
+                {
+                    UserName = "Mohamed.elkhattab@its.ws",
+                    Email = "Mohamed.elkhattab@its.ws",
+                    FirstName = "Mohamed Omar El Khattab",
+                    LastName = "Mohamed Omar El Khattab",
+                    EmployeeId = 37
+                };
+
+                var result = await userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await userManager.AddPasswordAsync(user, password);
+                    await userManager.AddToRoleAsync(user, "Project Manager");
+                }
+            }
         }
     }
 }

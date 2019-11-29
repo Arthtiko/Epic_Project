@@ -36,7 +36,6 @@ namespace Epic_Project.Controllers
             List<ProfileModel> model = getProfile();
             return Json(model.ToDataSourceResult(request));
         }
-
         [Authorize]
         public List<ProfileModel> getProfile()
         {

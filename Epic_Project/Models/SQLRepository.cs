@@ -973,7 +973,124 @@ namespace Epic_Project.Models
         }
         #endregion
 
-        
+        #region Date Control
+
+        public IEnumerable<DateControl> GetDateControl(int? year, int? month, string type)
+        {
+            List<DateControl> DateControlList = new List<DateControl>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_DateControl]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@Month", month);
+                    if (type != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("DateControlType", type));
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", type);
+                    }
+                    
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                DateControl temp = new DateControl();
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.DateControlType.TypeId = Convert.ToInt32(dt.Rows[i]["TypeId"]);
+                temp.DateControlType.TypeName = Convert.ToString(dt.Rows[i]["TypeName"]);
+                temp.Effort.EffortId = Convert.ToInt32(dt.Rows[i]["EffortId"]);
+                temp.Effort.EffortName = Convert.ToString(dt.Rows[i]["EffortName"]);
+                temp.Progress.ProgressId = Convert.ToInt32(dt.Rows[i]["ProgressId"]);
+                temp.Progress.ProgressName = Convert.ToString(dt.Rows[i]["ProgressName"]);
+                temp.Variance.VarianceId = Convert.ToInt32(dt.Rows[i]["VarianceId"]);
+                temp.Variance.VarianceName = Convert.ToString(dt.Rows[i]["VarianceName"]);
+                DateControlList.Add(temp);
+            }
+            return DateControlList;
+        }
+
+        public DateControl InsertDateControl(DateControl dateControl)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[ins_DateControl]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", dateControl.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", dateControl.Month);
+                    sqlCommand.Parameters.AddWithValue("@Effort", dateControl.Effort.EffortId);
+                    sqlCommand.Parameters.AddWithValue("@Progress", dateControl.Progress.ProgressId);
+                    sqlCommand.Parameters.AddWithValue("@Variance", dateControl.Variance.VarianceId);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return dateControl;
+        }
+
+        public void DeleteDateControl(int year, int month)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_DateControl]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@Month", month);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public DateControl UpdateDateControl(DateControl dateControl)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_DateControl]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", dateControl.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", dateControl.Month);
+                    sqlCommand.Parameters.AddWithValue("@Type", dateControl.DateControlType.TypeId);
+                    sqlCommand.Parameters.AddWithValue("@Effort", dateControl.Effort.EffortId);
+                    sqlCommand.Parameters.AddWithValue("@Progress", dateControl.Progress.ProgressId);
+                    sqlCommand.Parameters.AddWithValue("@Variance", dateControl.Variance.VarianceId);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return dateControl;
+        }
+        #endregion
+
         public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month)
         {
             int prevYear = month == 1 ? year - 1 : year;
@@ -1338,9 +1455,10 @@ namespace Epic_Project.Models
             return modules;
         }
 
-        public IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule)
+        public IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule, string type)
         {
             List<Date> dates = GetDates();
+            List<DateControl> dateControlList = (List<DateControl>)GetDateControl(null, null, type);
             List<LineChartModel> models = new List<LineChartModel>();
             List<ProgressModel> tempModels = new List<ProgressModel>();
 
@@ -1354,77 +1472,35 @@ namespace Epic_Project.Models
             for (int i = tempModels.Count() - 1; i >= 0; i--)
             {
                 tempModel = new LineChartModel();
-                tempModel.ActualEffort = tempModels[i].ActualEffort;
-                tempModel.OverallCompilation = tempModels[i].Completed;
-                tempModel.Variance = tempModels[i].Variance;
-                tempModel.Category = dates[i].Year + " - " + dates[i].Month;
-                models.Add(tempModel);
-            }
-            models.Last().ActualEffort = null;
-            models.Last().Variance = null;
-
-            return models;
-        }
-
-        public IEnumerable<LineChartModel> GetLineChartProgress2(string location, string isFirstSellableModule)
-        {
-            List<Date> dates = GetDates();
-            List<LineChartModel> models = new List<LineChartModel>();
-            List<ProgressModel> tempModels = new List<ProgressModel>();
-
-            LineChartModel tempModel = new LineChartModel();
-
-            for (int i = 0; i < dates.Count(); i++)
-            {
-                tempModels.Add(GetProgress(dates[i].Year, dates[i].Month, location, isFirstSellableModule));
-            }
-
-            bool control = true;
-            for (int i = tempModels.Count() - 1; i > 0; i--)
-            {
-                tempModel = new LineChartModel();
-                tempModel.ActualEffort = tempModels[i].ActualEffort;
-                tempModel.OverallCompilation = tempModels[i].Completed;
-                if (!(tempModels[i].ActualEffort == tempModels[i - 1].ActualEffort || tempModels[i].Completed == tempModels[i - 1].Completed) && control)
+                if (dateControlList[i].Effort.EffortName == "TRUE")
+                {
+                    tempModel.ActualEffort = tempModels[i].ActualEffort;
+                }
+                else
+                {
+                    tempModel.ActualEffort = null;
+                }
+                if (dateControlList[i].Progress.ProgressName == "TRUE")
+                {
+                    tempModel.OverallCompilation = tempModels[i].Completed;
+                }
+                else
+                {
+                    tempModel.OverallCompilation = null;
+                }
+                if (dateControlList[i].Variance.VarianceName == "TRUE")
                 {
                     tempModel.Variance = tempModels[i].Variance;
                 }
                 else
                 {
-                    if (control)
-                    {
-                        tempModel.Variance = tempModels[i].Variance;
-                    }
-                    else
-                    {
-                        tempModel.Variance = null;
-                    }
-                    control = false;
+                    tempModel.Variance = null;
                 }
                 tempModel.Category = dates[i].Year + " - " + dates[i].Month;
                 models.Add(tempModel);
             }
-            tempModel = new LineChartModel();
-            tempModel.ActualEffort = tempModels[0].ActualEffort;
-            tempModel.OverallCompilation = tempModels[0].Completed;
-            if (!(tempModels[0].ActualEffort == tempModels[1].ActualEffort || tempModels[0].Completed == tempModels[1].Completed) && control)
-            {
-                tempModel.Variance = tempModels[0].Variance;
-            }
-            else
-            {
-                if (control)
-                {
-                    tempModel.Variance = tempModels[0].Variance;
-                }
-                else
-                {
-                    tempModel.Variance = null;
-                    control = false;
-                }
-            }
-            tempModel.Category = dates[0].Year + " - " + dates[0].Month;
-            models.Add(tempModel);
+            //models.Last().ActualEffort = null;
+            //models.Last().Variance = null;
 
             return models;
         }

@@ -332,6 +332,14 @@ namespace EPICProject.Controllers
             {
                 _repository.GenerateMeasurementForNextMonth(year, month, null, _repository.GetEmployeeById(id).EmployeeName, ipAddress);
             }
+            _repository.InsertDateControl(new DateControl()
+            {
+                Year = year,
+                Month = month,
+                Effort = new EffortViewModel() { EffortId = 2, EffortName = "FALSE" },
+                Progress = new ProgressViewModel() { ProgressId = 1, ProgressName = "TRUE" },
+                Variance = new VarianceViewModel() { VarianceId = 2, VarianceName = "FALSE"}
+            });
             
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }
@@ -353,6 +361,8 @@ namespace EPICProject.Controllers
             {
                 _repository.DeleteLastMonth(month, year, location, _repository.GetEmployeeById(id).EmployeeName, ipAddress);
             }
+            Date date = _repository.GetDates()[0];
+            _repository.DeleteDateControl(date.Year, date.Month);
             
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }

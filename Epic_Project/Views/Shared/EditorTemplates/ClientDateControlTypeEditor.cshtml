@@ -1,0 +1,8 @@
+﻿@model Epic_Project.Models.DateControlTypeViewModel
+
+@(Html.Kendo().DropDownListFor(m => m)
+          .DataValueField("TypeId")
+          .DataTextField("TypeName")
+          .HtmlAttributes(new { data_bind = "value: DateControlType" })
+          .BindTo((System.Collections.IEnumerable)ViewData["dateControlTypes"])
+)

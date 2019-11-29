@@ -47,6 +47,13 @@ namespace Epic_Project.Models
         Employee UpdateEmployee(Employee employee);
         #endregion
 
+        #region Date Control
+        IEnumerable<DateControl> GetDateControl(int? year, int? month, string type);
+        DateControl InsertDateControl(DateControl dateControl);
+        void DeleteDateControl(int year, int month);
+        DateControl UpdateDateControl(DateControl dateControl);
+        #endregion
+
         #region Parameter
         int GetParameterValue(string columnName, string parameterName);
         IEnumerable<Parameter> GetParameter(string name);
@@ -54,8 +61,7 @@ namespace Epic_Project.Models
 
         #region Progress
         ProgressModel GetProgress(int year, int month, string location, string isFirstSellableModule);
-        IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule);
-        IEnumerable<LineChartModel> GetLineChartProgress2(string location, string isFirstSellableModule);
+        IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule, string type);
         IEnumerable<HighLevelProgress> GetHighLevelProgress(string location, string isFirstSellableModule, Date date);
         #endregion
 
