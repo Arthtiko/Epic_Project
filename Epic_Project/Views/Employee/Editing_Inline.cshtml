@@ -5,7 +5,7 @@
        columns.Bound(e => e.EmployeeName).Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(e => e.EmployeeType.TypeName).Title("Type").Width(180).EditorTemplateName("ClientEmployeeTypeEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(e => e.EmployeeLocation.LocationName).Title("Location").Width(180).EditorTemplateName("ClientEmployeeLocationEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-       if (Context.User.IsInRole("ProjectManager") || Context.User.IsInRole("ProgramManager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180); }
+       if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180); }
    })
    .ToolBar(toolbar => toolbar.Create())
    .Editable(editable => editable.Mode(GridEditMode.InLine))
@@ -57,7 +57,7 @@
         //var headerHeight = $(window).headerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 165; // - headerHeight;       header is empty but this calculation makes grid small
         calculatedHeight = calculatedHeight + 25;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 

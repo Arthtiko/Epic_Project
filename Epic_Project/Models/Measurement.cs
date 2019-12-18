@@ -61,12 +61,15 @@ namespace Epic_Project.Models
         public string Location { get; set; }
         public string Type { get; set; }
         public string TeamName { get; set; }
-        public bool IsAllShowedTurkeyO { get; set; }
-        public bool IsAllShowedTurkeyFSM { get; set; }
-        public bool IsAllShowedEgyptO { get; set; }
-        public bool IsAllShowedEgyptFSM { get; set; }
-        public bool IsAllShowedTotalO { get; set; }
-        public bool IsAllShowedTotalFSM { get; set; }
+        public int TeamId { get; set; }
+        public int MaxYear { get; set; }
+        public int MaxMonth { get; set; }
+        public GraphControl TurkeyOverall { get; set; }
+        public GraphControl EgyptOverall { get; set; }
+        public GraphControl TotalOverall { get; set; }
+        public GraphControl TurkeyFSM { get; set; }
+        public GraphControl EgyptFSM { get; set; }
+        public GraphControl TotalFSM { get; set; }
     }
 
     public class MeasurementTypeViewModel

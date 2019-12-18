@@ -104,5 +104,23 @@ namespace Epic_Project.Controllers
             ViewData["projectManagers"] = employeeList;
             ViewData["defaultProjectManager"] = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = "" };
         }
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult GetTurkeyProgress()
+        {
+            Date date = _repository.GetDates()[0];
+            ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Turkey", null);
+            model.Completed = (float)Math.Round(model.Completed, 2);
+            model.ActualEffort = (float)Math.Round(model.ActualEffort, 2);
+            model.Variance = (float)Math.Round((float)model.Variance, 2);
+            model.Total = _repository.GetEpicWeight("Turkey", null);
+            model.Total = (float)Math.Round(model.Total * 100, 2);
+            IEnumerable<ProgressModel> progressList = new ProgressModel[]
+            {
+                model
+            };
+            return Json(progressList);
+        }
     }
 }

@@ -33,15 +33,17 @@ namespace Epic_Project.Models
 
         }
     }
-    public class LineChartModel2
+    public class GraphControl
     {
-        public double[] ActualEffort { get; set; }
-        public double[] OverallCompilation { get; set; }
-        public double[] Variance { get; set; }
-        public string[] Category { get; set; }
-        public LineChartModel2()
-        {
+        public bool ShowActualEffort { get; set; }
+        public bool ShowProgress { get; set; }
+        public bool ShowVariance { get; set; }
 
+        public GraphControl()
+        {
+            ShowActualEffort = true;
+            ShowProgress = true;
+            ShowVariance = true;
         }
     }
 }

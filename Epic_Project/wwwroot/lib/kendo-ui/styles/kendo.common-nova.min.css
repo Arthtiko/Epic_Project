@@ -775,7 +775,8 @@ input.k-checkbox + label {
 }
 
     .k-button.k-button-icon .k-icon:before, .k-grid-filter .k-icon:before, .k-header .k-icon:before {
-        text-indent: 0
+        text-indent: 0;
+        margin-bottom: -3px;
     }
 
 .k-sprite {
@@ -2273,7 +2274,7 @@ button.k-button-expand, input[type=submit].k-button-expand, input[type=button].k
 }
 
 .k-grid-header th.k-header {
-    vertical-align: bottom;
+    /*vertical-align: bottom;*/
     cursor: default
 }
 
@@ -15643,7 +15644,7 @@ div.k-scrollview-wrap {
 }
 
 .k-filter-row th, .k-grid-header th.k-header {
-    padding: .786em .6em .786em 1.286em
+    padding: .2em .4em .2em .6em
 }
 
 .k-rtl .k-filter-row th, .k-rtl .k-grid-header th.k-header {
@@ -16268,8 +16269,8 @@ form.k-filter-menu .k-textbox {
 }
 
 .k-grid-header .k-grid-filter, .k-grid-header .k-header-column-menu {
-    padding: .857em;
-    margin: -.9em -.6em -.714em 0
+    padding: .2em;
+    margin-right: 1px;
 }
 
 .k-checkbox-label, .k-checkbox-wrapper, .k-radio-label {

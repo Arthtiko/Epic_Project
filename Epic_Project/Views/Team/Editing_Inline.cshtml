@@ -6,7 +6,7 @@
           columns.Bound(t => t.TeamLeader.TeamLeaderName).Title("Team Leader").EditorTemplateName("ClientTeamLeaderEditor").Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
           columns.Bound(t => t.ProjectManager.ProjectManagerName).Title("Project Manager").EditorTemplateName("ClientProjectManagerEditor").Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
           columns.Bound(t => t.TeamLocation).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-          if (Context.User.IsInRole("ProjectManager") || Context.User.IsInRole("ProgramManager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); command.Destroy(); }).Width(210); }
+          if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); command.Destroy(); }).Width(210); }
       })
       .ToolBar(toolbar => toolbar.Create())
       .Editable(editable => editable.Mode(GridEditMode.InLine))
@@ -33,6 +33,8 @@
           .Destroy(update => update.Action("EditingInLine_Destroy", "Team"))
       )
 )
+
+
 <script type="text/javascript">
     function error_handler(e) {
         if (e.errors) {
@@ -48,6 +50,10 @@
         }
     }
 
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+
     function resizeGrid() {
         //Define Elements Needed
         var header = $("#header-content");
@@ -57,7 +63,7 @@
         var windowHeight = $(window).innerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 165; // - headerHeight;       header is empty but this calculation makes grid small
         calculatedHeight = calculatedHeight + 25;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 

@@ -6,24 +6,21 @@
 
 <script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
 
-<div class="row" style="position: relative;">
-    <div style="margin-left: 65px">
+@*<div class="row" style="position: relative;">
+    <div style="margin-left: 15px">
         <form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline_Details" method="post" style="height: 40px; margin-left: 10px; margin-top: 5px;">
             <div class="row">
                 <div style="margin-left: 4px">
                     <text class="text-size">Year-Month: </text>
                     <select class="k-select select-size" id="form-select-time" asp-for="YearMonth" onchange="submit()"></select>
                 </div>
-                @*<div>
-                    <button class="k-button button-size" type="submit">FILTER</button>
-                </div>*@
             </div>
         </form>
     </div>
     <div>
         <a class="k-button button-size" id="showGrid" style="margin-top: 1px;">Show Data</a>
     </div>
-</div>
+</div>*@
 
 
 @(Html.Kendo().Grid<MeasurementDetailsViewModel>()
@@ -75,7 +72,7 @@
           columns.Bound(m => m.PreviousMonthCumulativeActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Previous Month Cumulative Actual Effort").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
           columns.Bound(m => m.ActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
       })
-      .ToolBar(tools => tools.Excel())
+      .ToolBar(toolbar => toolbar.ClientTemplateId("GridToolbarTemplate"))
       .Groupable()
       .Scrollable()
       .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
@@ -142,7 +139,7 @@
         var windowHeight = $(window).innerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 35 - 240 -35; // -80; // bunu ekleyince window vertical scroll bar gidiyo
+        var calculatedHeight = windowHeight - 35 - 150 - 50; // -80; // bunu ekleyince window vertical scroll bar gidiyo
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
 
@@ -223,9 +220,64 @@
     });
 
 </script>
+
+
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Year-Month: </text>
+        @(Html.Kendo().DropDownList()
+                                      .Name("yearMonths")
+                                      .Value(Model.YearMonth)
+                                      .Events(e => e.Change("datesOnChange"))
+                                      .DataSource(ds =>
+                                      {
+                                          ds.Read("selectDates", "MeasurementGrid");
+                                      })
+                                      .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+                                      .Name("show-data")
+                                      .Content("Show Data")
+                                      .Events(e => e.Click("showData"))
+                                      .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+                              .Name("excel")
+                              .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
+                              .Content("Export to Excel")
+                              .ToClientTemplate()
+        )
+    </div>
+</script>
+<script type="text/javascript">
+    function datesOnChange(e) {
+        window.location.href = "Editing_Inline_Details?YearMonth=" + this.value();
+    }
+    function showData() {
+        $("#grid").data("kendoGrid").dataSource.read();
+    }
+    function exportExcel() {
+        window.location.href = "#";
+    }
+</script>
+
 <style>
     .button-size {
         margin-left: 24px;
         margin-top: -5px;
+    }
+    #grid .k-grid-toolbar {
+        padding: .6em 1.3em .6em .4em;
+    }
+
+    .dateListContainer {
+        margin-left: 24px;
+        display: inline-block;
+    }
+
+    .toolbar {
+        float: right;
     }
 </style>

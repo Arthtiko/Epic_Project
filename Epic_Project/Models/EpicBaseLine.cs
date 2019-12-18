@@ -18,6 +18,7 @@ namespace Epic_Project.Models
             Team = new Team();
         }
         [Required]
+        [UIHint("NoSpinners")]
         public int EPICId { get; set; }
         [Required]
         public string EPICName { get; set; }

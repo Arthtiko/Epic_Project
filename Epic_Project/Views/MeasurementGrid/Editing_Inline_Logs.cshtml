@@ -1,0 +1,228 @@
+﻿@model MeasurementSearchModel
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
+
+
+<div class="row" style="position: relative;">
+    <div style="margin-left: 15px">
+        <form class="k-form" asp-controller="MeasurementGrid" asp-action="Editing_Inline_Logs" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
+            <div class="row" style="margin-top: -5px;">
+                <div style="margin-left: 4px">
+                    <text class="text-size">EPIC Id: </text>
+                    <select class="k-select select-size" id="form-select-id" asp-for="EpicId" onchange="submit()"></select>
+                </div>
+                <div style="margin-left: 4px">
+                    <text class="text-size">Year-Month: </text>
+                    <select class="k-select select-size" id="form-select-time" asp-for="YearMonth" onchange="submit()"></select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div>
+        <a class="k-button button-size-month" id="showGrid">Show Data</a>
+    </div>
+    @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
+    {
+        <div style="position: absolute; right: 0; margin-right: 40px">
+            <a class="k-button button-size-month" asp-controller="MeasurementGrid" asp-action="Editing_Inline">Measurements</a>
+        </div>
+    }
+</div>
+@(Html.Kendo().Grid<MeasurementLog>
+               ()
+               .Name("grid-log")
+               .AutoBind(false)
+               .Columns(columns =>
+               {
+                   columns.Bound(m => m.EpicId).Filterable(ftb => ftb.Multi(true).Search(true)).Title("EPIC Id").Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
+                   columns.Bound(m => m.EpicName).Filterable(ftb => ftb.Multi(true).Search(true)).Width(270).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Locked(true);
+                   columns.Bound(m => m.Module).Filterable(ftb => ftb.Multi(true).Search(true)).Width(220).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.Year).Filterable(false).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.Month).Filterable(false).Width(70).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.Type).Filterable(ftb => ftb.Multi(true).Search(true)).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.Team).Filterable(ftb => ftb.Multi(true).Search(true)).Width(125).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.RequirementProgress).Filterable(false).Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.DesignProgress).Filterable(false).Format("{0:0.00 \\'%'}").Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.DevelopmentProgress).Filterable(false).Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.TestProgress).Filterable(false).Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.UatProgress).Filterable(false).Format("{0:0.00 \\'%'}").Width(115).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.PreviousMonthCumulativeActualEffort).Filterable(false).Format("{0:0.00}").Width(180).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.ActualEffort).Filterable(false).Filterable(false).Format("{0:0.00}").Width(110).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.UserName).Filterable(ftb => ftb.Multi(true).Search(true)).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.Time).Filterable(false).Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.UserIp).Filterable(ftb => ftb.Multi(true).Search(true)).Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+               })
+                   .ToolBar(toolbar =>
+                   {
+                       toolbar.Excel();
+                   })
+                   .Editable(editable => editable.Mode(GridEditMode.InLine))
+                   .Scrollable()
+                   .Excel(excel => excel.FileName("Measurement-Log " + Model.Year + "-" + Model.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "MeasurementGrid")))
+                   .Resizable(resizable => resizable.Columns(true))
+                   .Reorderable(reorderable => reorderable.Columns(true))
+                   .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+                   .DataSource(dataSource => dataSource
+                   .Ajax().Read(read => read.Action("EditingInLineLogs_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month }))
+                   .Events(events => { events.Error("error_handler"); events.RequestEnd("onRequestEnd"); })
+                   .Model(model =>
+                   {
+                       model.Id(m => m.EpicId);
+                       model.Field(m => m.EpicId).Editable(false);
+                       model.Field(m => m.EpicName).Editable(false);
+                       model.Field(m => m.Module).Editable(false);
+                       model.Field(m => m.Year).Editable(false);
+                       model.Field(m => m.Month).Editable(false);
+                       model.Field(m => m.Type).Editable(false);
+                       model.Field(m => m.Team).Editable(false);
+                       model.Field(m => m.RequirementProgress).Editable(false);
+                       model.Field(m => m.DesignProgress).Editable(false);
+                       model.Field(m => m.DevelopmentProgress).Editable(false);
+                       model.Field(m => m.TestProgress).Editable(false);
+                       model.Field(m => m.UatProgress).Editable(false);
+                       model.Field(m => m.PreviousMonthCumulativeActualEffort).Editable(false);
+                       model.Field(m => m.ActualEffort).Editable(false);
+                       model.Field(m => m.UserName).Editable(false);
+                       model.Field(m => m.UserIp).Editable(false);
+                   })
+                   
+                   )
+)
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function calculateWeightedOverallProgress(data) {
+        return data.EpicWeight * data.OverallEpicCompilation / 100;
+    }
+
+    function onRequestEnd() {
+        var grid = $("#grid-log").data("kendoGrid");
+        grid.refresh();
+    }
+
+    $(document).ready(function () {
+        var url = window.location.href.split("/")[3];
+        if (url == null || url == "") {
+            $.get('MeasurementGrid/selectDates', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-time");
+                    if (value == (@Model.Year + "-" + @Model.Month)) {
+                        document.getElementById("form-select-time").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+            $.get('MeasurementGrid/selectEpicId', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-id");
+                    if (value == @Model.EpicId) {
+                        document.getElementById("form-select-id").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+        }
+        else {
+            $.get('selectDates', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-time");
+                    if (value == (@Model.Year + "-" + @Model.Month)) {
+                        document.getElementById("form-select-time").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+            $.get('selectEpicId', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-id");
+                    if (value == @Model.EpicId) {
+                        document.getElementById("form-select-id").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+        }
+
+    })
+
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid-log");
+
+        var minimumAcceptableGridHeight = 300;
+
+        var windowHeight = $(window).innerHeight();
+        //var headerHeight = $(window).headerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 145; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+
+
+    $("#showGrid").click(function () {
+        $("#grid-log").data("kendoGrid").dataSource.read();
+    });
+
+</script>
+
+
+
+
+<style>
+    .k-grid tbody tr {
+        height: 40px;
+    }
+
+    .button-size {
+        margin-left: 24px;
+        margin-top: -5px;
+    }
+
+    .button-size-month {
+        margin-left: 24px;
+    }
+
+    .toolbarSeparater {
+        background-color: transparent;
+        border: none;
+        cursor: default;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>

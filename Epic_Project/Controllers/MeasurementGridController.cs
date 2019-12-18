@@ -68,6 +68,8 @@ namespace EPICProject.Controllers
             }
             
             DateList = _repository.GetDates();
+            int maxYear = DateList[0].Year;
+            int maxMonth = DateList[0].Month;
             if (DateList != null && DateList.Count > 0)
             {
                 StartMonth = DateList[0].Month;
@@ -107,7 +109,7 @@ namespace EPICProject.Controllers
             teamName = teamName == null ? "" : teamName;
             //location = location == null ? "" : location;
             type = type == null ? "" : type;
-            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, Location = location, Type = type, TeamName = teamName };
+            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, Location = location, Type = type, TeamName = teamName, MaxYear = maxYear, MaxMonth = maxMonth };
             return View(model);
         }
 
@@ -155,6 +157,28 @@ namespace EPICProject.Controllers
         }
 
         [Authorize]
+        public ActionResult Editing_InLine_Logs(int epicId, int year, int month, string yearMonth)
+        {
+            int y;
+            int m;
+            Date date = _repository.GetDates()[0];
+            if (yearMonth != null)
+            {
+                string yText = yearMonth.Split("-")[0];
+                y = Convert.ToInt32(yText);
+                string mText = yearMonth.Split("-")[1];
+                m = Convert.ToInt32(mText);
+            }
+            else
+            {
+                y = date.Year;
+                m = date.Month;
+            }
+            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth };
+            return View(model);
+        }
+
+        [Authorize]
         public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month)
         {
             return Json(_repository.FillMeasurementDetails(year, month).ToDataSourceResult(request));
@@ -184,6 +208,11 @@ namespace EPICProject.Controllers
                 measurements = _repository.SearchMeasurement(year, month, location, type, teamName);
             }
             return Json(measurements.ToDataSourceResult(request));
+        }
+
+        public ActionResult EditingInLineLogs_Read([DataSourceRequest] DataSourceRequest request)
+        {
+            return Json(_repository.GetMeasurementLogs(0, 2019, 12, null).ToDataSourceResult(request));
         }
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
@@ -316,26 +345,39 @@ namespace EPICProject.Controllers
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         public IActionResult GenerateNextMonth(int year, int month, string location)
- 
        {
+            Date date = new Date() { Year = year, Month = month };
+            if (year == 0 || month == 0)
+            {
+                date = _repository.GetDates()[0];
+                if (date.Month == 12)
+                {
+                    date.Month = 1;
+                    date.Year++;
+                }
+                else
+                {
+                    date.Month++;
+                }
+            }
             string ipAddress = _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
             int id = _repository.GetEmployeeId(UserId);
             if (id == 1001)
             {
-                _repository.GenerateMeasurementForNextMonth(year, month, null, "Test Admin Turkey", ipAddress);
+                _repository.GenerateMeasurementForNextMonth(date.Year, date.Month, null, "Test Admin Turkey", ipAddress);
             }
             else if (id == 2001)
             {
-                _repository.GenerateMeasurementForNextMonth(year, month, null, "Test Admin Egypt", ipAddress);
+                _repository.GenerateMeasurementForNextMonth(date.Year, date.Month, null, "Test Admin Egypt", ipAddress);
             }
             else
             {
-                _repository.GenerateMeasurementForNextMonth(year, month, null, _repository.GetEmployeeById(id).EmployeeName, ipAddress);
+                _repository.GenerateMeasurementForNextMonth(date.Year, date.Month, null, _repository.GetEmployeeById(id).EmployeeName, ipAddress);
             }
             _repository.InsertDateControl(new DateControl()
             {
-                Year = year,
-                Month = month,
+                Year = date.Year,
+                Month = date.Month,
                 Effort = new EffortViewModel() { EffortId = 2, EffortName = "FALSE" },
                 Progress = new ProgressViewModel() { ProgressId = 1, ProgressName = "TRUE" },
                 Variance = new VarianceViewModel() { VarianceId = 2, VarianceName = "FALSE"}
@@ -490,6 +532,20 @@ namespace EPICProject.Controllers
             }
             return Json(selectList);
         }
+
+        [Authorize]
+        public JsonResult selectEpicId()
+        {
+            List<EpicBaseLine> epics = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
+            List<string> ids = new List<string>();
+            ids.Add("");
+            for (int i = 0; i < epics.Count(); i++)
+            {
+                ids.Add(epics[i].EPICId.ToString());
+            }
+            return Json(ids);
+        }
+
         [Authorize]
         public JsonResult SelectTeams()
         {

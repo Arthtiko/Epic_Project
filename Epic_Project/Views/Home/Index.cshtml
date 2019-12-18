@@ -2,10 +2,14 @@
 <div class="row">
     <form class="k-form" asp-controller="Home" asp-action="Index" method="post" style="height: 40px; margin-left: 35px; margin-top: 10px;">
         <div class="row">
-            <div style="margin-left: 44px">
+            <div style="margin-left: -6px">
                 <text class="text-size">Year-Month: </text>
                 <select class="k-select select-size" id="form-select-time" style="width: 200px;" asp-for="YearMonth"></select>
             </div>
+            @*<div style="margin-left: -6px">
+                <text class="text-size">Team: </text>
+                <select class="k-select select-size" id="form-select-team" style="width: 200px;" asp-for="TeamName"></select>
+            </div>*@
             <div>
                 <button class="k-button button-size" type="submit">FILTER</button>
             </div>
@@ -37,13 +41,19 @@
                                            )
                                            .Series(series =>
                                            {
-                                               series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-                                               if (Model.IsAllShowedTurkeyO)
+                                               if (Model.TurkeyOverall.ShowProgress)
                                                {
-                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
-                                                   series.Column(model => model.Variance).Name("Variance").Color("#f44747");
+                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
                                                }
-                                               series.Column(model => model.Total).Name("Total").Color("#0e68ce").Name("Share");
+                                               if (Model.TurkeyOverall.ShowActualEffort)
+                                               {
+                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                               }
+                                               if (Model.TurkeyOverall.ShowVariance)
+                                               {
+                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                               }
+                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share").Width(30);
                                            })
                                            .CategoryAxis(axis => axis
                                                .Name("series-axis")
@@ -56,11 +66,11 @@
                                             .Labels(labels => labels.Format("{0}"))
                                             .AxisCrossingValue(0, int.MinValue)
                                            )
-                                           .Tooltip(tooltip => tooltip
-                                               .Visible(true)
-                                               .Format("{0}%")
-                                               .Template("#= series.name #: #= value #")
-                                           )
+                                        //.Tooltip(tooltip => tooltip
+                                        //    .Visible(true)
+                                        //    .Format("{0}%")
+                                        //    .Template("#= series.name #: #= value #")
+                                        //)
                                         )
                                     </div>
                                 </td>
@@ -78,15 +88,19 @@
                                                             )
                                                             .Series(series =>
                                                             {
-                                                                series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-
-                                                                if (Model.IsAllShowedEgyptO)
+                                                                if (Model.EgyptOverall.ShowProgress)
                                                                 {
-                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
-                                                                    series.Column(model => model.Variance).Name("Variance").Color("#f44747");
+                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
                                                                 }
-                                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Name("Share");
-
+                                                                if (Model.EgyptOverall.ShowActualEffort)
+                                                                {
+                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                }
+                                                                if (Model.EgyptOverall.ShowVariance)
+                                                                {
+                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                }
+                                                                series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share").Width(30);
                                                             })
                                                             .CategoryAxis(axis => axis
                                                                 .Name("series-axis")
@@ -98,11 +112,11 @@
                                                                 .Labels(labels => labels.Format("{0}"))
                                                                 .AxisCrossingValue(0, int.MinValue)
                                                             )
-                                                            .Tooltip(tooltip => tooltip
-                                                                .Visible(true)
-                                                                .Format("{0}%")
-                                                                .Template("#= series.name #: #= value #")
-                                                            )
+                                        //.Tooltip(tooltip => tooltip
+                                        //    .Visible(true)
+                                        //    .Format("{0}%")
+                                        //    .Template("#= series.name #: #= value #")
+                                        //)
                                         )
                                     </div>
                                 </td>
@@ -120,14 +134,19 @@
                                                             )
                                                             .Series(series =>
                                                             {
-                                                                series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-
-                                                                if (Model.IsAllShowedTotalO)
+                                                                if (Model.TotalOverall.ShowProgress)
                                                                 {
-                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
-                                                                    series.Column(model => model.Variance).Name("Variance").Color("#f44747");
+                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
                                                                 }
-                                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Name("Total");
+                                                                if (Model.TotalOverall.ShowActualEffort)
+                                                                {
+                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                }
+                                                                if (Model.TotalOverall.ShowVariance)
+                                                                {
+                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                }
+                                                                series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Total");
                                                             })
                                                             .CategoryAxis(axis => axis
                                                                 .Name("series-axis")
@@ -139,11 +158,11 @@
                                                                 .Labels(labels => labels.Format("{0}"))
                                                                 .AxisCrossingValue(0, int.MinValue)
                                                             )
-                                                            .Tooltip(tooltip => tooltip
-                                                                .Visible(true)
-                                                                .Format("{0}%")
-                                                                .Template("#= series.name #: #= value #")
-                                                            )
+                                        //.Tooltip(tooltip => tooltip
+                                        //    .Visible(true)
+                                        //    .Format("{0}%")
+                                        //    .Template("#= series.name #: #= value #")
+                                        //)
                                         )
                                     </div>
                                 </td>
@@ -190,6 +209,7 @@
                                                             .ValueAxis(axis => axis
                                                                 .Numeric().Labels(labels => labels.Format("{0}%"))
                                                                 .Name("of Total")
+                                                                .Max(50)
                                                                 .Line(line => line.Visible(false))
                                                                 .AxisCrossingValue(-15)
                                                             )
@@ -229,6 +249,7 @@
                                                             .ValueAxis(axis => axis
                                                                 .Numeric().Labels(labels => labels.Format("{0}%"))
                                                                 .Name("of Total")
+                                                                .Max(50)
                                                                 .Line(line => line.Visible(false))
                                                                 .AxisCrossingValue(-15)
                                                             )
@@ -268,6 +289,7 @@
                                                                     .ValueAxis(axis => axis
                                                                         .Numeric().Labels(labels => labels.Format("{0}%"))
                                                                         .Name("of Total")
+                                                                .Max(50)
                                                                         .Line(line => line.Visible(false))
                                                                         .AxisCrossingValue(-15)
                                                                     )
@@ -310,14 +332,19 @@
                                             )
                                             .Series(series =>
                                             {
-                                                series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-
-                                                if (Model.IsAllShowedTurkeyFSM)
+                                                if (Model.TurkeyFSM.ShowProgress)
                                                 {
-                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
-                                                    series.Column(model => model.Variance).Name("Variance").Color("#f44747");
+                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
                                                 }
-                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Name("Share");
+                                                if (Model.TurkeyFSM.ShowActualEffort)
+                                                {
+                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                }
+                                                if (Model.TurkeyFSM.ShowVariance)
+                                                {
+                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                }
+                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Labels(l => l.Visible(true)).Name("Share");
                                             })
                                             .CategoryAxis(axis => axis
                                                 .Name("series-axis")
@@ -330,93 +357,103 @@
                                              .Labels(labels => labels.Format("{0}"))
                                              .AxisCrossingValue(0, int.MinValue)
                                             )
-                                            .Tooltip(tooltip => tooltip
-                                                .Visible(true)
-                                                .Format("{0}%")
-                                                .Template("#= series.name #: #= value #")
-                                            )
+                                        //.Tooltip(tooltip => tooltip
+                                        //    .Visible(true)
+                                        //    .Format("{0}%")
+                                        //    .Template("#= series.name #: #= value #")
+                                        //)
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<ProgressModel>()
-                                                                            .Name("chart-progress-egypt-first-sellable")
-                                                                            .Title("Egypt")
-                                                                            .Legend(legend => legend
-                                                                                .Position(ChartLegendPosition.Bottom)
-                                                                            )
-                                                                            .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
-                                                                            .ChartArea(chartArea => chartArea
-                                                                                .Background("transparent")
-                                                                            )
-                                                                            .Series(series =>
-                                                                            {
-                                                                                series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-
-                                                                                if (Model.IsAllShowedEgyptFSM)
-                                                                                {
-                                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
-                                                                                    series.Column(model => model.Variance).Name("Variance").Color("#f44747");
-                                                                                }
-                                                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Name("Share");
-                                                                            })
-                                                                            .CategoryAxis(axis => axis
-                                                                                .Name("series-axis")
-                                                                                .Line(line => line.Visible(false))
-                                                                            )
-                                                                            .HtmlAttributes(new { @class = "small-chart" })
-                                                                            .ValueAxis(axis => axis
-                                                                                .Numeric().Max(100)
-                                                                                .Labels(labels => labels.Format("{0}"))
-                                                                                .AxisCrossingValue(0, int.MinValue)
-                                                                            )
-                                                                            .Tooltip(tooltip => tooltip
-                                                                                .Visible(true)
-                                                                                .Format("{0}%")
-                                                                                .Template("#= series.name #: #= value #")
-                                                                            )
+                                           .Name("chart-progress-egypt-first-sellable")
+                                           .Title("Egypt")
+                                           .Legend(legend => legend
+                                               .Position(ChartLegendPosition.Bottom)
+                                           )
+                                           .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
+                                           .ChartArea(chartArea => chartArea
+                                               .Background("transparent")
+                                           )
+                                           .Series(series =>
+                                           {
+                                               if (Model.EgyptFSM.ShowProgress)
+                                               {
+                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                               }
+                                               if (Model.EgyptFSM.ShowActualEffort)
+                                               {
+                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                               }
+                                               if (Model.EgyptFSM.ShowVariance)
+                                               {
+                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                               }
+                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share");
+                                           })
+                                           .CategoryAxis(axis => axis
+                                               .Name("series-axis")
+                                               .Line(line => line.Visible(false))
+                                           )
+                                           .HtmlAttributes(new { @class = "small-chart" })
+                                           .ValueAxis(axis => axis
+                                               .Numeric().Max(100)
+                                               .Labels(labels => labels.Format("{0}"))
+                                               .AxisCrossingValue(0, int.MinValue)
+                                           )
+                                        //.Tooltip(tooltip => tooltip
+                                        //    .Visible(true)
+                                        //    .Format("{0}%")
+                                        //    .Template("#= series.name #: #= value #")
+                                        //)
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<ProgressModel>()
-                                                                            .Name("chart-progress-overall-first-sellable")
-                                                                            .Title("Total")
-                                                                            .Legend(legend => legend
-                                                                                .Position(ChartLegendPosition.Bottom).Align(ChartLegendAlign.Center)
-                                                                            )
-                                                                            .DataSource(ds => ds.Read(read => read.Action("GetOverallFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
-                                                                            .ChartArea(chartArea => chartArea
-                                                                                .Background("transparent")
-                                                                            )
-                                                                            .Series(series =>
-                                                                            {
-                                                                                series.Column(model => model.Completed).Name("Completed").Color("#7fdb6a").Name("Completion Percentage");
-
-                                                                                if (Model.IsAllShowedTotalFSM)
-                                                                                {
-                                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Color("#eedc31").Name("Actual Effort");
-                                                                                    series.Column(model => model.Variance).Name("Variance").Color("#f44747");
-                                                                                }
-                                                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Name("Total");
-                                                                            })
-                                                                            .CategoryAxis(axis => axis
-                                                                                .Name("series-axis")
-                                                                                .Line(line => line.Visible(false))
-                                                                            )
-                                                                            .HtmlAttributes(new { @class = "small-chart" })
-                                                                            .ValueAxis(axis => axis
-                                                                                .Numeric().Max(100)
-                                                                                .Labels(labels => labels.Format("{0}"))
-                                                                                .AxisCrossingValue(0, int.MinValue)
-                                                                            )
-                                                                            .Tooltip(tooltip => tooltip
-                                                                                .Visible(true)
-                                                                                .Format("{0}%")
-                                                                                .Template("#= series.name #: #= value #")
-                                                                            )
+                                           .Name("chart-progress-overall-first-sellable")
+                                           .Title("Total")
+                                           .Legend(legend => legend
+                                               .Position(ChartLegendPosition.Bottom).Align(ChartLegendAlign.Center)
+                                           )
+                                           .DataSource(ds => ds.Read(read => read.Action("GetOverallFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
+                                           .ChartArea(chartArea => chartArea
+                                               .Background("transparent")
+                                           )
+                                           .Series(series =>
+                                           {
+                                               if (Model.TotalFSM.ShowProgress)
+                                               {
+                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                               }
+                                               if (Model.TotalFSM.ShowActualEffort)
+                                               {
+                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                               }
+                                               if (Model.TotalFSM.ShowVariance)
+                                               {
+                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                               }
+                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Total");
+                                           })
+                                           .CategoryAxis(axis => axis
+                                               .Name("series-axis")
+                                               .Line(line => line.Visible(false))
+                                           )
+                                           .HtmlAttributes(new { @class = "small-chart" })
+                                           .ValueAxis(axis => axis
+                                               .Numeric().Max(100)
+                                               .Labels(labels => labels.Format("{0}"))
+                                               .AxisCrossingValue(0, int.MinValue)
+                                           )
+                                        //.Tooltip(tooltip => tooltip
+                                        //    .Visible(true)
+                                        //    .Format("{0}%")
+                                        //    .Template("#= series.name #: #= value #")
+                                        //)
                                         )
                                     </div>
                                 </td>
@@ -438,117 +475,120 @@
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<LineChartModel>()
-                                                            .Name("line-turkey-first-sellable")
-                                                            .Title("Progress of Turkey")
-                                                            .Legend(legend => legend
-                                                                .Position(ChartLegendPosition.Bottom)
-                                                            )
-                                                            .DataSource(ds => ds.Read(read => read.Action("GetTurkeyFirstSellableLineChart", "Home")))
-                                                            .ChartArea(chartArea => chartArea
-                                                                .Background("transparent")
-                                                            )
-                                                            .SeriesDefaults(seriesDefaults =>
-                                                                seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                                            )
-                                                            .Series(series =>
-                                                            {
-                                                                series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                                series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                                series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                                            })
-                                                            .CategoryAxis(axis => axis
-                                                            .Labels(labels => labels.Rotation(-90))
-                                                                .Crosshair(c => c.Visible(true))
-                                                            )
-                                                            .ValueAxis(axis => axis
-                                                                .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                                .Name("of Total")
-                                                                .Line(line => line.Visible(false))
-                                                                .AxisCrossingValue(-15)
-                                                            )
-                                                            .Tooltip(tooltip => tooltip
-                                                            .Visible(true)
-                                                            .Shared(true)
-                                                            .Format("{0:0.00}")
-                                                        )
+                                               .Name("line-turkey-first-sellable")
+                                               .Title("Progress of Turkey")
+                                               .Legend(legend => legend
+                                                   .Position(ChartLegendPosition.Bottom)
+                                               )
+                                               .DataSource(ds => ds.Read(read => read.Action("GetTurkeyFirstSellableLineChart", "Home")))
+                                               .ChartArea(chartArea => chartArea
+                                                   .Background("transparent")
+                                               )
+                                               .SeriesDefaults(seriesDefaults =>
+                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                               )
+                                               .Series(series =>
+                                               {
+                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                               })
+                                               .CategoryAxis(axis => axis
+                                               .Labels(labels => labels.Rotation(-90))
+                                                   .Crosshair(c => c.Visible(true))
+                                               )
+                                               .ValueAxis(axis => axis
+                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                   .Name("of Total")
+                                                   .Max(50)
+                                                   .Line(line => line.Visible(false))
+                                                   .AxisCrossingValue(-15)
+                                               )
+                                               .Tooltip(tooltip => tooltip
+                                               .Visible(true)
+                                               .Shared(true)
+                                               .Format("{0:0.00}")
+                                           )
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<LineChartModel>()
-                                                                    .Name("line-egypt-first-sellable")
-                                                                    .Title("Progress of Egypt")
-                                                                    .Legend(legend => legend
-                                                                        .Position(ChartLegendPosition.Bottom)
-                                                                    )
-                                                                    .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableLineChart", "Home")))
-                                                                    .ChartArea(chartArea => chartArea
-                                                                        .Background("transparent")
-                                                                    )
-                                                                    .SeriesDefaults(seriesDefaults =>
-                                                                        seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                                                    )
-                                                                    .Series(series =>
-                                                                    {
-                                                                        series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                                        series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                                        series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                                                    })
-                                                                    .CategoryAxis(axis => axis
-                                                                    .Labels(labels => labels.Rotation(-90))
-                                                                        .Crosshair(c => c.Visible(true))
-                                                                    )
-                                                                    .ValueAxis(axis => axis
-                                                                        .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                                        .Name("of Total")
-                                                                        .Line(line => line.Visible(false))
-                                                                        .AxisCrossingValue(-15)
-                                                                    )
-                                                                    .Tooltip(tooltip => tooltip
-                                                                    .Visible(true)
-                                                                    .Shared(true)
-                                                                    .Format("{0:0.00}")
-                                                                )
+                                               .Name("line-egypt-first-sellable")
+                                               .Title("Progress of Egypt")
+                                               .Legend(legend => legend
+                                                   .Position(ChartLegendPosition.Bottom)
+                                               )
+                                               .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableLineChart", "Home")))
+                                               .ChartArea(chartArea => chartArea
+                                                   .Background("transparent")
+                                               )
+                                               .SeriesDefaults(seriesDefaults =>
+                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                               )
+                                               .Series(series =>
+                                               {
+                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                               })
+                                               .CategoryAxis(axis => axis
+                                               .Labels(labels => labels.Rotation(-90))
+                                                   .Crosshair(c => c.Visible(true))
+                                               )
+                                               .ValueAxis(axis => axis
+                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                   .Name("of Total")
+                                           .Max(50)
+                                                   .Line(line => line.Visible(false))
+                                                   .AxisCrossingValue(-15)
+                                               )
+                                               .Tooltip(tooltip => tooltip
+                                               .Visible(true)
+                                               .Shared(true)
+                                               .Format("{0:0.00}")
+                                           )
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<LineChartModel>()
-                                                                            .Name("line-total-first-sellable")
-                                                                            .Title("Total")
-                                                                            .Legend(legend => legend
-                                                                                .Position(ChartLegendPosition.Bottom)
-                                                                            )
-                                                                            .DataSource(ds => ds.Read(read => read.Action("GetTotalFirstSellableLineChart", "Home")))
-                                                                            .ChartArea(chartArea => chartArea
-                                                                                .Background("transparent")
-                                                                            )
-                                                                            .SeriesDefaults(seriesDefaults =>
-                                                                                seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                                                            )
-                                                                            .Series(series =>
-                                                                            {
-                                                                                series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                                                series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                                                series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                                                            })
-                                                                            .CategoryAxis(axis => axis
-                                                                            .Labels(labels => labels.Rotation(-90))
-                                                                                .Crosshair(c => c.Visible(true))
-                                                                            )
-                                                                            .ValueAxis(axis => axis
-                                                                                .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                                                .Name("of Total")
-                                                                                .Line(line => line.Visible(false))
-                                                                                .AxisCrossingValue(-15)
-                                                                            )
-                                                                            .Tooltip(tooltip => tooltip
-                                                                            .Visible(true)
-                                                                            .Shared(true)
-                                                                            .Format("{0:0.00}")
-                                                                        )
+                                               .Name("line-total-first-sellable")
+                                               .Title("Total")
+                                               .Legend(legend => legend
+                                                   .Position(ChartLegendPosition.Bottom)
+                                               )
+                                               .DataSource(ds => ds.Read(read => read.Action("GetTotalFirstSellableLineChart", "Home")))
+                                               .ChartArea(chartArea => chartArea
+                                                   .Background("transparent")
+                                               )
+                                               .SeriesDefaults(seriesDefaults =>
+                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                               )
+                                               .Series(series =>
+                                               {
+                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                               })
+                                               .CategoryAxis(axis => axis
+                                               .Labels(labels => labels.Rotation(-90))
+                                                   .Crosshair(c => c.Visible(true))
+                                               )
+                                               .ValueAxis(axis => axis
+                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                   .Name("of Total")
+                                                   .Max(50)
+                                                   .Line(line => line.Visible(false))
+                                                   .AxisCrossingValue(-15)
+                                               )
+                                               .Tooltip(tooltip => tooltip
+                                               .Visible(true)
+                                               .Shared(true)
+                                               .Format("{0:0.00}")
+                                           )
                                         )
                                     </div>
                                 </td>
@@ -769,6 +809,13 @@
                     i++;
                 })
             })
+            @*$.get('Home/SelectTeams', function (data) {
+                console.log(data)
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-team");
+                    document.getElementById("form-select-team").selectedIndex = @Model.TeamId;
+                })
+            })*@
         }
         else {
             $.get('selectDates', function (data) {
@@ -782,6 +829,13 @@
                     i++;
                 })
             })
+            @*$.get('SelectTeams', function (data) {
+                console.log(data)
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-team");
+                    document.getElementById("form-select-team").selectedIndex = @Model.TeamId;
+                })
+            })*@
         }
 
     })

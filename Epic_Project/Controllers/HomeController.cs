@@ -20,6 +20,12 @@ namespace Epic_Project.Controllers
     public class HomeController : Controller
     {
         private readonly IRepository _repository;
+        private GraphControl TurkeyOverall = new GraphControl();
+        private GraphControl EgyptOverall = new GraphControl();
+        private GraphControl TotalOverall = new GraphControl();
+        private GraphControl TurkeyFSM = new GraphControl();
+        private GraphControl EgyptFSM = new GraphControl();
+        private GraphControl TotalFSM = new GraphControl();
         private int StartMonth;
         private int StartYear;
         private int NextMonth;
@@ -68,39 +74,110 @@ namespace Epic_Project.Controllers
                 string mText = yearMonth.Split("-")[1];
                 m = Convert.ToInt32(mText);
             }
-            bool isAllShowedTurkeyO = true;
-            bool isAllShowedTurkeyFSM = true;
-            bool isAllShowedEgyptO = true;
-            bool isAllShowedEgyptFSM = true;
-            bool isAllShowedTotalO = true;
-            bool isAllShowedTotalFSM = true;
             List<DateControl> dateControlList = (List<DateControl>)_repository.GetDateControl(y, m, null);
             for (int i = 0; i < dateControlList.Count(); i++)
             {
-                if (dateControlList[i].DateControlType.TypeId == 1 && dateControlList[i].Effort.EffortName == "FALSE")
+                if (dateControlList[i].DateControlType.TypeId == 1)
                 {
-                    isAllShowedTurkeyO = false;
+                    if (dateControlList[i].Effort.EffortName == "FALSE")
+                    {
+                        TurkeyOverall.ShowActualEffort = false;
+                    }
+                    if (dateControlList[i].Progress.ProgressName == "FALSE")
+                    {
+                        TurkeyOverall.ShowProgress = false;
+                    }
+                    if (dateControlList[i].Variance.VarianceName == "FALSE")
+                    {
+                        TurkeyOverall.ShowVariance = false;
+                    }
                 }
-                else if (dateControlList[i].DateControlType.TypeId == 2 && dateControlList[i].Effort.EffortName == "FALSE")
+                else if (dateControlList[i].DateControlType.TypeId == 2)
                 {
-                    isAllShowedTurkeyFSM = false;
+                    if (dateControlList[i].Effort.EffortName == "FALSE")
+                    {
+                        TurkeyFSM.ShowActualEffort = false;
+                    }
+                    if (dateControlList[i].Progress.ProgressName == "FALSE")
+                    {
+                        TurkeyFSM.ShowProgress = false;
+                    }
+                    if (dateControlList[i].Variance.VarianceName == "FALSE")
+                    {
+                        TurkeyFSM.ShowVariance = false;
+                    }
                 }
-                else if (dateControlList[i].DateControlType.TypeId == 3 && dateControlList[i].Effort.EffortName == "FALSE")
+                else if (dateControlList[i].DateControlType.TypeId == 3)
                 {
-                    isAllShowedEgyptO = false;
+                    if (dateControlList[i].Effort.EffortName == "FALSE")
+                    {
+                        EgyptOverall.ShowActualEffort = false;
+                    }
+                    if (dateControlList[i].Progress.ProgressName == "FALSE")
+                    {
+                        EgyptOverall.ShowProgress = false;
+                    }
+                    if (dateControlList[i].Variance.VarianceName == "FALSE")
+                    {
+                        EgyptOverall.ShowVariance = false;
+                    }
                 }
-                else if (dateControlList[i].DateControlType.TypeId == 4 && dateControlList[i].Effort.EffortName == "FALSE")
+                else if (dateControlList[i].DateControlType.TypeId == 4)
                 {
-                    isAllShowedEgyptFSM = false;
+                    if (dateControlList[i].Effort.EffortName == "FALSE")
+                    {
+                        EgyptFSM.ShowActualEffort = false;
+                    }
+                    if (dateControlList[i].Progress.ProgressName == "FALSE")
+                    {
+                        EgyptFSM.ShowProgress = false;
+                    }
+                    if (dateControlList[i].Variance.VarianceName == "FALSE")
+                    {
+                        EgyptFSM.ShowVariance = false;
+                    }
                 }
-                else if (dateControlList[i].DateControlType.TypeId == 5 && dateControlList[i].Effort.EffortName == "FALSE")
+                else if (dateControlList[i].DateControlType.TypeId == 5)
                 {
-                    isAllShowedTotalO = false;
+                    if (dateControlList[i].Effort.EffortName == "FALSE")
+                    {
+                        TotalOverall.ShowActualEffort = false;
+                    }
+                    if (dateControlList[i].Progress.ProgressName == "FALSE")
+                    {
+                        TotalOverall.ShowProgress = false;
+                    }
+                    if (dateControlList[i].Variance.VarianceName == "FALSE")
+                    {
+                        TotalOverall.ShowVariance = false;
+                    }
                 }
-                else if (dateControlList[i].DateControlType.TypeId == 6 && dateControlList[i].Effort.EffortName == "FALSE")
+                else if (dateControlList[i].DateControlType.TypeId == 6)
                 {
-                    isAllShowedTotalFSM = false;
+                    if (dateControlList[i].Effort.EffortName == "FALSE")
+                    {
+                        TotalFSM.ShowActualEffort = false;
+                    }
+                    if (dateControlList[i].Progress.ProgressName == "FALSE")
+                    {
+                        TotalFSM.ShowProgress = false;
+                    }
+                    if (dateControlList[i].Variance.VarianceName == "FALSE")
+                    {
+                        TotalFSM.ShowVariance = false;
+                    }
                 }
+            }
+            string tName;
+            int teamId;
+            if (teamName == null || teamName == "Overall Program")
+            {
+                teamId = 0;
+            }
+            else
+            {
+                tName = teamName.Split('-')[0];
+                teamId = Convert.ToInt32(tName);
             }
             var model = new MeasurementSearchModel() {
                 Year = y,
@@ -110,12 +187,14 @@ namespace Epic_Project.Controllers
                 NextYear = NextYear,
                 LastMonth = DateList[0].Month,
                 LastYear = DateList[0].Year,
-                IsAllShowedTurkeyO = isAllShowedTurkeyO,
-                IsAllShowedTurkeyFSM = isAllShowedTurkeyFSM,
-                IsAllShowedEgyptO = isAllShowedEgyptO,
-                IsAllShowedEgyptFSM = isAllShowedEgyptFSM,
-                IsAllShowedTotalO = isAllShowedTotalO,
-                IsAllShowedTotalFSM = isAllShowedTotalFSM
+                TeamId = teamId,
+                TeamName = "Overall Program",
+                TurkeyOverall = TurkeyOverall,
+                EgyptOverall = EgyptOverall,
+                TotalOverall = TotalOverall,
+                TurkeyFSM = TurkeyFSM,
+                EgyptFSM = EgyptFSM,
+                TotalFSM = TotalFSM
             };
             return View(model);
         }
@@ -132,14 +211,7 @@ namespace Epic_Project.Controllers
             ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Turkey", null);
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
-            if (lastDate.Year == date.Year && lastDate.Month == date.Month)
-            {
-                model.Variance = null;
-            }
-            else
-            {
-                model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            }
+            model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = _repository.GetEpicWeight("Turkey", null);
             model.Total = (float)Math.Round(model.Total*100, afterComma);
 
@@ -159,14 +231,7 @@ namespace Epic_Project.Controllers
             ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Egypt", null);
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
-            if (lastDate.Year == date.Year && lastDate.Month == date.Month)
-            {
-                model.Variance = null;
-            }
-            else
-            {
-                model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            }
+            model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = _repository.GetEpicWeight("Egypt", null);
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
             
@@ -186,14 +251,7 @@ namespace Epic_Project.Controllers
             ProgressModel model = _repository.GetProgress(date.Year, date.Month, null, null);
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
-            if (lastDate.Year == date.Year && lastDate.Month == date.Month)
-            {
-                model.Variance = null;
-            }
-            else
-            {
-                model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            }
+            model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = 100;
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
@@ -211,14 +269,7 @@ namespace Epic_Project.Controllers
             ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Turkey", "TRUE");
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
-            if (lastDate.Year == date.Year && lastDate.Month == date.Month)
-            {
-                model.Variance = null;
-            }
-            else
-            {
-                model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            }
+            model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             //model.Total = _repository.GetEpicWeight("Turkey", "TRUE");
             model.Total = TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
@@ -239,14 +290,7 @@ namespace Epic_Project.Controllers
             ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Egypt", "TRUE");
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
-            if (lastDate.Year == date.Year && lastDate.Month == date.Month)
-            {
-                model.Variance = null;
-            }
-            else
-            {
-                model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            }
+            model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
 
@@ -266,14 +310,7 @@ namespace Epic_Project.Controllers
             ProgressModel model = _repository.GetProgress(date.Year, date.Month, null, "TRUE");
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
-            if (lastDate.Year == date.Year && lastDate.Month == date.Month)
-            {
-                model.Variance = null;
-            }
-            else
-            {
-                model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            }
+            model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             //model.Total = _repository.GetEpicWeight(null, "TRUE");
             model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
             model.Total = model.Total + TurkeyFSMTotal;
@@ -485,6 +522,20 @@ namespace Epic_Project.Controllers
                 }
                 NextMonth = m;
                 NextYear = y;
+            }
+            return Json(selectList);
+        }
+
+        [Authorize]
+        public JsonResult SelectTeams()
+        {
+            List<Team> TeamList = new List<Team>();
+            TeamList = (List<Team>)_repository.GetTeamAll(0, null, 0, 0);
+            List<string> selectList = new List<string>();
+            selectList.Add("");
+            for (int i = 0; i < TeamList.Count(); i++)
+            {
+                selectList.Add(TeamList[i].TeamName);
             }
             return Json(selectList);
         }
