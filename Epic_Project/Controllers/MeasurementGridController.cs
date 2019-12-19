@@ -181,7 +181,8 @@ namespace EPICProject.Controllers
         [Authorize]
         public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month)
         {
-            return Json(_repository.FillMeasurementDetails(year, month).ToDataSourceResult(request));
+            var x = _repository.FillMeasurementDetails(year, month);
+            return Json(x.ToDataSourceResult(request));
         }
 
         [Authorize]

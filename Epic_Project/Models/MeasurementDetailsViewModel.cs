@@ -49,5 +49,6 @@ namespace Epic_Project.Models
         public float ActualWeightedOverallProgress { get; set; }
         public float PreviousMonthCumulativeActualEffort { get; set; }
         public float ActualEffort { get; set; }
+        public float Variance { get; set; }
     }
 }

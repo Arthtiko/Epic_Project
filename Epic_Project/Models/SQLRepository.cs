@@ -1252,10 +1252,12 @@ namespace Epic_Project.Models
                 }
                 temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
                 temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                temp.Variance = (float)Convert.ToDouble(dt.Rows[i]["Variance"]);
 
                 MeasurementDetailsList.Add(temp);
             }
-            
+
+
             return MeasurementDetailsList;
         }
 
