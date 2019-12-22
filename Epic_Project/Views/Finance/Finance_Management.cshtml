@@ -1,0 +1,172 @@
+﻿@model FinanceSearchModel
+
+<div class="row">
+    <form class="k-form" asp-controller="Finance" asp-action="Finance_Management" method="post" style="height: 40px; margin-left: 35px; margin-top: 10px;">
+        <div class="row">
+            <div style="margin-left: -6px">
+                <text class="text-size">Year-Month: </text>
+                <select class="k-select select-size" id="form-select-time" style="width: 200px;" asp-for="YearMonth"></select>
+            </div>
+            <div>
+                <button class="k-button button-size" type="submit">FILTER</button>
+            </div>
+        </div>
+    </form>
+    @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
+    {
+    <div style="position: absolute; right: 0; margin-right: 40px">
+        <a class="k-button button-size-month" asp-controller="Finance" asp-action="GenerateNextMonth" onclick="javascript:return ShowMessageCreateNewMonth();">Generate Next Month</a>
+        <a class="k-button button-size-month" asp-controller="Finance" asp-action="DeleteLastMonth" onclick="javascript:return ShowMessageDeleteLastMonth();">Delete Last Month</a>
+    </div>
+    }
+</div>
+
+@(Html.Kendo().Grid<Finance>
+    ()
+    .Name("grid")
+    .Columns(columns =>
+    {
+        columns.Bound(f => f.Category).FooterHtmlAttributes(new { style = "text-align:center;" }).ClientFooterTemplate("Total Investment Cost:").Filterable(x => x.Multi(true).Search(true)).Width(180).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .8em .6em .8em 1.2em;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        columns.Bound(f => f.Year).Filterable(x => x.Multi(true).Search(true)).Width(105).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .8em .6em .8em 1.2em;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        columns.Bound(f => f.Month).Filterable(x => x.Multi(true).Search(true)).Width(105).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .8em .6em .8em 1.2em;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        columns.Bound(f => f.PeriodBudget).FooterHtmlAttributes(new { style = "text-align:center;" }).ClientFooterTemplate("#= kendo.format('{0:c2}', sum)#").Format("{0:c2}").Filterable(false).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .8em .6em .8em 1.2em;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        columns.Bound(f => f.TotalBudget).FooterHtmlAttributes(new { style = "text-align:center;" }).ClientFooterTemplate("#= kendo.format('{0:c2}', sum)#").Format("{0:c2}").Filterable(false).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .8em .6em .8em 1.2em;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        columns.Bound(f => f.Actual).FooterHtmlAttributes(new { style = "text-align:center;" }).ClientFooterTemplate("#= kendo.format('{0:c2}', sum)#").Format("{0:c2}").Filterable(false).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .8em .6em .8em 1.2em;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        if ((User.IsInRole("Project Manager") || User.IsInRole("Program Manager") || User.IsInRole("Admin")) && (Model.IsTurkey))
+        {
+            columns.Command(command => { command.Edit(); }).Width(125);
+        }
+    })
+    .ToolBar(toolbar =>
+    {
+        toolbar.Excel();
+    })
+    .Editable(editable => editable.Mode(GridEditMode.InLine))
+    .Scrollable()
+    .Groupable()
+    .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
+    .Filterable()
+    .Excel(excel => excel.FileName("Finance_Management " + Model.Year + "-" + Model.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Finance")))
+    .Resizable(resizable => resizable.Columns(true))
+    .Reorderable(reorderable => reorderable.Columns(true))
+    .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+    .DataSource(dataSource => dataSource
+    .Ajax().ServerOperation(false)
+    .Aggregates(aggregates =>
+    {
+        aggregates.Add(m => m.PeriodBudget).Sum();
+        aggregates.Add(m => m.TotalBudget).Sum();
+        aggregates.Add(m => m.Actual).Sum();
+    })
+    .Events(events => { events.Error("error_handler"); events.RequestEnd("onRequestEnd"); })
+    .Model(model =>
+    {
+        model.Id(m => m.Category);
+        model.Field(m => m.Category).Editable(false);
+        model.Field(m => m.Year).Editable(false);
+        model.Field(m => m.Month).Editable(false);
+        model.Field(m => m.PeriodBudget).Editable(false);
+        model.Field(m => m.TotalBudget).Editable(false);
+    })
+    .Read(read => read.Action("Finance_Management_Read", "Finance", new { Model.Year, Model.Month }))
+    .Update(update => update.Action("Finance_Management_Update", "Finance"))
+    )
+    )
+    <script>
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+    function onRequestEnd() {
+        var grid = $("#grid").data("kendoGrid");
+        grid.refresh();
+    }
+
+    $(document).ready(function () {
+        var url = window.location.href.split("/")[3];
+        if (url == null || url == "") {
+            $.get('Finance/selectDates', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-time");
+                    if (value == (@Model.Year + "-" + @Model.Month)) {
+                        document.getElementById("form-select-time").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+        }
+        else {
+            $.get('selectDates', function (data) {
+                console.log(data)
+                var i = 0;
+                $.each(data, function (index, value) {
+                    $('<option>').val(value).text(value).appendTo("#form-select-time");
+                    if (value == (@Model.Year + "-" + @Model.Month)) {
+                        document.getElementById("form-select-time").selectedIndex = i;
+                    }
+                    i++;
+                })
+            })
+        }
+
+        })
+
+        function ShowMessageDeleteLastMonth() {
+            var result = confirm("Do you want to delete last month?");
+            if (result) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function ShowMessageCreateNewMonth() {
+            var result = confirm("Do you want to create new month?");
+            if (result) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid");
+
+        var minimumAcceptableGridHeight = 300;
+
+        var windowHeight = $(window).innerHeight();
+        //var headerHeight = $(window).headerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 50 - 160 - 50 + 30; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+    </script>
+
+    <style>
+        .button-size {
+            margin-left: 24px;
+            margin-top: -5px;
+        }
+    </style>

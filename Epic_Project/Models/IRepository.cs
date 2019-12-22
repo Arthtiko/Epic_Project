@@ -55,6 +55,17 @@ namespace Epic_Project.Models
         DateControl UpdateDateControl(DateControl dateControl);
         #endregion
 
+        #region Finance
+        IEnumerable<Finance> GetFinanceAll(string category, int year, int month);
+        IEnumerable<FinanceReport> GetFinanceReport(string category, int year, int month);
+        Finance InsertFinanceAll(Finance finance);
+        void DeleteFinance(Finance finance);
+        Finance UpdateFinanceAll(Finance finance);
+        List<Date> GetFinanceDates();
+        void GenerateNewFinanceMonth();
+        void DeleteLastFinanceMonth();
+        #endregion
+
         #region Parameter
         int GetParameterValue(string columnName, string parameterName);
         IEnumerable<Parameter> GetParameter(string name);

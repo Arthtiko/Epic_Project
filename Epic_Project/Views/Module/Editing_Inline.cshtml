@@ -1,13 +1,22 @@
-﻿@(Html.Kendo().Grid<Module>()
+﻿@model ModuleModel
+
+@(Html.Kendo().Grid<Module>()
       .Name("grid")
       .Columns(columns =>
       {
-          columns.Bound(m => m.ModuleName).Width(360).HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal;" });
-          columns.Bound(m => m.Progress).Width(360).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal;" });
+          columns.Bound(m => m.ModuleName).Width(540).HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.EpicCount).Width(120).ClientFooterTemplate("Total: #=sum#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.TotalEstimation).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.Weight).Width(160).Title("Total Weight").ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.ActualEffort).Title("Total Effort").Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.Variance).Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.WeightedOverallProgress).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)# %").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+          columns.Bound(m => m.Progress).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
       })
       .Scrollable()
       .Sortable()
       .Groupable()
+      .Resizable(r => r.Columns(true))
       .Events(e => e.DataBound("dataBound"))
       .HtmlAttributes(new { style = "background-color: Gainsboro;" })
       .DataSource(dataSource => dataSource
@@ -17,7 +26,15 @@
           {
               model.Id(m => m.ModuleId);
               model.Field(m => m.ModuleId).Editable(false);
-              model.Field(m => m.ModuleId).DefaultValue(ViewBag.MaxModuleId);
+          })
+          .Aggregates(aggregates =>
+          {
+              aggregates.Add(m => m.EpicCount).Sum();
+              aggregates.Add(m => m.TotalEstimation).Sum();
+              aggregates.Add(m => m.Weight).Sum();
+              aggregates.Add(m => m.ActualEffort).Sum();
+              aggregates.Add(m => m.WeightedOverallProgress).Sum();
+              aggregates.Add(m => m.Variance).Sum();
           })
           .Read(read => read.Action("EditingInLine_Read", "Module"))
       )
@@ -46,7 +63,7 @@
         var windowHeight = $(window).innerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 165; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 180 - 60; // - headerHeight;       header is empty but this calculation makes grid small
         calculatedHeight = calculatedHeight + 80;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 

@@ -1147,6 +1147,219 @@ namespace Epic_Project.Models
         }
         #endregion
 
+        #region Finance
+
+        public IEnumerable<Finance> GetFinanceAll(string category, int year, int month)
+        {
+            List<Finance> financeList = new List<Finance>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Finance]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (category != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Category", category);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Finance temp = new Finance();
+                temp.Category = Convert.ToString(dt.Rows[i]["Category"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.PeriodBudget = (float)Convert.ToDouble(dt.Rows[i]["PeriodBudget"]);
+                temp.TotalBudget = (float)Convert.ToDouble(dt.Rows[i]["TotalBudget"]);
+                temp.Actual = (float)Convert.ToDouble(dt.Rows[i]["Actual"]);
+                financeList.Add(temp);
+            }
+            return financeList;
+        }
+        public IEnumerable<FinanceReport> GetFinanceReport(string category, int year, int month)
+        {
+            List<FinanceReport> financeList = new List<FinanceReport>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_FinanceReport]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (category != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Category", category);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                FinanceReport temp = new FinanceReport();
+                temp.Category = Convert.ToString(dt.Rows[i]["Category"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.PeriodBudget = (float)Convert.ToDouble(dt.Rows[i]["PeriodBudget"]);
+                temp.Actual = (float)Convert.ToDouble(dt.Rows[i]["Actual"]);
+                temp.PeriodActualPercentage = (float)Convert.ToDouble(dt.Rows[i]["PeriodActualPercentage"]);
+                temp.TotalBudget = (float)Convert.ToDouble(dt.Rows[i]["TotalBudget"]);
+                temp.TotalRemaining = (float)Convert.ToDouble(dt.Rows[i]["TotalRemaining"]);
+                temp.TotalActualPercentage = (float)Convert.ToDouble(dt.Rows[i]["TotalActualPercentage"]);
+                financeList.Add(temp);
+            }
+            return financeList;
+        }
+        public Finance InsertFinanceAll(Finance finance)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[ins_Finance]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Category", finance.Category);
+                    sqlCommand.Parameters.AddWithValue("@Year", finance.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", finance.Month);
+                    sqlCommand.Parameters.AddWithValue("@PeriodBudget", finance.PeriodBudget);
+                    sqlCommand.Parameters.AddWithValue("@TotalBudget", finance.TotalBudget);
+                    sqlCommand.Parameters.AddWithValue("@Actual", finance.Actual);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return finance;
+        }
+        public void DeleteFinance(Finance finance)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_Finance]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Category", finance.Category);
+                    sqlCommand.Parameters.AddWithValue("@Year", finance.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", finance.Month);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+        public Finance UpdateFinanceAll(Finance finance)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_Finance]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Category", finance.Category);
+                    sqlCommand.Parameters.AddWithValue("@Year", finance.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", finance.Month);
+                    sqlCommand.Parameters.AddWithValue("@PeriodBudget", finance.PeriodBudget);
+                    sqlCommand.Parameters.AddWithValue("@TotalBudget", finance.TotalBudget);
+                    sqlCommand.Parameters.AddWithValue("@Actual", finance.Actual);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            return finance;
+        }
+        public List<Date> GetFinanceDates()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_financeDates]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Date temp = new Date();
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                DateList.Add(temp);
+            }
+            return DateList;
+        }
+
+        public void GenerateNewFinanceMonth()
+        {
+            Date date = GetFinanceDates()[0];
+            Date newDate = new Date()
+            {
+                Month = date.Month == 12 ? 1 : date.Month + 1,
+                Year = date.Month == 12 ? date.Year + 1 : date.Year
+            };
+
+            List<Finance> finances = (List<Finance>)GetFinanceAll(null, date.Year, date.Month);
+
+            for (int i = 0; i < finances.Count(); i++)
+            {
+                Finance temp = finances[i];
+                temp.Year = newDate.Year;
+                temp.Month = newDate.Month;
+                InsertFinanceAll(temp);
+            }
+        }
+
+        public void DeleteLastFinanceMonth()
+        {
+            Date date = GetFinanceDates()[0];
+            Finance finance = new Finance() { Year = date.Year, Month = date.Month};
+
+            DeleteFinance(finance);
+        }
+
+        #endregion
+
         public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month)
         {
             int prevYear = month == 1 ? year - 1 : year;
@@ -1461,6 +1674,9 @@ namespace Epic_Project.Models
         public List<Module> GetModuleProgress(int year, int month)
         {
             List<Module> modules = (List<Module>)GetModuleAll();
+            year = month == 1 ? year - 1 : year;
+            month = month == 1 ? 12 : month - 1;
+            List<Module> moduleAggregates = GetModuleAggregates(year, month);
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -1484,12 +1700,18 @@ namespace Epic_Project.Models
                 temp.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
                 temp.Progress = (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
                 temp.Weight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                temp.Variance = (float)Convert.ToDouble(dt.Rows[i]["Variance"]);
+                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                temp.WeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
                 for (int j = 0; j < modules.Count(); j++)
                 {
                     if (modules[j].ModuleId == temp.ModuleId)
                     {
+                        modules[j].WeightedOverallProgress = modules[j].WeightedOverallProgress + temp.WeightedOverallProgress;
                         modules[j].Progress = modules[j].Progress + temp.Progress;
                         modules[j].Weight = modules[j].Weight + temp.Weight;
+                        modules[j].Variance = modules[j].Variance + temp.Variance;
+                        modules[j].ActualEffort = modules[j].ActualEffort + temp.ActualEffort;
                     }
                 }
             }
@@ -1497,7 +1719,55 @@ namespace Epic_Project.Models
             {
                 modules[i].Progress = (float)Math.Round(modules[i].Progress / modules[i].Weight, 2);
             }
-            return modules;
+            List<Module> SortedList = modules.OrderByDescending(mo => mo.Progress).ToList();
+            for (int i = 0; i < SortedList.Count(); i++)
+            {
+                for (int j = 0; j < moduleAggregates.Count(); j++)
+                {
+                    if (SortedList[i].ModuleId == moduleAggregates[j].ModuleId)
+                    {
+                        SortedList[i].EpicCount = moduleAggregates[j].EpicCount;
+                        SortedList[i].TotalEstimation = moduleAggregates[j].TotalEstimation;
+                    }
+                }
+            }
+            return SortedList;
+        }
+
+        public List<Module> GetModuleAggregates(int year, int month)
+        {
+            List<Module> moduleList = new List<Module>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_ModuleAggregate]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Module temp = new Module();
+                temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                temp.EpicCount = Convert.ToInt32(dt.Rows[i]["EpicCount"]);
+                temp.TotalEstimation = (float)Convert.ToDouble(dt.Rows[i]["TotalEstimation"]);
+                moduleList.Add(temp);
+            }
+            return moduleList;
         }
 
         public IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule, string type)
