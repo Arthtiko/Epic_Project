@@ -1,0 +1,397 @@
+﻿@model ImportSearchModel
+
+<div class="row" style="position: relative;">
+    <div style="margin-left: 15px">
+        <form class="k-form" asp-controller="Import" asp-action="Index" method="post" style="height: 40px; margin-left: 10px; margin-top: 10px;">
+            <div class="row" style="margin-top: -5px;">
+                <div style="margin-left: 4px">
+                    <text class="text-size">Import Mode: </text>
+                    <select class="k-select select-size" asp-for="Mode" onchange="submit()">
+                        <option value="1">Progress Only</option>
+                        <option value="2">Effort Only</option>
+                        <option value="3">Progress and Effort</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
+    {
+        <div style="position: absolute; right: 0; margin-right: 40px">
+            <a class="k-button button-size-month" onclick="importOnClick()">Import</a>
+        </div>
+    }
+</div>
+
+
+@(Html.Kendo().Spreadsheet()
+            .Name("spreadsheet")
+            .HtmlAttributes(new { style = "width:100%; height:900px;" })
+            .Excel(excel => excel
+                .ProxyURL(Url.Action("Index_Save", "Import"))
+            )
+            .Pdf(pdf => pdf
+                .ProxyURL(Url.Action("Index_Save", "Spreadsheet"))
+            )
+            .Sheets(sheets =>
+            {
+                if (Model.Mode == 1)
+                {
+                    sheets.Add()
+                    .Name("Measurement Import")
+                    .MergedCells("A1:I1")
+                    .Columns(columns =>
+                    {
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(25);
+                        columns.Add().Width(600);
+                    })
+                    .Rows(rows =>
+                    {
+                        rows.Add().Height(130).Cells(cells =>
+                        {
+                            cells.Add()
+                                .Value("Measurement Import")
+                                .FontSize(32)
+                                .Background("rgb(96,181,255)")
+                                .TextAlign(SpreadsheetTextAlign.Center).VerticalAlign(SpreadsheetVerticalAlign.Center)
+                                .Color("white");
+                            cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add();
+                            cells.Add()
+                                .Value("Info:\n" +
+                                "Epic Id: As Integer,\n" +
+                                "Year: As Integer,\n" +
+                                "Month: As Integer,\n" +
+                                "Type: 1 for Target, 2 for Actual, \n" +
+                                "Progresses: 100.00 for 100%, 0.00 for 0%")
+                                .FontSize(16).Bold(true)
+                                .Background("rgb(96,181,255)")
+                                .TextAlign(SpreadsheetTextAlign.Center)
+                                .Color("white");
+                        });
+                        rows.Add().Height(25).Cells(cells =>
+                        {
+                            cells.Add()
+                                .Value("Epic ID")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Year")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Month")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Type")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Requirement Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Design Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Development Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Test Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Uat Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                        });
+                    });
+                }
+                else if (Model.Mode == 2)
+                {
+                    sheets.Add()
+                    .Name("Measurement Import")
+                    .MergedCells("A1:E1")
+                    .Columns(columns =>
+                    {
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(120);
+                        columns.Add().Width(25);
+                        columns.Add().Width(600);
+                    })
+                    .Rows(rows =>
+                    {
+                        rows.Add().Height(130).Cells(cells =>
+                        {
+                            cells.Add()
+                                .Value("Measurement Import")
+                                .FontSize(32)
+                                .Background("rgb(96,181,255)")
+                                .TextAlign(SpreadsheetTextAlign.Center).VerticalAlign(SpreadsheetVerticalAlign.Center)
+                                .Color("white");
+                            cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add();
+                            cells.Add()
+                                .Value("Info:\n" +
+                                "Epic Id: As Integer,\n" +
+                                "Year: As Integer,\n" +
+                                "Month: As Integer,\n" +
+                                "Type: 1 for Target, 2 for Actual, \n" +
+                                "Actual Effort: As Float")
+                                .FontSize(16).Bold(true)
+                                .Background("rgb(96,181,255)")
+                                .TextAlign(SpreadsheetTextAlign.Center)
+                                .Color("white");
+                        });
+                        rows.Add().Height(25).Cells(cells =>
+                        {
+                            cells.Add()
+                                .Value("Epic ID")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Year")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Month")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Type")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Actual Effort")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                        });
+                    });
+                }
+                else if(Model.Mode == 3)
+                {
+                    sheets.Add()
+                    .Name("Measurement Import")
+                    .MergedCells("A1:J1")
+                    .Columns(columns =>
+                    {
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(80);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(120);
+                        columns.Add().Width(25);
+                        columns.Add().Width(600);
+                    })
+                    .Rows(rows =>
+                    {
+                        rows.Add().Height(130).Cells(cells =>
+                        {
+                            cells.Add()
+                                .Value("Measurement Import")
+                                .FontSize(32)
+                                .Background("rgb(96,181,255)")
+                                .TextAlign(SpreadsheetTextAlign.Center).VerticalAlign(SpreadsheetVerticalAlign.Center)
+                                .Color("white");
+                            cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add();
+                            cells.Add()
+                                .Value("Info:\n" +
+                                "Epic Id: As Integer,\n" +
+                                "Year: As Integer,\n" +
+                                "Month: As Integer,\n" +
+                                "Type: 1 for Target, 2 for Actual, \n" +
+                                "Progresses: 100.00 for 100%, 0.00 for 0%, \n" +
+                                "Actual Effort: As Float")
+                                .FontSize(16).Bold(true)
+                                .Background("rgb(96,181,255)")
+                                .TextAlign(SpreadsheetTextAlign.Center)
+                                .Color("white");
+                        });
+                        rows.Add().Height(25).Cells(cells =>
+                        {
+                            cells.Add()
+                                .Value("Epic ID")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Year")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Month")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Type")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Requirement Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Design Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Development Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Test Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Uat Progress")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                            cells.Add()
+                                .Value("Actual Effort")
+                                .Background("rgb(167,214,255)")
+                                .Color("rgb(0,62,117)")
+                                .TextAlign(SpreadsheetTextAlign.Center);
+                        });
+                    });
+                }
+            })
+)
+
+<script>
+    var zIndex = 25;
+    $(".k-window").each(function (i, elem) {
+        $(elem).css("z-index", ++zIndex);
+    });
+
+    function importOnClick() {
+       
+        var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
+        var sheet = spreadsheet.sheetByIndex(0);
+        var data = sheet.toJSON();
+        var obj;
+
+        var epicId = 0; var year = 0; var month = 0; var type = 0; var req = 0; var des = 0; var dev = 0; var test = 0; var uat = 0; var effort = 0;
+
+        console.log(sheet);
+        console.log(data);
+
+        var totalRowsCount = data.rows.length;
+
+        for (let i = 2; i < totalRowsCount; i++) {
+            obj = data.rows[i].cells;
+
+            if (@Model.Mode == 1) {
+                epicId = obj[0].value;
+                year = obj[1].value;
+                month = obj[2].value;
+                type = obj[3].value;
+                req = obj[4].value;
+                des = obj[5].value;
+                dev = obj[6].value;
+                test = obj[7].value;
+                uat = obj[8].value;
+            }
+            else if (@Model.Mode == 2) {
+                epicId = obj[0].value;
+                year = obj[1].value;
+                month = obj[2].value;
+                effort = obj[3].value;
+                effort = obj[4].value;
+            }
+            else if (@Model.Mode == 3) {
+                epicId = obj[0].value;
+                year = obj[1].value;
+                month = obj[2].value;
+                type = obj[3].value;
+                req = obj[4].value;
+                des = obj[5].value;
+                dev = obj[6].value;
+                test = obj[7].value;
+                uat = obj[8].value;
+                effort = obj[9].value;
+            }
+
+            $.ajax({
+                contentType: 'application/json',
+                data: {
+                    "epicId": epicId,
+                    "year": year,
+                    "month": month,
+                    "type": type,
+                    "req": req,
+                    "des": des,
+                    "dev": dev,
+                    "test": test,
+                    "uat": uat,
+                    "effort": effort,
+                    "mode": @Model.Mode
+                },
+                type: "GET",
+                dataType: "text",
+                url: "/Import/ImportMeasurement",
+                success: function (result) {
+                    console.log("result:")
+                    console.log(result)
+                },
+                error: function (error) {
+                    console.error("error:");
+                    console.error(error);
+                }
+            });
+
+            
+        }
+    }
+</script>
+
+
+@*var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
+        var sheet = spreadsheet.sheetByIndex(0);
+        var data = sheet.toJSON();
+        var obj; var id;
+        console.log('sheet: ' + sheet);
+        console.log('data: ' + data);
+
+        var totalRowsCount = data.rows.length;
+
+        console.log('Total= ' + totalRowsCount)*@

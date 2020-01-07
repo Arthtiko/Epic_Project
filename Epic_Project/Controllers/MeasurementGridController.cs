@@ -211,10 +211,8 @@ namespace EPICProject.Controllers
             return Json(measurements.ToDataSourceResult(request));
         }
 
-        public ActionResult EditingInLineLogs_Read([DataSourceRequest] DataSourceRequest request)
-        {
-            return Json(_repository.GetMeasurementLogs(0, 2019, 12, null).ToDataSourceResult(request));
-        }
+
+        
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -342,6 +340,12 @@ namespace EPICProject.Controllers
             }
 
             return Json(new[] { measurement }.ToDataSourceResult(request, ModelState));
+        }
+
+        [Authorize]
+        public ActionResult log_read([DataSourceRequest] DataSourceRequest request, int EpicId, int year, int month)
+        {
+            return Json(_repository.GetMeasurementLogs(EpicId, year, month, null).ToDataSourceResult(request));
         }
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]

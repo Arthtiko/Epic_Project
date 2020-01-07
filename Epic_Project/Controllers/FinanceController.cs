@@ -137,6 +137,12 @@ namespace Epic_Project.Controllers
         }
 
         [Authorize]
+        public ActionResult Finance_Graph()
+        {
+            return View();
+        }
+
+        [Authorize]
         public ActionResult Finance_Management_Read([DataSourceRequest] DataSourceRequest request, int year, int month)
         {
             return Json(_repository.GetFinanceAll(null, year, month).ToDataSourceResult(request));
@@ -153,6 +159,20 @@ namespace Epic_Project.Controllers
         {
             Finance newFinance = _repository.UpdateFinanceAll(finance);
             return Json(new[] { newFinance }.ToDataSourceResult(request));
+        }
+
+        [HttpPost]
+        public ActionResult GetReportingPeriodGraph()
+        {
+            IEnumerable<FinanceGraph> model = _repository.GetFinanceGraph(false);
+            return Json(model);
+        }
+
+        [HttpPost]
+        public ActionResult GetProgramTotalGraph()
+        {
+            IEnumerable<FinanceGraph> model = _repository.GetFinanceGraph(true);
+            return Json(model);
         }
 
         [Authorize]

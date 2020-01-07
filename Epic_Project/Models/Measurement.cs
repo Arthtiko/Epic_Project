@@ -102,4 +102,23 @@ namespace Epic_Project.Models
 
         }
     }
+
+    public class MeasurementImportModel
+    {
+        public int EpicId { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int Type { get; set; }
+        public float RequirementProgress { get; set; }
+        public float DesignProgress { get; set; }
+        public float DevelopmentProgress { get; set; }
+        public float TestProgress { get; set; }
+        public float UatProgress { get; set; }
+        public float ActualEffort { get; set; }
+    }
+
+    public class ImportSearchModel
+    {
+        public int Mode { get; set; }
+    }
 }

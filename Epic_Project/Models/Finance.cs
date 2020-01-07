@@ -37,4 +37,19 @@ namespace Epic_Project.Models
         public float PeriodActualPercentage { get; set; }
         public float TotalActualPercentage { get; set; }
     }
+
+    public class FinanceGraph
+    {
+        public float? Line1 { get; set; }
+        public float? Line2 { get; set; }
+        public float? Line3 { get; set; }
+        public float? Line4 { get; set; }
+        public float? Line5 { get; set; }
+        public float? Line6 { get; set; }
+        public string Category { get; set; }
+        public FinanceGraph()
+        {
+
+        }
+    }
 }

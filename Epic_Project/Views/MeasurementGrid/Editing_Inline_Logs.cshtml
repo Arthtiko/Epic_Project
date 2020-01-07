@@ -67,7 +67,7 @@
                    .Reorderable(reorderable => reorderable.Columns(true))
                    .HtmlAttributes(new { style = "background-color: Gainsboro;" })
                    .DataSource(dataSource => dataSource
-                   .Ajax().Read(read => read.Action("EditingInLineLogs_Read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month }))
+                   .Ajax().ServerOperation(true)
                    .Events(events => { events.Error("error_handler"); events.RequestEnd("onRequestEnd"); })
                    .Model(model =>
                    {
@@ -89,7 +89,8 @@
                        model.Field(m => m.UserName).Editable(false);
                        model.Field(m => m.UserIp).Editable(false);
                    })
-                   
+                   .Read(read => read.Action("log_read", "MeasurementGrid", new { Model.EpicId, Model.Year, Model.Month }))
+
                    )
 )
 

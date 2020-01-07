@@ -2,6 +2,7 @@
    .Name("grid")
    .Columns(columns =>
    {
+       columns.Bound(e => e.EmployeeId).Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(e => e.EmployeeName).Width(240).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(e => e.EmployeeType.TypeName).Title("Type").Width(180).EditorTemplateName("ClientEmployeeTypeEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        columns.Bound(e => e.EmployeeLocation.LocationName).Title("Location").Width(180).EditorTemplateName("ClientEmployeeLocationEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });

@@ -1498,7 +1498,6 @@ button.k-button-expand, input[type=submit].k-button-expand, input[type=button].k
 }
 
 .k-tabstrip-items .k-tab-on-top {
-    z-index: 1
 }
 
 .k-panelbar .k-tabstrip-items .k-link, .k-tabstrip-items .k-link {
@@ -7961,7 +7960,6 @@ html .k-upload {
     position: absolute;
     bottom: 0;
     right: 0;
-    z-index: 1;
     font: 170px monospace !important;
     filter: alpha(opacity=0);
     opacity: 0;
@@ -12677,7 +12675,6 @@ div.k-navigator .k-navigator-left, div.k-navigator .k-navigator-w {
         position: absolute;
         outline-color: transparent !important;
         box-sizing: border-box;
-        z-index: 10
     }
 
     .k-spreadsheet .k-spreadsheet-action-bar {
@@ -12819,7 +12816,6 @@ div.k-navigator .k-navigator-left, div.k-navigator .k-navigator-w {
     .k-spreadsheet .k-spreadsheet-quick-access-toolbar {
         display: inline-block;
         position: absolute;
-        z-index: 1;
         top: 0;
         left: 0;
         padding: .3em .3em 0
@@ -13013,7 +13009,6 @@ textarea.k-spreadsheet-clipboard {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 10000;
     border-width: 0 1px 1px 0;
     border-style: solid
 }
@@ -13037,15 +13032,14 @@ textarea.k-spreadsheet-clipboard {
     overflow: scroll;
     -webkit-overflow-scrolling: touch;
     position: absolute;
-    z-index: 1
 }
 
 .k-spreadsheet-fixed-container {
     position: absolute;
     width: 100%;
     height: 100%;
+    z-index: 1;
     box-sizing: border-box;
-    z-index: 2;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -13059,7 +13053,6 @@ textarea.k-spreadsheet-clipboard {
 
 .k-spreadsheet-column-header, .k-spreadsheet-row-header {
     text-align: center;
-    z-index: 100
 }
 
     .k-spreadsheet-column-header .k-spreadsheet-cell, .k-spreadsheet-row-header .k-spreadsheet-cell {
@@ -13431,7 +13424,6 @@ div.k-spreadsheet-window {
     position: absolute;
     bottom: .2em;
     left: .4em;
-    z-index: 1
 }
 
 .k-spreadsheet-sheets-bar .k-spreadsheet-sheets-remove {

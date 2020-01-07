@@ -85,7 +85,7 @@ namespace Epic_Project
                     template: "{controller=Home}/{action=Index}/{id?}");
                     //template: "{controller=MeasurementGrid}/{action=Editing_Inline_Details}/{id?}");
             });
-
+            
             //DummyData.Initialize(context, userManager, roleManager).Wait();
         }
     }

@@ -1329,7 +1329,6 @@ namespace Epic_Project.Models
             }
             return DateList;
         }
-
         public void GenerateNewFinanceMonth()
         {
             Date date = GetFinanceDates()[0];
@@ -1349,7 +1348,6 @@ namespace Epic_Project.Models
                 InsertFinanceAll(temp);
             }
         }
-
         public void DeleteLastFinanceMonth()
         {
             Date date = GetFinanceDates()[0];
@@ -1357,7 +1355,125 @@ namespace Epic_Project.Models
 
             DeleteFinance(finance);
         }
+        public FinanceGraph GetFinanceGraphData(int year, int month, bool isTotal)
+        {
+            string cat1 = "\tArchtecht - Technical & Businessteam Cost";
+            string cat2 = "\tITS - Technical & Business team Cost";
+            string cat3 = "\tLicense fee to KTP";
+            string cat4 = "\tServers";
+            string cat5 = "\tTravel Expenses - Archtecht";
+            string cat6 = "\tTravel Expenses - ITS";
+            FinanceGraph temp = new FinanceGraph();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_FinanceGraph]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Category", null);
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                string tempCategory = Convert.ToString(dt.Rows[i]["Category"]);
+                if (tempCategory == cat1)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line1 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line1 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
+                if (tempCategory == cat2)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line2 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line2 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
+                if (tempCategory == cat3)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line3 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line3 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
+                if (tempCategory == cat4)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line4 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line4 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
+                if (tempCategory == cat5)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line5 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line5 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
+                if (tempCategory == cat6)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line6 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line6 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
+                temp.Category = Convert.ToString(dt.Rows[i]["Year"]) + " - " + Convert.ToString(dt.Rows[i]["Month"]);
+            }
+            return temp;
+        }
+        public IEnumerable<FinanceGraph> GetFinanceGraph(bool isTotal)
+        {
+            List<Date> dates = GetFinanceDates();
 
+            List<FinanceGraph> financeList = new List<FinanceGraph>();
+            
+            for (int i = dates.Count() - 1; i >= 0; i--)
+            {
+                FinanceGraph temp = GetFinanceGraphData(dates[i].Year, dates[i].Month, isTotal);
+                financeList.Add(temp);
+            }
+
+            return financeList;
+        }
         #endregion
 
         public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month)

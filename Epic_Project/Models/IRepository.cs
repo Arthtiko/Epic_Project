@@ -64,6 +64,7 @@ namespace Epic_Project.Models
         List<Date> GetFinanceDates();
         void GenerateNewFinanceMonth();
         void DeleteLastFinanceMonth();
+        IEnumerable<FinanceGraph> GetFinanceGraph(bool isTotal);
         #endregion
 
         #region Parameter
