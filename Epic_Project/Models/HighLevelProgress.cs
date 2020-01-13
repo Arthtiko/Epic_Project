@@ -14,4 +14,5 @@ namespace Epic_Project.Models
         public int Total { get; set; }
         public string TargetFinishDate { get; set; }
     }
+    
 }

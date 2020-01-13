@@ -1,7 +1,24 @@
 ﻿@model ModuleModel
 
+<div class="row" style="position: relative;">
+    <div style="margin-left: 15px">
+        <div style="height: 40px; margin-left: 10px; margin-top: 10px;">
+            <div class="row" style="margin-top: -5px;">
+                <div style="margin-left: 4px">
+                    <text class="text-size">Year-Month: </text>
+                    <select class="k-select select-size" id="form-select-time"></select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <a class="k-button button-size-month" id="showGrid">Show Data</a>
+    </div>
+</div>
+
 @(Html.Kendo().Grid<Module>()
       .Name("grid")
+      .AutoBind(false)
       .Columns(columns =>
       {
           columns.Bound(m => m.ModuleName).Width(540).HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
@@ -36,10 +53,40 @@
               aggregates.Add(m => m.WeightedOverallProgress).Sum();
               aggregates.Add(m => m.Variance).Sum();
           })
-          .Read(read => read.Action("EditingInLine_Read", "Module"))
+          .Read(read => read.Action("EditingInLine_Read", "Module").Data("getReadData"))
       )
 )
 <script type="text/javascript">
+    $("#showGrid").click(function () {
+        var yearMonth = document.getElementById("form-select-time").value;
+        var year = yearMonth.split("-")[0];
+        var month = yearMonth.split("-")[1];
+        $.ajax({
+            contentType: 'application/json',
+            data: {
+                "year": year,
+                "month": month
+            },
+            type: "GET",
+            async: false,
+            dataType: "text",
+            url: "/Module/IsVarianceShowed",
+            success: function (result) {
+                if (result == "true") {
+                    $("#grid").data("kendoGrid").showColumn(5);
+                }
+                else {
+                    $("#grid").data("kendoGrid").hideColumn(5);
+                }
+            },
+            error: function (error) {
+                console.log("error");
+                console.log(error);
+            }
+        });
+        $("#grid").data("kendoGrid").dataSource.read();
+    });
+
     function error_handler(e) {
         if (e.errors) {
             var message = "Errors:\n";
@@ -54,6 +101,16 @@
         }
     }
 
+    function getReadData() {
+        var yearMonth = document.getElementById("form-select-time").value;
+        var year = yearMonth.split("-")[0];
+        var month = yearMonth.split("-")[1];
+        return {
+            year: year,
+            month: month
+        };
+    }
+
     function resizeGrid() {
         //Define Elements Needed
         var header = $("#header-content");
@@ -64,7 +121,7 @@
         var contentArea = grid.find(".k-grid-content");
 
         var calculatedHeight = windowHeight - 180 - 60; // - headerHeight;       header is empty but this calculation makes grid small
-        calculatedHeight = calculatedHeight + 80;
+        calculatedHeight = calculatedHeight + 40;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);
@@ -86,9 +143,22 @@
             });
         });
     }
+
+    $(document).ready(function () {
+        $.get('selectDates', function (data) {
+            console.log(data)
+            var i = 0;
+            $.each(data, function (index, value) {
+                $('<option>').val(value).text(value).appendTo("#form-select-time");
+            })
+        })
+    })
 </script>
 <style>
     .k-grid tbody tr {
-        height: 40px;
+        height: 42px;
+    }
+    .button-size-month {
+        margin-left: 24px;
     }
 </style>

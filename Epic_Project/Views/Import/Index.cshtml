@@ -26,7 +26,8 @@
 
 @(Html.Kendo().Spreadsheet()
             .Name("spreadsheet")
-            .HtmlAttributes(new { style = "width:100%; height:900px;" })
+            .HtmlAttributes(new { style = "width:100%; height:910px;" })
+            .Toolbar(t => t.Data(false).Home(false).Insert(false))
             .Excel(excel => excel
                 .ProxyURL(Url.Action("Index_Save", "Import"))
             )
@@ -296,6 +297,13 @@
                 }
             })
 )
+@(Html.Kendo().Dialog()
+        .Name("dialog")
+        .Title("Import Report")
+        .Visible(false)
+        .Width(500)
+        .Modal(true)
+    )
 
 <script>
     var zIndex = 25;
@@ -303,22 +311,35 @@
         $(elem).css("z-index", ++zIndex);
     });
 
+    function changeContent(data) {
+        $("#dialog").data("kendoDialog").content("<div>" + data + "</div>");
+    }
+
+    function showDialog() {
+        $('#dialog').data("kendoDialog").open();
+    }
+
     function importOnClick() {
        
         var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
         var sheet = spreadsheet.sheetByIndex(0);
         var data = sheet.toJSON();
         var obj;
+        var failedEpics = [];
+        var failedYears = [];
+        var failedMonths = [];
+        var failedTypes = [];
+        var issues = [];
+        var failedEpicCount = 0;
 
-        var epicId = 0; var year = 0; var month = 0; var type = 0; var req = 0; var des = 0; var dev = 0; var test = 0; var uat = 0; var effort = 0;
-
-        console.log(sheet);
-        console.log(data);
+        var epicId = 0; var year = 0; var month = 0; var type = 0; var req = 0; var des = 0; var dev = 0; var test = 0; var uat = 0; var effort = 0;        
 
         var totalRowsCount = data.rows.length;
 
         for (let i = 2; i < totalRowsCount; i++) {
             obj = data.rows[i].cells;
+
+            console.log(obj);
 
             if (@Model.Mode == 1) {
                 epicId = obj[0].value;
@@ -335,7 +356,7 @@
                 epicId = obj[0].value;
                 year = obj[1].value;
                 month = obj[2].value;
-                effort = obj[3].value;
+                type = obj[3].value;
                 effort = obj[4].value;
             }
             else if (@Model.Mode == 3) {
@@ -350,7 +371,7 @@
                 uat = obj[8].value;
                 effort = obj[9].value;
             }
-
+            
             $.ajax({
                 contentType: 'application/json',
                 data: {
@@ -364,34 +385,57 @@
                     "test": test,
                     "uat": uat,
                     "effort": effort,
-                    "mode": @Model.Mode
+                    "mode": @Model.Mode,
+                    "lineCount": totalRowsCount
                 },
                 type: "GET",
+                async: false,
                 dataType: "text",
                 url: "/Import/ImportMeasurement",
                 success: function (result) {
-                    console.log("result:")
-                    console.log(result)
+                    console.log("result");
+                    if (result != "Success") {
+                        failedEpics[failedEpicCount] = epicId;
+                        failedYears[failedEpicCount] = year;
+                        failedMonths[failedEpicCount] = month;
+                        failedTypes[failedEpicCount] = type;
+                        issues[failedEpicCount] = result;
+                        failedEpicCount++;
+                    }
                 },
                 error: function (error) {
-                    console.error("error:");
-                    console.error(error);
+                    console.log("error");
                 }
             });
-
-            
         }
+
+        var content = "";
+        if (failedEpicCount > 0) {
+            //content = content + "Epic IDs of Failed Requests:\n"
+            $("#dialog").data("kendoDialog").title("Failed Requests");
+            for (let i = 0; i < failedEpicCount; i++) {
+                let t;
+                if (type == 1) {
+                    t = "Target";
+                }
+                else {
+                    t = "Actual";
+                }
+                content = content + "<pre>EPIC: " + failedEpics[i] + ", " + failedYears[i] + "-" + failedMonths[i] + ", " + t + "\nIssue: " + issues[i] + "</pre>";
+            }
+        }
+        else {
+            $("#dialog").data("kendoDialog").title("Import Report");
+            content = "<pre>All import requests sent successfully.</pre>";
+        }
+        
+        changeContent(content);
+        showDialog();
     }
 </script>
 
-
-@*var spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
-        var sheet = spreadsheet.sheetByIndex(0);
-        var data = sheet.toJSON();
-        var obj; var id;
-        console.log('sheet: ' + sheet);
-        console.log('data: ' + data);
-
-        var totalRowsCount = data.rows.length;
-
-        console.log('Total= ' + totalRowsCount)*@
+<style>
+    .k-tabstrip-wrapper {
+        display: none;
+    }
+</style>

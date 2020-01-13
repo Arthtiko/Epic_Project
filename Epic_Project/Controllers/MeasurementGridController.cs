@@ -179,9 +179,21 @@ namespace EPICProject.Controllers
         }
 
         [Authorize]
-        public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month)
+        public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int year, int month, string location, string isFSM, string team)
         {
-            var x = _repository.FillMeasurementDetails(year, month);
+            if (location == "All")
+            {
+                location = null;
+            }
+            if (isFSM == "All")
+            {
+                isFSM = null;
+            }
+            if (team == "All")
+            {
+                team = null;
+            }
+            var x = _repository.FillMeasurementDetails(year, month, location, isFSM, team);
             return Json(x.ToDataSourceResult(request));
         }
 
@@ -210,10 +222,7 @@ namespace EPICProject.Controllers
             }
             return Json(measurements.ToDataSourceResult(request));
         }
-
-
         
-
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, Measurement measurement)
@@ -494,6 +503,32 @@ namespace EPICProject.Controllers
             ViewData["dates"] = options;
         }
 
+        public string IsVarianceShowed(int year, int month)
+        {
+            List<DateControl> dateControlList = (List<DateControl>)_repository.GetDateControl(year, month, null);
+            bool isVarianceShowed = true;
+            int idx = 0;
+            for (int i = 0; i < dateControlList.Count(); i++)
+            {
+                if (dateControlList[i].Variance.VarianceName == "TRUE")
+                {
+                    idx++;
+                }
+            }
+            if (idx != dateControlList.Count())
+            {
+                isVarianceShowed = false;
+            }
+            if (isVarianceShowed)
+            {
+                return "true";
+            }
+            else
+            {
+                return "false";
+            }
+        }
+
         [Authorize]
         public JsonResult selectDates()
         {
@@ -537,26 +572,12 @@ namespace EPICProject.Controllers
             }
             return Json(selectList);
         }
-
         [Authorize]
-        public JsonResult selectEpicId()
-        {
-            List<EpicBaseLine> epics = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
-            List<string> ids = new List<string>();
-            ids.Add("");
-            for (int i = 0; i < epics.Count(); i++)
-            {
-                ids.Add(epics[i].EPICId.ToString());
-            }
-            return Json(ids);
-        }
-
-        [Authorize]
-        public JsonResult SelectTeams()
+        public JsonResult selectTeams()
         {
             TeamList = (List<Team>)_repository.GetTeamAll(0, null, 0, 0);
             List<string> selectList = new List<string>();
-            selectList.Add("");
+            selectList.Add("All");
             for (int i = 0; i < TeamList.Count(); i++)
             {
                 selectList.Add(TeamList[i].TeamName);
@@ -564,14 +585,22 @@ namespace EPICProject.Controllers
             return Json(selectList);
         }
         [Authorize]
-        public JsonResult FilterMenu_Locations()
+        public JsonResult selectLocations()
         {
             List<string> locations = new List<string>()
             {
-                "Turkey", "Egypt"
+                "All", "Turkey", "Egypt"
             };
             return Json(locations);
         }
-
+        [Authorize]
+        public JsonResult selectFSM()
+        {
+            List<string> locations = new List<string>()
+            {
+                "All", "TRUE", "FALSE"
+            };
+            return Json(locations);
+        }
     }
 }

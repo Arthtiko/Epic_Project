@@ -376,6 +376,7 @@ namespace Epic_Project.Controllers
         #endregion
 
         #region High Level Progress
+        
         [Authorize]
         public ActionResult GetHighLevelTurkey([DataSourceRequest] DataSourceRequest request, int year, int month)
         {
@@ -385,6 +386,21 @@ namespace Epic_Project.Controllers
                 Month = month
             };
             List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress("Turkey", null, date);
+            model[0].TargetFinishDate = "12/12/2019";
+            model[1].TargetFinishDate = "24/02/2020";
+            model[2].TargetFinishDate = "02/04/2020";
+            model[3].TargetFinishDate = "09/04/2020";
+            model[4].TargetFinishDate = "30/04/2020";
+            return Json(model.ToDataSourceResult(request));
+        }
+        public ActionResult GetHighLevelTurkeyNew([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+            Date date = new Date()
+            {
+                Year = year,
+                Month = month
+            };
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Turkey", null, date);
             model[0].TargetFinishDate = "12/12/2019";
             model[1].TargetFinishDate = "24/02/2020";
             model[2].TargetFinishDate = "02/04/2020";
@@ -409,6 +425,22 @@ namespace Epic_Project.Controllers
             model[4].TargetFinishDate = "30/04/2020";
             return Json(model.ToDataSourceResult(request));
         }
+        [Authorize]
+        public ActionResult GetHighLevelTurkeyFSMNew([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+            Date date = new Date()
+            {
+                Year = year,
+                Month = month
+            };
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Turkey", "TRUE", date);
+            model[0].TargetFinishDate = "12/12/2019";
+            model[1].TargetFinishDate = "24/02/2020";
+            model[2].TargetFinishDate = "02/04/2020";
+            model[3].TargetFinishDate = "09/04/2020";
+            model[4].TargetFinishDate = "30/04/2020";
+            return Json(model.ToDataSourceResult(request));
+        }
 
         [Authorize]
         public ActionResult GetHighLevelEgypt([DataSourceRequest] DataSourceRequest request, int year, int month)
@@ -419,6 +451,22 @@ namespace Epic_Project.Controllers
                 Month = month
             };
             List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress("Egypt", null, date);
+            model[0].TargetFinishDate = "29/12/2019";
+            model[1].TargetFinishDate = "11/03/2020";
+            model[2].TargetFinishDate = "31/03/2020";
+            model[3].TargetFinishDate = "29/04/2020";
+            model[4].TargetFinishDate = "30/04/2020";
+            return Json(model.ToDataSourceResult(request));
+        }
+        [Authorize]
+        public ActionResult GetHighLevelEgyptNew([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+            Date date = new Date()
+            {
+                Year = year,
+                Month = month
+            };
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Egypt", null, date);
             model[0].TargetFinishDate = "29/12/2019";
             model[1].TargetFinishDate = "11/03/2020";
             model[2].TargetFinishDate = "31/03/2020";
@@ -443,6 +491,22 @@ namespace Epic_Project.Controllers
             model[4].TargetFinishDate = "30/04/2020";
             return Json(model.ToDataSourceResult(request));
         }
+        [Authorize]
+        public ActionResult GetHighLevelEgyptFSMNew([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+            Date date = new Date()
+            {
+                Year = year,
+                Month = month
+            };
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Egypt", "TRUE", date);
+            model[0].TargetFinishDate = "29/12/2019";
+            model[1].TargetFinishDate = "11/03/2020";
+            model[2].TargetFinishDate = "31/03/2020";
+            model[3].TargetFinishDate = "29/04/2020";
+            model[4].TargetFinishDate = "30/04/2020";
+            return Json(model.ToDataSourceResult(request));
+        }
 
         [Authorize]
         public ActionResult GetHighLevelOverall([DataSourceRequest] DataSourceRequest request, int year, int month)
@@ -460,6 +524,22 @@ namespace Epic_Project.Controllers
             model[4].TargetFinishDate = "30/04/2020";
             return Json(model.ToDataSourceResult(request));
         }
+        [Authorize]
+        public ActionResult GetHighLevelOverallNew([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+            Date date = new Date()
+            {
+                Year = year,
+                Month = month
+            };
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew(null, null, date);
+            model[0].TargetFinishDate = "29/12/2019";
+            model[1].TargetFinishDate = "11/03/2020";
+            model[2].TargetFinishDate = "02/04/2020";
+            model[3].TargetFinishDate = "29/04/2020";
+            model[4].TargetFinishDate = "30/04/2020";
+            return Json(model.ToDataSourceResult(request));
+        }
 
         [Authorize]
         public ActionResult GetHighLevelOverallFSM([DataSourceRequest] DataSourceRequest request, int year, int month)
@@ -470,6 +550,22 @@ namespace Epic_Project.Controllers
                 Month = month
             };
             List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress(null, "TRUE", date);
+            model[0].TargetFinishDate = "29/12/2019";
+            model[1].TargetFinishDate = "11/03/2020";
+            model[2].TargetFinishDate = "02/04/2020";
+            model[3].TargetFinishDate = "29/04/2020";
+            model[4].TargetFinishDate = "30/04/2020";
+            return Json(model.ToDataSourceResult(request));
+        }
+        [Authorize]
+        public ActionResult GetHighLevelOverallFSMNew([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+            Date date = new Date()
+            {
+                Year = year,
+                Month = month
+            };
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew(null, "TRUE", date);
             model[0].TargetFinishDate = "29/12/2019";
             model[1].TargetFinishDate = "11/03/2020";
             model[2].TargetFinishDate = "02/04/2020";

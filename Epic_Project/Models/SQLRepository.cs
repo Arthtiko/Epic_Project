@@ -1460,6 +1460,41 @@ namespace Epic_Project.Models
             }
             return temp;
         }
+        public List<FinanceGraph> GetFinanceTotalValues(int year, int month)
+        {
+            List<FinanceGraph> list = new List<FinanceGraph>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_FinanceGraphTotal]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                FinanceGraph temp = new FinanceGraph();
+                temp.Category = "Total";
+                temp.Line1 = (float)Convert.ToDouble(dt.Rows[i]["TotalPercentage"]);
+                temp.Line2 = (float)Convert.ToDouble(dt.Rows[i]["PeriodPercentage"]);
+                list.Add(temp);
+            }
+            return list;
+        }
         public IEnumerable<FinanceGraph> GetFinanceGraph(bool isTotal)
         {
             List<Date> dates = GetFinanceDates();
@@ -1469,6 +1504,15 @@ namespace Epic_Project.Models
             for (int i = dates.Count() - 1; i >= 0; i--)
             {
                 FinanceGraph temp = GetFinanceGraphData(dates[i].Year, dates[i].Month, isTotal);
+                FinanceGraph totals = GetFinanceTotalValues(dates[i].Year, dates[i].Month)[0];
+                if (isTotal)
+                {
+                    temp.Line7 = totals.Line1;
+                }
+                else
+                {
+                    temp.Line7 = totals.Line2;
+                }
                 financeList.Add(temp);
             }
 
@@ -1476,7 +1520,7 @@ namespace Epic_Project.Models
         }
         #endregion
 
-        public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month)
+        public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month, string location, string isFSM, string team)
         {
             int prevYear = month == 1 ? year - 1 : year;
             int prevMonth = month == 1 ? 12 : month - 1;
@@ -1492,6 +1536,18 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@PrevYear", prevYear);
                     sqlCommand.Parameters.AddWithValue("@Month", month);
                     sqlCommand.Parameters.AddWithValue("@PrevMonth", prevMonth);
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
+                    }
+                    if (isFSM != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", isFSM));
+                    }
+                    if (team != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Team", GetTeamIdByName(team));
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -1582,6 +1638,7 @@ namespace Epic_Project.Models
                 temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
                 temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
                 temp.Variance = (float)Convert.ToDouble(dt.Rows[i]["Variance"]);
+                temp.Deviation = (float)Convert.ToDouble(dt.Rows[i]["Deviation"]);
 
                 MeasurementDetailsList.Add(temp);
             }
@@ -1790,8 +1847,6 @@ namespace Epic_Project.Models
         public List<Module> GetModuleProgress(int year, int month)
         {
             List<Module> modules = (List<Module>)GetModuleAll();
-            year = month == 1 ? year - 1 : year;
-            month = month == 1 ? 12 : month - 1;
             List<Module> moduleAggregates = GetModuleAggregates(year, month);
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -1831,10 +1886,12 @@ namespace Epic_Project.Models
                     }
                 }
             }
+
             for (int i = 0; i < modules.Count(); i++)
             {
                 modules[i].Progress = (float)Math.Round(modules[i].Progress / modules[i].Weight, 2);
             }
+
             List<Module> SortedList = modules.OrderByDescending(mo => mo.Progress).ToList();
             for (int i = 0; i < SortedList.Count(); i++)
             {
@@ -1949,6 +2006,96 @@ namespace Epic_Project.Models
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 string procName = "[sel_HighLevelProgress]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", date.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", date.Month);
+                    sqlCommand.Parameters.AddWithValue("@Type", 2);
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", location));
+                    }
+                    if (isFirstSellableModule != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", isFirstSellableModule));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            if (dt != null && dt.Rows != null && dt.Rows.Count > 0)
+            {
+                highLevelProgresses = new List<HighLevelProgress>();
+                requirement = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Requirement",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["RequirementInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["RequirementInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["RequirementFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(requirement);
+
+                design = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Design",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["DesignInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["DesignInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["DesignFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(design);
+
+                development = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Development",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["DevelopmentInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["DevelopmentInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["DevelopmentFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(development);
+
+                test = new HighLevelProgress()
+                {
+                    TaskBreakdown = "Test",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["TestInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["TestInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["TestFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(test);
+
+                uat = new HighLevelProgress()
+                {
+                    TaskBreakdown = "UAT",
+                    InProgress = Convert.ToInt32(dt.Rows[0]["UatInProgress"]),
+                    InQueue = Convert.ToInt32(dt.Rows[0]["UatInQueue"]),
+                    Finished = Convert.ToInt32(dt.Rows[0]["UatFinished"]),
+                    Total = Convert.ToInt32(dt.Rows[0]["Total"])
+                };
+                highLevelProgresses.Add(uat);
+            }
+
+            return highLevelProgresses;
+        }
+        public IEnumerable<HighLevelProgress> GetHighLevelProgressNew(string location, string isFirstSellableModule, Date date)
+        {
+            List<HighLevelProgress> highLevelProgresses = new List<HighLevelProgress>();
+            HighLevelProgress requirement = new HighLevelProgress();
+            HighLevelProgress design = new HighLevelProgress();
+            HighLevelProgress development = new HighLevelProgress();
+            HighLevelProgress test = new HighLevelProgress();
+            HighLevelProgress uat = new HighLevelProgress();
+
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_HighLevelProgressNew]";
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;

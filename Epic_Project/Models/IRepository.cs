@@ -76,6 +76,7 @@ namespace Epic_Project.Models
         ProgressModel GetProgress(int year, int month, string location, string isFirstSellableModule);
         IEnumerable<LineChartModel> GetLineChartProgress(string location, string isFirstSellableModule, string type);
         IEnumerable<HighLevelProgress> GetHighLevelProgress(string location, string isFirstSellableModule, Date date);
+        IEnumerable<HighLevelProgress> GetHighLevelProgressNew(string location, string isFirstSellableModule, Date date);
         #endregion
 
         #region Identity
@@ -83,7 +84,7 @@ namespace Epic_Project.Models
         #endregion
 
         #region Measurement Operations
-        List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month);
+        List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month, string location, string isFSM, string team);
         List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location, string userName, string ipAddress);
         void DeleteLastMonth(int month, int year, string location, string userName, string ipAddress);
         List<Measurement> SearchMeasurement(int year, int month, string location, string type, string teamName);

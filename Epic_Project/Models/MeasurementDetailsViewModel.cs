@@ -50,5 +50,6 @@ namespace Epic_Project.Models
         public float PreviousMonthCumulativeActualEffort { get; set; }
         public float ActualEffort { get; set; }
         public float Variance { get; set; }
+        public float Deviation { get; set; }
     }
 }

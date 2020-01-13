@@ -13,14 +13,20 @@ namespace Epic_Project.Controllers
     [Authorize(Roles = "Admin, Project Manager, Program Manager")]
     public class ImportController : Controller
     {
+        List<Measurement> measurements = new List<Measurement>();
+        List<EpicBaseLine> epics = new List<EpicBaseLine>();
+        List<string> usernameList = new List<string>();
+        List<string> ipAddressList = new List<string>();
         private IHttpContextAccessor _accessor;
         private readonly IRepository _repository;
         private string UserId;
+        int idx = 0;
         public ImportController(IRepository repository, IHttpContextAccessor httpContextAccessor)
         {
             _accessor = httpContextAccessor;
             _repository = repository;
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            epics = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
         }
 
         public IActionResult Index(int mode)
@@ -33,7 +39,7 @@ namespace Epic_Project.Controllers
         }
         
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
-        public void ImportMeasurement(int epicId, int year, int month, int type, float req, float des, float dev, float test, float uat, float effort, int mode)
+        public string ImportMeasurement(int epicId, int year, int month, int type, float req, float des, float dev, float test, float uat, float effort, int mode, int lineCount)
         {
             Measurement measurement = new Measurement();
             string ipAddress = _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -58,6 +64,12 @@ namespace Epic_Project.Controllers
                     ActualEffort = effort
                 };
 
+                EpicBaseLine temp = epics.Find(e => e.EPICId == epicId);
+                if (temp == null)
+                {
+                    return "Epic could not found.";
+                }
+
                 measurement = CreateMeasurementForImport(measurement, mode);
                 if (measurement != null)
                 {
@@ -69,7 +81,12 @@ namespace Epic_Project.Controllers
 
                         if (epic.ProjectLocation.LocationName == "Turkey")
                         {
-                            measurement = _repository.UpdateMeasurement(measurement, "Turkey Test Admin", ipAddress);
+                            _repository.UpdateMeasurement(measurement, "Turkey Test Admin", ipAddress);
+                            return "Success";
+                        }
+                        else
+                        {
+                            return "Invalid Epic Location";
                         }
                     }
                     else if (id == 2001)
@@ -78,7 +95,12 @@ namespace Epic_Project.Controllers
 
                         if (epic.ProjectLocation.LocationName == "Egypt")
                         {
-                            measurement = _repository.UpdateMeasurement(measurement, "Egypt Test Admin", ipAddress);
+                            _repository.UpdateMeasurement(measurement, "Egypt Test Admin", ipAddress);
+                            return "Success";
+                        }
+                        else
+                        {
+                            return "Invalid Epic Location";
                         }
                     }
                     else
@@ -88,11 +110,21 @@ namespace Epic_Project.Controllers
 
                         if (emp.EmployeeLocation.LocationName == epic.ProjectLocation.LocationName)
                         {
-                            measurement = _repository.UpdateMeasurement(measurement, emp.EmployeeName, ipAddress);
+                            _repository.UpdateMeasurement(measurement, emp.EmployeeName, ipAddress);
+                            return "Success";
+                        }
+                        else
+                        {
+                            return "Invalid Epic Location";
                         }
                     }
                 }
+                else
+                {
+                    return "Invalid ID, Year, Month or Type.";
+                }
             }
+            return "Can only import to current and previous month.";
         }
 
         [HttpPost]

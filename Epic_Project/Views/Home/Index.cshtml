@@ -21,297 +21,6 @@
         <td>
             <div class="column">
                 <div class="card m-3">
-                    <div class="card-header" style="text-align: center">
-                        <text style="font-size: 18px; font-weight: bold;">Overall Program</text>
-                    </div>
-                    <div class="card-body row">
-                        <table>
-                            <tr>
-                                <td>
-                                    <div>
-                                        @(Html.Kendo().Chart<ProgressModel>()
-                                           .Name("chart-progress-turkey")
-                                           .Title("Turkey")
-                                           .Legend(legend => legend
-                                               .Position(ChartLegendPosition.Bottom)
-                                           )
-                                           .DataSource(ds => ds.Read(read => read.Action("GetTurkeyProgress", "Home", new { Model.Year, Model.Month })))
-                                           .ChartArea(chartArea => chartArea
-                                               .Background("transparent")
-                                           )
-                                           .Series(series =>
-                                           {
-                                               if (Model.TurkeyOverall.ShowProgress)
-                                               {
-                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
-                                               }
-                                               if (Model.TurkeyOverall.ShowActualEffort)
-                                               {
-                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
-                                               }
-                                               if (Model.TurkeyOverall.ShowVariance)
-                                               {
-                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
-                                               }
-                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share").Width(30);
-                                           })
-                                           .CategoryAxis(axis => axis
-                                               .Name("series-axis")
-                                               .Line(line => line.Visible(false))
-                                           )
-                                           .HtmlAttributes(new { @class = "small-chart" })
-                                           .ValueAxis(axis => axis
-                                            .Numeric()
-                                            .Max(100)
-                                            .Labels(labels => labels.Format("{0}"))
-                                            .AxisCrossingValue(0, int.MinValue)
-                                           )
-                                        //.Tooltip(tooltip => tooltip
-                                        //    .Visible(true)
-                                        //    .Format("{0}%")
-                                        //    .Template("#= series.name #: #= value #")
-                                        //)
-                                        )
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        @(Html.Kendo().Chart<ProgressModel>()
-                                                            .Name("chart-progress-egypt")
-                                                            .Title("Egypt")
-                                                            .Legend(legend => legend
-                                                                .Position(ChartLegendPosition.Bottom)
-                                                            )
-                                                            .DataSource(ds => ds.Read(read => read.Action("GetEgyptProgress", "Home", new { Model.Year, Model.Month })))
-                                                            .ChartArea(chartArea => chartArea
-                                                                .Background("transparent")
-                                                            )
-                                                            .Series(series =>
-                                                            {
-                                                                if (Model.EgyptOverall.ShowProgress)
-                                                                {
-                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
-                                                                }
-                                                                if (Model.EgyptOverall.ShowActualEffort)
-                                                                {
-                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
-                                                                }
-                                                                if (Model.EgyptOverall.ShowVariance)
-                                                                {
-                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
-                                                                }
-                                                                series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share").Width(30);
-                                                            })
-                                                            .CategoryAxis(axis => axis
-                                                                .Name("series-axis")
-                                                                .Line(line => line.Visible(false))
-                                                            )
-                                                            .HtmlAttributes(new { @class = "small-chart" })
-                                                            .ValueAxis(axis => axis
-                                                                .Numeric().Max(100)
-                                                                .Labels(labels => labels.Format("{0}"))
-                                                                .AxisCrossingValue(0, int.MinValue)
-                                                            )
-                                        //.Tooltip(tooltip => tooltip
-                                        //    .Visible(true)
-                                        //    .Format("{0}%")
-                                        //    .Template("#= series.name #: #= value #")
-                                        //)
-                                        )
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        @(Html.Kendo().Chart<ProgressModel>()
-                                                            .Name("chart-progress-overall")
-                                                            .Title("Total")
-                                                            .Legend(legend => legend
-                                                                .Position(ChartLegendPosition.Bottom).Align(ChartLegendAlign.Center)
-                                                            )
-                                                            .DataSource(ds => ds.Read(read => read.Action("GetOverallProgress", "Home", new { Model.Year, Model.Month })))
-                                                            .ChartArea(chartArea => chartArea
-                                                                .Background("transparent")
-                                                            )
-                                                            .Series(series =>
-                                                            {
-                                                                if (Model.TotalOverall.ShowProgress)
-                                                                {
-                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
-                                                                }
-                                                                if (Model.TotalOverall.ShowActualEffort)
-                                                                {
-                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
-                                                                }
-                                                                if (Model.TotalOverall.ShowVariance)
-                                                                {
-                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
-                                                                }
-                                                                series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Total");
-                                                            })
-                                                            .CategoryAxis(axis => axis
-                                                                .Name("series-axis")
-                                                                .Line(line => line.Visible(false))
-                                                            )
-                                                            .HtmlAttributes(new { @class = "small-chart" })
-                                                            .ValueAxis(axis => axis
-                                                                .Numeric().Max(100)
-                                                                .Labels(labels => labels.Format("{0}"))
-                                                                .AxisCrossingValue(0, int.MinValue)
-                                                            )
-                                        //.Tooltip(tooltip => tooltip
-                                        //    .Visible(true)
-                                        //    .Format("{0}%")
-                                        //    .Template("#= series.name #: #= value #")
-                                        //)
-                                        )
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </td>
-        <td>
-            <div class="column">
-                <div class="card m-3">
-                    <div class="card-header" style="text-align: center">
-                        <text style="font-size: 18px; font-weight: bold;">Historical Overall Progress</text>
-                    </div>
-                    <div class="card-body row">
-                        <table>
-                            <tr>
-                                <td>
-                                    <div>
-                                        @(Html.Kendo().Chart<LineChartModel>()
-                                                            .Name("line-turkey")
-                                                            .Title("Progress of Turkey")
-                                                            .Legend(legend => legend
-                                                                .Position(ChartLegendPosition.Bottom)
-                                                            )
-                                                            .DataSource(ds => ds.Read(read => read.Action("GetTurkeyLineChart", "Home")))
-                                                            .ChartArea(chartArea => chartArea
-                                                                .Background("transparent")
-                                                            )
-                                                            .SeriesDefaults(seriesDefaults =>
-                                                                seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                                            )
-                                                            .Series(series =>
-                                                            {
-                                                                series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                                series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                                series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                                            })
-                                                            .CategoryAxis(axis => axis
-                                                                .Labels(labels => labels.Rotation(-90))
-                                                                .Crosshair(c => c.Visible(true))
-                                                            )
-                                                            .ValueAxis(axis => axis
-                                                                .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                                .Name("of Total")
-                                                                .Max(50)
-                                                                .Line(line => line.Visible(false))
-                                                                .AxisCrossingValue(-15)
-                                                            )
-                                                            .Tooltip(tooltip => tooltip
-                                                            .Visible(true)
-                                                            .Shared(true)
-                                                            .Format("{0:0.00}")
-                                                        )
-                                        )
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        @(Html.Kendo().Chart<LineChartModel>()
-                                                            .Name("line-egypt")
-                                                            .Title("Progress of Egypt")
-                                                            .Legend(legend => legend
-                                                                .Position(ChartLegendPosition.Bottom)
-                                                            )
-                                                            .DataSource(ds => ds.Read(read => read.Action("GetEgyptLineChart", "Home")))
-                                                            .ChartArea(chartArea => chartArea
-                                                                .Background("transparent")
-                                                            )
-                                                            .SeriesDefaults(seriesDefaults =>
-                                                                seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                                            )
-                                                            .Series(series =>
-                                                            {
-                                                                series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                                series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                                series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                                            })
-                                                            .CategoryAxis(axis => axis
-                                                            .Labels(labels => labels.Rotation(-90))
-                                                                .Crosshair(c => c.Visible(true))
-                                                            )
-                                                            .ValueAxis(axis => axis
-                                                                .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                                .Name("of Total")
-                                                                .Max(50)
-                                                                .Line(line => line.Visible(false))
-                                                                .AxisCrossingValue(-15)
-                                                            )
-                                                            .Tooltip(tooltip => tooltip
-                                                            .Visible(true)
-                                                            .Shared(true)
-                                                            .Format("{0:0.00}")
-                                                        )
-                                        )
-                                    </div>
-                                </td>
-                                <td>
-                                    <div>
-                                        @(Html.Kendo().Chart<LineChartModel>()
-                                                                    .Name("line-total")
-                                                                    .Title("Total")
-                                                                    .Legend(legend => legend
-                                                                        .Position(ChartLegendPosition.Bottom)
-                                                                    )
-                                                                    .DataSource(ds => ds.Read(read => read.Action("GetTotalLineChart", "Home")))
-                                                                    .ChartArea(chartArea => chartArea
-                                                                        .Background("transparent")
-                                                                    )
-                                                                    .SeriesDefaults(seriesDefaults =>
-                                                                        seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                                                    )
-                                                                    .Series(series =>
-                                                                    {
-                                                                        series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                                        series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                                        series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                                                    })
-                                                                    .CategoryAxis(axis => axis
-                                                                    .Labels(labels => labels.Rotation(-90))
-                                                                .Crosshair(c => c.Visible(true))
-                                                            )
-                                                                    .ValueAxis(axis => axis
-                                                                        .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                                        .Name("of Total")
-                                                                .Max(50)
-                                                                        .Line(line => line.Visible(false))
-                                                                        .AxisCrossingValue(-15)
-                                                                    )
-                                                                    .Tooltip(tooltip => tooltip
-                                                            .Visible(true)
-                                                            .Shared(true)
-                                                            .Format("{0:0.00}")
-                                                                    )
-                                        )
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div class="column">
-                <div class="card m-3">
                     <div class="card-header" style="text-align: center;">
                         <text style="font-size: 18px; font-weight: bold;">First Sellable Module</text>
                     </div>
@@ -321,139 +30,139 @@
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<ProgressModel>()
-                                            .Name("chart-progress-turkey-first-sellable")
-                                            .Title("Turkey")
-                                            .Legend(legend => legend
-                                                .Position(ChartLegendPosition.Bottom)
-                                            )
-                                            .DataSource(ds => ds.Read(read => read.Action("GetTurkeyFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
-                                            .ChartArea(chartArea => chartArea
-                                                .Background("transparent")
-                                            )
-                                            .Series(series =>
-                                            {
-                                                if (Model.TurkeyFSM.ShowProgress)
-                                                {
-                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
-                                                }
-                                                if (Model.TurkeyFSM.ShowActualEffort)
-                                                {
-                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
-                                                }
-                                                if (Model.TurkeyFSM.ShowVariance)
-                                                {
-                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
-                                                }
-                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Labels(l => l.Visible(true)).Name("Share");
-                                            })
-                                            .CategoryAxis(axis => axis
-                                                .Name("series-axis")
-                                                .Line(line => line.Visible(false))
-                                            )
-                                            .HtmlAttributes(new { @class = "small-chart" })
-                                            .ValueAxis(axis => axis
-                                             .Numeric()
-                                             .Max(100)
-                                             .Labels(labels => labels.Format("{0}"))
-                                             .AxisCrossingValue(0, int.MinValue)
-                                            )
-                                        //.Tooltip(tooltip => tooltip
-                                        //    .Visible(true)
-                                        //    .Format("{0}%")
-                                        //    .Template("#= series.name #: #= value #")
-                                        //)
+                                                                            .Name("chart-progress-turkey-first-sellable")
+                                                                            .Title("Turkey")
+                                                                            .Legend(legend => legend
+                                                                                .Position(ChartLegendPosition.Bottom)
+                                                                            )
+                                                                            .DataSource(ds => ds.Read(read => read.Action("GetTurkeyFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
+                                                                            .ChartArea(chartArea => chartArea
+                                                                                .Background("transparent")
+                                                                            )
+                                                                            .Series(series =>
+                                                                            {
+                                                                                if (Model.TurkeyFSM.ShowProgress)
+                                                                                {
+                                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                                                                }
+                                                                                if (Model.TurkeyFSM.ShowActualEffort)
+                                                                                {
+                                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                                }
+                                                                                if (Model.TurkeyFSM.ShowVariance)
+                                                                                {
+                                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                                }
+                                                                                series.Column(model => model.Total).Name("Total").Color("#0e68ce").Labels(l => l.Visible(true)).Name("Share");
+                                                                            })
+                                                                            .CategoryAxis(axis => axis
+                                                                                .Name("series-axis")
+                                                                                .Line(line => line.Visible(false))
+                                                                            )
+                                                                            .HtmlAttributes(new { @class = "small-chart" })
+                                                                            .ValueAxis(axis => axis
+                                                                             .Numeric()
+                                                                             .Max(100)
+                                                                             .Labels(labels => labels.Format("{0}"))
+                                                                             .AxisCrossingValue(0, int.MinValue)
+                                                                            )
+                                                //.Tooltip(tooltip => tooltip
+                                                //    .Visible(true)
+                                                //    .Format("{0}%")
+                                                //    .Template("#= series.name #: #= value #")
+                                                //)
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<ProgressModel>()
-                                           .Name("chart-progress-egypt-first-sellable")
-                                           .Title("Egypt")
-                                           .Legend(legend => legend
-                                               .Position(ChartLegendPosition.Bottom)
-                                           )
-                                           .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
-                                           .ChartArea(chartArea => chartArea
-                                               .Background("transparent")
-                                           )
-                                           .Series(series =>
-                                           {
-                                               if (Model.EgyptFSM.ShowProgress)
-                                               {
-                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
-                                               }
-                                               if (Model.EgyptFSM.ShowActualEffort)
-                                               {
-                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
-                                               }
-                                               if (Model.EgyptFSM.ShowVariance)
-                                               {
-                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
-                                               }
-                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share");
-                                           })
-                                           .CategoryAxis(axis => axis
-                                               .Name("series-axis")
-                                               .Line(line => line.Visible(false))
-                                           )
-                                           .HtmlAttributes(new { @class = "small-chart" })
-                                           .ValueAxis(axis => axis
-                                               .Numeric().Max(100)
-                                               .Labels(labels => labels.Format("{0}"))
-                                               .AxisCrossingValue(0, int.MinValue)
-                                           )
-                                        //.Tooltip(tooltip => tooltip
-                                        //    .Visible(true)
-                                        //    .Format("{0}%")
-                                        //    .Template("#= series.name #: #= value #")
-                                        //)
+                                                                           .Name("chart-progress-egypt-first-sellable")
+                                                                           .Title("Egypt")
+                                                                           .Legend(legend => legend
+                                                                               .Position(ChartLegendPosition.Bottom)
+                                                                           )
+                                                                           .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
+                                                                           .ChartArea(chartArea => chartArea
+                                                                               .Background("transparent")
+                                                                           )
+                                                                           .Series(series =>
+                                                                           {
+                                                                               if (Model.EgyptFSM.ShowProgress)
+                                                                               {
+                                                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                                                               }
+                                                                               if (Model.EgyptFSM.ShowActualEffort)
+                                                                               {
+                                                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                               }
+                                                                               if (Model.EgyptFSM.ShowVariance)
+                                                                               {
+                                                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                               }
+                                                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share");
+                                                                           })
+                                                                           .CategoryAxis(axis => axis
+                                                                               .Name("series-axis")
+                                                                               .Line(line => line.Visible(false))
+                                                                           )
+                                                                           .HtmlAttributes(new { @class = "small-chart" })
+                                                                           .ValueAxis(axis => axis
+                                                                               .Numeric().Max(100)
+                                                                               .Labels(labels => labels.Format("{0}"))
+                                                                               .AxisCrossingValue(0, int.MinValue)
+                                                                           )
+                                                //.Tooltip(tooltip => tooltip
+                                                //    .Visible(true)
+                                                //    .Format("{0}%")
+                                                //    .Template("#= series.name #: #= value #")
+                                                //)
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<ProgressModel>()
-                                           .Name("chart-progress-overall-first-sellable")
-                                           .Title("Total")
-                                           .Legend(legend => legend
-                                               .Position(ChartLegendPosition.Bottom).Align(ChartLegendAlign.Center)
-                                           )
-                                           .DataSource(ds => ds.Read(read => read.Action("GetOverallFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
-                                           .ChartArea(chartArea => chartArea
-                                               .Background("transparent")
-                                           )
-                                           .Series(series =>
-                                           {
-                                               if (Model.TotalFSM.ShowProgress)
-                                               {
-                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
-                                               }
-                                               if (Model.TotalFSM.ShowActualEffort)
-                                               {
-                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
-                                               }
-                                               if (Model.TotalFSM.ShowVariance)
-                                               {
-                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
-                                               }
-                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Total");
-                                           })
-                                           .CategoryAxis(axis => axis
-                                               .Name("series-axis")
-                                               .Line(line => line.Visible(false))
-                                           )
-                                           .HtmlAttributes(new { @class = "small-chart" })
-                                           .ValueAxis(axis => axis
-                                               .Numeric().Max(100)
-                                               .Labels(labels => labels.Format("{0}"))
-                                               .AxisCrossingValue(0, int.MinValue)
-                                           )
-                                        //.Tooltip(tooltip => tooltip
-                                        //    .Visible(true)
-                                        //    .Format("{0}%")
-                                        //    .Template("#= series.name #: #= value #")
-                                        //)
+                                                                           .Name("chart-progress-overall-first-sellable")
+                                                                           .Title("Total")
+                                                                           .Legend(legend => legend
+                                                                               .Position(ChartLegendPosition.Bottom).Align(ChartLegendAlign.Center)
+                                                                           )
+                                                                           .DataSource(ds => ds.Read(read => read.Action("GetOverallFirstSellableProgress", "Home", new { Model.Year, Model.Month })))
+                                                                           .ChartArea(chartArea => chartArea
+                                                                               .Background("transparent")
+                                                                           )
+                                                                           .Series(series =>
+                                                                           {
+                                                                               if (Model.TotalFSM.ShowProgress)
+                                                                               {
+                                                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                                                               }
+                                                                               if (Model.TotalFSM.ShowActualEffort)
+                                                                               {
+                                                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                               }
+                                                                               if (Model.TotalFSM.ShowVariance)
+                                                                               {
+                                                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                               }
+                                                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Total");
+                                                                           })
+                                                                           .CategoryAxis(axis => axis
+                                                                               .Name("series-axis")
+                                                                               .Line(line => line.Visible(false))
+                                                                           )
+                                                                           .HtmlAttributes(new { @class = "small-chart" })
+                                                                           .ValueAxis(axis => axis
+                                                                               .Numeric().Max(100)
+                                                                               .Labels(labels => labels.Format("{0}"))
+                                                                               .AxisCrossingValue(0, int.MinValue)
+                                                                           )
+                                                //.Tooltip(tooltip => tooltip
+                                                //    .Visible(true)
+                                                //    .Format("{0}%")
+                                                //    .Template("#= series.name #: #= value #")
+                                                //)
                                         )
                                     </div>
                                 </td>
@@ -475,120 +184,120 @@
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<LineChartModel>()
-                                               .Name("line-turkey-first-sellable")
-                                               .Title("Progress of Turkey")
-                                               .Legend(legend => legend
-                                                   .Position(ChartLegendPosition.Bottom)
-                                               )
-                                               .DataSource(ds => ds.Read(read => read.Action("GetTurkeyFirstSellableLineChart", "Home")))
-                                               .ChartArea(chartArea => chartArea
-                                                   .Background("transparent")
-                                               )
-                                               .SeriesDefaults(seriesDefaults =>
-                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                               )
-                                               .Series(series =>
-                                               {
-                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                               })
-                                               .CategoryAxis(axis => axis
-                                               .Labels(labels => labels.Rotation(-90))
-                                                   .Crosshair(c => c.Visible(true))
-                                               )
-                                               .ValueAxis(axis => axis
-                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                   .Name("of Total")
-                                                   .Max(50)
-                                                   .Line(line => line.Visible(false))
-                                                   .AxisCrossingValue(-15)
-                                               )
-                                               .Tooltip(tooltip => tooltip
-                                               .Visible(true)
-                                               .Shared(true)
-                                               .Format("{0:0.00}")
-                                           )
+                                                                               .Name("line-turkey-first-sellable")
+                                                                               .Title("Progress of Turkey")
+                                                                               .Legend(legend => legend
+                                                                                   .Position(ChartLegendPosition.Bottom)
+                                                                               )
+                                                                               .DataSource(ds => ds.Read(read => read.Action("GetTurkeyFirstSellableLineChart", "Home")))
+                                                                               .ChartArea(chartArea => chartArea
+                                                                                   .Background("transparent")
+                                                                               )
+                                                                               .SeriesDefaults(seriesDefaults =>
+                                                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                                                               )
+                                                                               .Series(series =>
+                                                                               {
+                                                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                                                               })
+                                                                               .CategoryAxis(axis => axis
+                                                                               .Labels(labels => labels.Rotation(-90))
+                                                                                   .Crosshair(c => c.Visible(true))
+                                                                               )
+                                                                               .ValueAxis(axis => axis
+                                                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                                                   .Name("of Total")
+                                                                                   .Max(50)
+                                                                                   .Line(line => line.Visible(false))
+                                                                                   .AxisCrossingValue(-15)
+                                                                               )
+                                                                               .Tooltip(tooltip => tooltip
+                                                                               .Visible(true)
+                                                                               .Shared(true)
+                                                                               .Format("{0:0.00}")
+                                                                           )
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<LineChartModel>()
-                                               .Name("line-egypt-first-sellable")
-                                               .Title("Progress of Egypt")
-                                               .Legend(legend => legend
-                                                   .Position(ChartLegendPosition.Bottom)
-                                               )
-                                               .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableLineChart", "Home")))
-                                               .ChartArea(chartArea => chartArea
-                                                   .Background("transparent")
-                                               )
-                                               .SeriesDefaults(seriesDefaults =>
-                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                               )
-                                               .Series(series =>
-                                               {
-                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                               })
-                                               .CategoryAxis(axis => axis
-                                               .Labels(labels => labels.Rotation(-90))
-                                                   .Crosshair(c => c.Visible(true))
-                                               )
-                                               .ValueAxis(axis => axis
-                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                   .Name("of Total")
-                                           .Max(50)
-                                                   .Line(line => line.Visible(false))
-                                                   .AxisCrossingValue(-15)
-                                               )
-                                               .Tooltip(tooltip => tooltip
-                                               .Visible(true)
-                                               .Shared(true)
-                                               .Format("{0:0.00}")
-                                           )
+                                                                               .Name("line-egypt-first-sellable")
+                                                                               .Title("Progress of Egypt")
+                                                                               .Legend(legend => legend
+                                                                                   .Position(ChartLegendPosition.Bottom)
+                                                                               )
+                                                                               .DataSource(ds => ds.Read(read => read.Action("GetEgyptFirstSellableLineChart", "Home")))
+                                                                               .ChartArea(chartArea => chartArea
+                                                                                   .Background("transparent")
+                                                                               )
+                                                                               .SeriesDefaults(seriesDefaults =>
+                                                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                                                               )
+                                                                               .Series(series =>
+                                                                               {
+                                                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                                                               })
+                                                                               .CategoryAxis(axis => axis
+                                                                               .Labels(labels => labels.Rotation(-90))
+                                                                                   .Crosshair(c => c.Visible(true))
+                                                                               )
+                                                                               .ValueAxis(axis => axis
+                                                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                                                   .Name("of Total")
+                                                                           .Max(50)
+                                                                                   .Line(line => line.Visible(false))
+                                                                                   .AxisCrossingValue(-15)
+                                                                               )
+                                                                               .Tooltip(tooltip => tooltip
+                                                                               .Visible(true)
+                                                                               .Shared(true)
+                                                                               .Format("{0:0.00}")
+                                                                           )
                                         )
                                     </div>
                                 </td>
                                 <td>
                                     <div>
                                         @(Html.Kendo().Chart<LineChartModel>()
-                                               .Name("line-total-first-sellable")
-                                               .Title("Total")
-                                               .Legend(legend => legend
-                                                   .Position(ChartLegendPosition.Bottom)
-                                               )
-                                               .DataSource(ds => ds.Read(read => read.Action("GetTotalFirstSellableLineChart", "Home")))
-                                               .ChartArea(chartArea => chartArea
-                                                   .Background("transparent")
-                                               )
-                                               .SeriesDefaults(seriesDefaults =>
-                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
-                                               )
-                                               .Series(series =>
-                                               {
-                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
-                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
-                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
-                                               })
-                                               .CategoryAxis(axis => axis
-                                               .Labels(labels => labels.Rotation(-90))
-                                                   .Crosshair(c => c.Visible(true))
-                                               )
-                                               .ValueAxis(axis => axis
-                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
-                                                   .Name("of Total")
-                                                   .Max(50)
-                                                   .Line(line => line.Visible(false))
-                                                   .AxisCrossingValue(-15)
-                                               )
-                                               .Tooltip(tooltip => tooltip
-                                               .Visible(true)
-                                               .Shared(true)
-                                               .Format("{0:0.00}")
-                                           )
+                                                                               .Name("line-total-first-sellable")
+                                                                               .Title("Total")
+                                                                               .Legend(legend => legend
+                                                                                   .Position(ChartLegendPosition.Bottom)
+                                                                               )
+                                                                               .DataSource(ds => ds.Read(read => read.Action("GetTotalFirstSellableLineChart", "Home")))
+                                                                               .ChartArea(chartArea => chartArea
+                                                                                   .Background("transparent")
+                                                                               )
+                                                                               .SeriesDefaults(seriesDefaults =>
+                                                                                   seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                                                               )
+                                                                               .Series(series =>
+                                                                               {
+                                                                                   series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                                                   series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                                                   series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                                                               })
+                                                                               .CategoryAxis(axis => axis
+                                                                               .Labels(labels => labels.Rotation(-90))
+                                                                                   .Crosshair(c => c.Visible(true))
+                                                                               )
+                                                                               .ValueAxis(axis => axis
+                                                                                   .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                                                   .Name("of Total")
+                                                                                   .Max(50)
+                                                                                   .Line(line => line.Visible(false))
+                                                                                   .AxisCrossingValue(-15)
+                                                                               )
+                                                                               .Tooltip(tooltip => tooltip
+                                                                               .Visible(true)
+                                                                               .Shared(true)
+                                                                               .Format("{0:0.00}")
+                                                                           )
                                         )
                                     </div>
                                 </td>
@@ -604,196 +313,669 @@
             <div class="column">
                 <div class="card m-3">
                     <div class="card-header" style="text-align: center">
-                        <text style="font-size: 18px; font-weight: bold;">Turkey First Sellable Module High Level EPIC Progress</text>
+                        <text style="font-size: 18px; font-weight: bold;">Overall Program</text>
                     </div>
                     <div class="card-body row">
-                        <div style="margin-left: 10px;">
-                            @(Html.Kendo().Grid<HighLevelProgress>()
-                                .Name("high-level-turkey-fsm")
-                                .Columns(columns =>
-                                {
-                                    columns.Bound(h => h.TaskBreakdown).Width(200).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.Finished).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.InProgress).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.InQueue).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.Total).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                })
-                                .HtmlAttributes(new { style = "background-color: Gainsboro; " })
-                                .DataSource(ds => ds
-                                    .Ajax()
-                                    .Read(read => read.Action("GetHighLevelTurkeyFSM", "Home", new { Model.Year, Model.Month }))
-                                )
-                            )
-                        </div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div>
+                                        @(Html.Kendo().Chart<ProgressModel>()
+                                                                           .Name("chart-progress-turkey")
+                                                                           .Title("Turkey")
+                                                                           .Legend(legend => legend
+                                                                               .Position(ChartLegendPosition.Bottom)
+                                                                           )
+                                                                           .DataSource(ds => ds.Read(read => read.Action("GetTurkeyProgress", "Home", new { Model.Year, Model.Month })))
+                                                                           .ChartArea(chartArea => chartArea
+                                                                               .Background("transparent")
+                                                                           )
+                                                                           .Series(series =>
+                                                                           {
+                                                                               if (Model.TurkeyOverall.ShowProgress)
+                                                                               {
+                                                                                   series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                                                               }
+                                                                               if (Model.TurkeyOverall.ShowActualEffort)
+                                                                               {
+                                                                                   series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                               }
+                                                                               if (Model.TurkeyOverall.ShowVariance)
+                                                                               {
+                                                                                   series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                               }
+                                                                               series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share").Width(30);
+                                                                           })
+                                                                           .CategoryAxis(axis => axis
+                                                                               .Name("series-axis")
+                                                                               .Line(line => line.Visible(false))
+                                                                           )
+                                                                           .HtmlAttributes(new { @class = "small-chart" })
+                                                                           .ValueAxis(axis => axis
+                                                                            .Numeric()
+                                                                            .Max(100)
+                                                                            .Labels(labels => labels.Format("{0}"))
+                                                                            .AxisCrossingValue(0, int.MinValue)
+                                                                           )
+                                                //.Tooltip(tooltip => tooltip
+                                                //    .Visible(true)
+                                                //    .Format("{0}%")
+                                                //    .Template("#= series.name #: #= value #")
+                                                //)
+                                        )
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        @(Html.Kendo().Chart<ProgressModel>()
+                                                                                            .Name("chart-progress-egypt")
+                                                                                            .Title("Egypt")
+                                                                                            .Legend(legend => legend
+                                                                                                .Position(ChartLegendPosition.Bottom)
+                                                                                            )
+                                                                                            .DataSource(ds => ds.Read(read => read.Action("GetEgyptProgress", "Home", new { Model.Year, Model.Month })))
+                                                                                            .ChartArea(chartArea => chartArea
+                                                                                                .Background("transparent")
+                                                                                            )
+                                                                                            .Series(series =>
+                                                                                            {
+                                                                                                if (Model.EgyptOverall.ShowProgress)
+                                                                                                {
+                                                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                                                                                }
+                                                                                                if (Model.EgyptOverall.ShowActualEffort)
+                                                                                                {
+                                                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                                                }
+                                                                                                if (Model.EgyptOverall.ShowVariance)
+                                                                                                {
+                                                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                                                }
+                                                                                                series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Share").Width(30);
+                                                                                            })
+                                                                                            .CategoryAxis(axis => axis
+                                                                                                .Name("series-axis")
+                                                                                                .Line(line => line.Visible(false))
+                                                                                            )
+                                                                                            .HtmlAttributes(new { @class = "small-chart" })
+                                                                                            .ValueAxis(axis => axis
+                                                                                                .Numeric().Max(100)
+                                                                                                .Labels(labels => labels.Format("{0}"))
+                                                                                                .AxisCrossingValue(0, int.MinValue)
+                                                                                            )
+                                                //.Tooltip(tooltip => tooltip
+                                                //    .Visible(true)
+                                                //    .Format("{0}%")
+                                                //    .Template("#= series.name #: #= value #")
+                                                //)
+                                        )
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        @(Html.Kendo().Chart<ProgressModel>()
+                                                                                            .Name("chart-progress-overall")
+                                                                                            .Title("Total")
+                                                                                            .Legend(legend => legend
+                                                                                                .Position(ChartLegendPosition.Bottom).Align(ChartLegendAlign.Center)
+                                                                                            )
+                                                                                            .DataSource(ds => ds.Read(read => read.Action("GetOverallProgress", "Home", new { Model.Year, Model.Month })))
+                                                                                            .ChartArea(chartArea => chartArea
+                                                                                                .Background("transparent")
+                                                                                            )
+                                                                                            .Series(series =>
+                                                                                            {
+                                                                                                if (Model.TotalOverall.ShowProgress)
+                                                                                                {
+                                                                                                    series.Column(model => model.Completed).Name("Completed").Labels(l => l.Visible(true)).Color("#7fdb6a").Name("Completion Percentage");
+                                                                                                }
+                                                                                                if (Model.TotalOverall.ShowActualEffort)
+                                                                                                {
+                                                                                                    series.Column(model => model.ActualEffort).Name("ActualEffort").Labels(l => l.Visible(true)).Color("#eedc31").Name("Actual Effort");
+                                                                                                }
+                                                                                                if (Model.TotalOverall.ShowVariance)
+                                                                                                {
+                                                                                                    series.Column(model => model.Variance).Name("Variance").Labels(l => l.Visible(true)).Color("#f44747");
+                                                                                                }
+                                                                                                series.Column(model => model.Total).Name("Total").Labels(l => l.Visible(true)).Color("#0e68ce").Name("Total");
+                                                                                            })
+                                                                                            .CategoryAxis(axis => axis
+                                                                                                .Name("series-axis")
+                                                                                                .Line(line => line.Visible(false))
+                                                                                            )
+                                                                                            .HtmlAttributes(new { @class = "small-chart" })
+                                                                                            .ValueAxis(axis => axis
+                                                                                                .Numeric().Max(100)
+                                                                                                .Labels(labels => labels.Format("{0}"))
+                                                                                                .AxisCrossingValue(0, int.MinValue)
+                                                                                            )
+                                                //.Tooltip(tooltip => tooltip
+                                                //    .Visible(true)
+                                                //    .Format("{0}%")
+                                                //    .Template("#= series.name #: #= value #")
+                                                //)
+                                        )
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </td>
         <td>
+            <div class="column">
+                <div class="card m-3">
+                    <div class="card-header" style="text-align: center">
+                        <text style="font-size: 18px; font-weight: bold;">Historical Overall Progress</text>
+                    </div>
+                    <div class="card-body row">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div>
+                                        @(Html.Kendo().Chart<LineChartModel>()
+                                                                                            .Name("line-turkey")
+                                                                                            .Title("Progress of Turkey")
+                                                                                            .Legend(legend => legend
+                                                                                                .Position(ChartLegendPosition.Bottom)
+                                                                                            )
+                                                                                            .DataSource(ds => ds.Read(read => read.Action("GetTurkeyLineChart", "Home")))
+                                                                                            .ChartArea(chartArea => chartArea
+                                                                                                .Background("transparent")
+                                                                                            )
+                                                                                            .SeriesDefaults(seriesDefaults =>
+                                                                                                seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                                                                            )
+                                                                                            .Series(series =>
+                                                                                            {
+                                                                                                series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                                                                series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                                                                series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                                                                            })
+                                                                                            .CategoryAxis(axis => axis
+                                                                                                .Labels(labels => labels.Rotation(-90))
+                                                                                                .Crosshair(c => c.Visible(true))
+                                                                                            )
+                                                                                            .ValueAxis(axis => axis
+                                                                                                .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                                                                .Name("of Total")
+                                                                                                .Max(50)
+                                                                                                .Line(line => line.Visible(false))
+                                                                                                .AxisCrossingValue(-15)
+                                                                                            )
+                                                                                            .Tooltip(tooltip => tooltip
+                                                                                            .Visible(true)
+                                                                                            .Shared(true)
+                                                                                            .Format("{0:0.00}")
+                                                                                        )
+                                        )
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        @(Html.Kendo().Chart<LineChartModel>()
+                                                                                            .Name("line-egypt")
+                                                                                            .Title("Progress of Egypt")
+                                                                                            .Legend(legend => legend
+                                                                                                .Position(ChartLegendPosition.Bottom)
+                                                                                            )
+                                                                                            .DataSource(ds => ds.Read(read => read.Action("GetEgyptLineChart", "Home")))
+                                                                                            .ChartArea(chartArea => chartArea
+                                                                                                .Background("transparent")
+                                                                                            )
+                                                                                            .SeriesDefaults(seriesDefaults =>
+                                                                                                seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                                                                            )
+                                                                                            .Series(series =>
+                                                                                            {
+                                                                                                series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                                                                series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                                                                series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                                                                            })
+                                                                                            .CategoryAxis(axis => axis
+                                                                                            .Labels(labels => labels.Rotation(-90))
+                                                                                                .Crosshair(c => c.Visible(true))
+                                                                                            )
+                                                                                            .ValueAxis(axis => axis
+                                                                                                .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                                                                .Name("of Total")
+                                                                                                .Max(50)
+                                                                                                .Line(line => line.Visible(false))
+                                                                                                .AxisCrossingValue(-15)
+                                                                                            )
+                                                                                            .Tooltip(tooltip => tooltip
+                                                                                            .Visible(true)
+                                                                                            .Shared(true)
+                                                                                            .Format("{0:0.00}")
+                                                                                        )
+                                        )
+                                    </div>
+                                </td>
+                                <td>
+                                    <div>
+                                        @(Html.Kendo().Chart<LineChartModel>()
+                                                                                                    .Name("line-total")
+                                                                                                    .Title("Total")
+                                                                                                    .Legend(legend => legend
+                                                                                                        .Position(ChartLegendPosition.Bottom)
+                                                                                                    )
+                                                                                                    .DataSource(ds => ds.Read(read => read.Action("GetTotalLineChart", "Home")))
+                                                                                                    .ChartArea(chartArea => chartArea
+                                                                                                        .Background("transparent")
+                                                                                                    )
+                                                                                                    .SeriesDefaults(seriesDefaults =>
+                                                                                                        seriesDefaults.Line().Style(ChartSeriesStyle.Smooth)
+                                                                                                    )
+                                                                                                    .Series(series =>
+                                                                                                    {
+                                                                                                        series.Line(model => model.OverallCompilation).Name("Completion Percentage").CategoryField("Category").Color("#7fdb6a");
+                                                                                                        series.Line(model => model.ActualEffort).Name("Actual Effort").CategoryField("Category").Color("#eedc31");
+                                                                                                        series.Line(model => model.Variance).Name("Variance").CategoryField("Category").Color("#f44747");
+                                                                                                    })
+                                                                                                    .CategoryAxis(axis => axis
+                                                                                                    .Labels(labels => labels.Rotation(-90))
+                                                                                                .Crosshair(c => c.Visible(true))
+                                                                                            )
+                                                                                                    .ValueAxis(axis => axis
+                                                                                                        .Numeric().Labels(labels => labels.Format("{0}%"))
+                                                                                                        .Name("of Total")
+                                                                                                .Max(50)
+                                                                                                        .Line(line => line.Visible(false))
+                                                                                                        .AxisCrossingValue(-15)
+                                                                                                    )
+                                                                                                    .Tooltip(tooltip => tooltip
+                                                                                            .Visible(true)
+                                                                                            .Shared(true)
+                                                                                            .Format("{0:0.00}")
+                                                                                                    )
+                                        )
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+
+
+    <tr>
+        <td colspan="2">
+            <div class="column">
+                <div class="card m-3">
+                    <div class="card-header" style="text-align: center">
+                        <text style="font-size: 18px; font-weight: bold;">Turkey First Sellable Module High Level EPIC Progress</text>
+                    </div>
+                    <div class="card-body row">
+                        <table>
+                            <tr>
+                                <td style="padding-left: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                               .Name("high-level-turkey-fsm")
+                                                                               .Columns(columns =>
+                                                                               {
+                                                                                   columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InProgress).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Total).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                               })
+                                                                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                               .DataSource(ds => ds
+                                                                                   .Ajax()
+                                                                                   .Read(read => read.Action("GetHighLevelTurkeyFSM", "Home", new { Model.Year, Model.Month }))
+                                                                               )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding-right: 15px;">
+                                    <div class="card">
+                                        <div class="card-body" ">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                               .Name("high-level-turkey-fsm-2")
+                                                                               .Columns(columns =>
+                                                                               {
+                                                                                   columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Finished).Title("Progress >= 80%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InProgress).Title("20% <= Progress < 80%").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InQueue).Title("Progress < 20%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Total).Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                               })
+                                                                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                               .DataSource(ds => ds
+                                                                                   .Ajax()
+                                                                                   .Read(read => read.Action("GetHighLevelTurkeyFSMNew", "Home", new { Model.Year, Model.Month }))
+                                                                               )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2">
             <div class="column">
                 <div class="card m-3">
                     <div class="card-header" style="text-align: center">
                         <text style="font-size: 18px; font-weight: bold;">Turkey Total High Level EPIC Progress</text>
                     </div>
                     <div class="card-body row">
-                        <div style="margin-left: 10px;">
-                            @(Html.Kendo().Grid<HighLevelProgress>()
-                                .Name("high-level-turkey")
-                                .Columns(columns =>
-                                {
-                                    columns.Bound(h => h.TaskBreakdown).Width(275).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.InProgress).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                })
-                                .HtmlAttributes(new { style = "background-color: Gainsboro; " })
-                                .DataSource(ds => ds
-                                    .Ajax()
-                                    .Read(read => read.Action("GetHighLevelTurkey", "Home", new { Model.Year, Model.Month }))
-                                )
-                            )
-                        </div>
+                        <table>
+                            <tr>
+                                <td style="padding-left: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                               .Name("high-level-turkey")
+                                                                               .Columns(columns =>
+                                                                               {
+                                                                                   columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InProgress).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                               })
+                                                                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                               .DataSource(ds => ds
+                                                                                   .Ajax()
+                                                                                   .Read(read => read.Action("GetHighLevelTurkey", "Home", new { Model.Year, Model.Month }))
+                                                                               )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding-right: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                               .Name("high-level-turkey-2")
+                                                                               .Columns(columns =>
+                                                                               {
+                                                                                   columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Finished).Title("Progress >= 80%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InProgress).Title("20% <= Progress < 80%").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.InQueue).Title("Progress < 20%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                   columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                               })
+                                                                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                               .DataSource(ds => ds
+                                                                                   .Ajax()
+                                                                                   .Read(read => read.Action("GetHighLevelTurkeyNew", "Home", new { Model.Year, Model.Month }))
+                                                                               )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </td>
-
     </tr>
     <tr>
-        <td>
+        <td colspan="2">
             <div class="column">
                 <div class="card m-3">
                     <div class="card-header" style="text-align: center">
                         <text style="font-size: 18px; font-weight: bold;">Egypt First Sellable Module High Level EPIC Progress</text>
                     </div>
                     <div class="card-body row">
-                        <div style="margin-left: 10px;">
-                            @(Html.Kendo().Grid<HighLevelProgress>()
-                                .Name("high-level-egypt-fsm")
-                                .Columns(columns =>
-                                {
-                                    columns.Bound(h => h.TaskBreakdown).Width(200).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.Finished).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.InProgress).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.InQueue).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.Total).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                    columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                })
-                                .HtmlAttributes(new { style = "background-color: Gainsboro; " })
-                                .DataSource(ds => ds
-                                    .Ajax()
-                                    .Read(read => read.Action("GetHighLevelEgyptFSM", "Home", new { Model.Year, Model.Month }))
-                                )
-                            )
-                        </div>
+                        <table>
+                            <tr>
+                                <td style="padding-left: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                                .Name("high-level-egypt-fsm")
+                                                                                .Columns(columns =>
+                                                                                {
+                                                                                    columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                    columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                    columns.Bound(h => h.InProgress).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                    columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                    columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                    columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                })
+                                                                                .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                                .DataSource(ds => ds
+                                                                                    .Ajax()
+                                                                                    .Read(read => read.Action("GetHighLevelEgyptFSM", "Home", new { Model.Year, Model.Month }))
+                                                                                )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding-right: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                              .Name("high-level-egypt-fsm-2")
+                                                                              .Columns(columns =>
+                                                                              {
+                                                                                  columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                  columns.Bound(h => h.Finished).Title("Progress >= 80%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                  columns.Bound(h => h.InProgress).Title("20% <= Progress < 80%").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                  columns.Bound(h => h.InQueue).Title("Progress < 20%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                  columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                                  columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                              })
+                                                                              .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                              .DataSource(ds => ds
+                                                                                  .Ajax()
+                                                                                  .Read(read => read.Action("GetHighLevelEgyptFSMNew", "Home", new { Model.Year, Model.Month }))
+                                                                              )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </td>
-        <td>
+    </tr>
+    <tr>
+        <td colspan="2">
             <div class="column">
                 <div class="card m-3">
                     <div class="card-header" style="text-align: center">
                         <text style="font-size: 18px; font-weight: bold;">Egypt Total High Level EPIC Progress</text>
                     </div>
                     <div class="card-body row">
-                        <div style="margin-left: 10px;">
-                            @(Html.Kendo().Grid<HighLevelProgress>()
-                               .Name("high-level-egypt")
-                               .Columns(columns =>
-                               {
-                                   columns.Bound(h => h.TaskBreakdown).Width(275).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.InProgress).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                               })
-                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
-                               .DataSource(ds => ds
-                                   .Ajax()
-                                   .Read(read => read.Action("GetHighLevelEgypt", "Home", new { Model.Year, Model.Month }))
-                               )
-                            )
-                        </div>
+                        <table>
+                            <tr>
+                                <td style="padding-left: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                       .Name("high-level-egypt")
+                                                                       .Columns(columns =>
+                                                                       {
+                                                                           columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InProgress).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                       })
+                                                                       .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                       .DataSource(ds => ds
+                                                                           .Ajax()
+                                                                           .Read(read => read.Action("GetHighLevelEgypt", "Home", new { Model.Year, Model.Month }))
+                                                                       )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding-right: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                       .Name("high-level-egypt-2")
+                                                                       .Columns(columns =>
+                                                                       {
+                                                                           columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Finished).Title("Progress >= 80%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InProgress).Title("20% <= Progress < 80%").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InQueue).Title("Progress < 20%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                       })
+                                                                       .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                       .DataSource(ds => ds
+                                                                           .Ajax()
+                                                                           .Read(read => read.Action("GetHighLevelEgyptNew", "Home", new { Model.Year, Model.Month }))
+                                                                       )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </td>
-
     </tr>
     <tr>
-        <td>
+        <td colspan="2">
             <div class="column">
                 <div class="card m-3">
                     <div class="card-header" style="text-align: center">
                         <text style="font-size: 18px; font-weight: bold;">Overall First Sellable Module High Level EPIC Progress</text>
                     </div>
                     <div class="card-body row">
-                        <div style="margin-left: 10px;">
-                            @(Html.Kendo().Grid<HighLevelProgress>()
-                               .Name("high-level-overall-fsm")
-                               .Columns(columns =>
-                               {
-                                   columns.Bound(h => h.TaskBreakdown).Width(200).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.Finished).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.InProgress).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.InQueue).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.Total).Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                               })
-                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
-                               .DataSource(ds => ds
-                                   .Ajax()
-                                   .Read(read => read.Action("GetHighLevelOverallFSM", "Home", new { Model.Year, Model.Month }))
-                               )
-                            )
-                        </div>
+                        <table>
+                            <tr>
+                                <td style="padding-left: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                              .Name("high-level-overall-fsm")
+                                                              .Columns(columns =>
+                                                              {
+                                                                  columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                  columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                  columns.Bound(h => h.InProgress).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                  columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                  columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                  columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                              })
+                                                              .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                              .DataSource(ds => ds
+                                                                  .Ajax()
+                                                                  .Read(read => read.Action("GetHighLevelOverallFSM", "Home", new { Model.Year, Model.Month }))
+                                                              )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding-right: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                               .Name("high-level-overall-fsm-2")
+                                                               .Columns(columns =>
+                                                               {
+                                                                   columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                   columns.Bound(h => h.Finished).Title("Progress >= 80%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                   columns.Bound(h => h.InProgress).Title("20% <= Progress < 80%").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                   columns.Bound(h => h.InQueue).Width(150).Title("Progress < 20%").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                   columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                   columns.Bound(h => h.TargetFinishDate).Width(155).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                               })
+                                                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                               .DataSource(ds => ds
+                                                                   .Ajax()
+                                                                   .Read(read => read.Action("GetHighLevelOverallFSMNew", "Home", new { Model.Year, Model.Month }))
+                                                               )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </td>
-        <td>
+    </tr>
+    <tr>
+        <td colspan="2">
             <div class="column">
                 <div class="card m-3">
                     <div class="card-header" style="text-align: center">
-                        <text style="font-size: 18px; font-weight: bold;">Overall High Level EPIC Progress</text>
+                        <text style="font-size: 18px; font-weight: bold;">Overall Total High Level EPIC Progress</text>
                     </div>
                     <div class="card-body row">
-                        <div style="margin-left: 10px;">
-                            @(Html.Kendo().Grid<HighLevelProgress>()
-                               .Name("high-level-overall")
-                               .Columns(columns =>
-                               {
-                                   columns.Bound(h => h.TaskBreakdown).Width(275).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.InProgress).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                                   columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black;" });
-                               })
-                               .HtmlAttributes(new { style = "background-color: Gainsboro; " })
-                               .DataSource(ds => ds
-                                   .Ajax()
-                                   .Read(read => read.Action("GetHighLevelOverall", "Home", new { Model.Year, Model.Month }))
-                               )
-                            )
-                        </div>
+                        <table>
+                            <tr>
+                                <td style="padding-left: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                       .Name("high-level-overall")
+                                                                       .Columns(columns =>
+                                                                       {
+                                                                           columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Finished).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InProgress).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InQueue).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                       })
+                                                                       .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                       .DataSource(ds => ds
+                                                                           .Ajax()
+                                                                           .Read(read => read.Action("GetHighLevelOverall", "Home", new { Model.Year, Model.Month }))
+                                                                       )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding-right: 15px;">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            @(Html.Kendo().Grid<HighLevelProgress>()
+                                                                       .Name("high-level-overall-2")
+                                                                       .Columns(columns =>
+                                                                       {
+                                                                           columns.Bound(h => h.TaskBreakdown).Width(225).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Finished).Title("Progress >= 80%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InProgress).Title("20% <= Progress < 80%").Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.InQueue).Title("Progress < 20%").Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                           columns.Bound(h => h.Total).Width(150).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; color:black; padding: .786em .6em .786em 1.286em;" });
+                                                                       })
+                                                                       .HtmlAttributes(new { style = "background-color: Gainsboro; " })
+                                                                       .DataSource(ds => ds
+                                                                           .Ajax()
+                                                                           .Read(read => read.Action("GetHighLevelOverallNew", "Home", new { Model.Year, Model.Month }))
+                                                                       )
+                                            )
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
         </td>
-
     </tr>
 </table>
 
-@*<style>
-        .k-chart.small-chart {
-            margin-top: 25px;
-            margin-left: 75px;
-            margin-right: 75px;
-        }
-    </style>*@
+
 <script>
     $(document).ready(function () {
         var url = window.location.href.split("/")[3];
@@ -809,13 +991,6 @@
                     i++;
                 })
             })
-            @*$.get('Home/SelectTeams', function (data) {
-                console.log(data)
-                $.each(data, function (index, value) {
-                    $('<option>').val(value).text(value).appendTo("#form-select-team");
-                    document.getElementById("form-select-team").selectedIndex = @Model.TeamId;
-                })
-            })*@
         }
         else {
             $.get('selectDates', function (data) {
@@ -829,17 +1004,12 @@
                     i++;
                 })
             })
-            @*$.get('SelectTeams', function (data) {
-                console.log(data)
-                $.each(data, function (index, value) {
-                    $('<option>').val(value).text(value).appendTo("#form-select-team");
-                    document.getElementById("form-select-team").selectedIndex = @Model.TeamId;
-                })
-            })*@
         }
 
     })
 </script>
+
+
 <style>
     .button-size {
         margin-left: 24px;

@@ -46,6 +46,7 @@ namespace Epic_Project.Models
         public float? Line4 { get; set; }
         public float? Line5 { get; set; }
         public float? Line6 { get; set; }
+        public float? Line7 { get; set; }
         public string Category { get; set; }
         public FinanceGraph()
         {
