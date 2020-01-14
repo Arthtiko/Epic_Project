@@ -316,12 +316,6 @@
         @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
         {
             @(Html.Kendo().Button()
-                          .Name("logs")
-                          .Content("Logs")
-                          .Events(e => e.Click("logs_page"))
-                          .ToClientTemplate()
-            )
-            @(Html.Kendo().Button()
                           .Name("generate")
                           .Content("Create New Month")
                           .Events(e => e.Click("newMonth"))
@@ -352,8 +346,8 @@
 @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
 {
 <script type="text/javascript">
-    function logs_page() {
-        window.location.href = "Editing_Inline_Logs";
+    function openMeasurementLog() {
+        window.location.href = "~/Log/MeasurementLog";
     }
     function newMonth() {
         window.location.href = "GenerateNextMonth";

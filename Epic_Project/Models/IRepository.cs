@@ -36,7 +36,7 @@ namespace Epic_Project.Models
         void DeleteMeasurement(int epicId, int year, int month, int type, string userName, string ipAddress);
         Measurement InsertMeasurement(Measurement measurement, string userName, string ipAddress);
         Measurement UpdateMeasurement(Measurement measurement, string userName, string ipAddress);
-        IEnumerable<MeasurementLog> GetMeasurementLogs(int epicId, int year, int month, string type);
+        IEnumerable<MeasurementLog> GetMeasurementLogs(int epicId, int year, int month, string type, string userName);
         #endregion
 
         #region Employee

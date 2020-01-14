@@ -57,12 +57,12 @@
         columns.Bound(m => m.PreviousMonthCumulativeActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Previous Month Cumulative Actual Effort").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
         columns.Bound(m => m.ActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
         columns.Bound(m => m.Variance).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
-        columns.Bound(m => m.Deviation).Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
+        //columns.Bound(m => m.Deviation).Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
     })
     .ToolBar(toolbar => toolbar.ClientTemplateId("GridToolbarTemplate"))
     .Groupable()
     .Scrollable(scrollable => scrollable.Virtual(true))
-    .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
+    .Sortable()
     .Filterable()
     .Events(e => e.DataBound("dataBound"))
     .Resizable(resizable => resizable.Columns(true))
@@ -123,18 +123,6 @@
         }
     }
 
-    function locationFilter(element) {
-        element.kendoDropDownList({
-            dataSource: {
-                transport: {
-                    read: "@Url.Action("FilterMenu_Locations")"
-                }
-            },
-            optionLabel: "Select Location"
-        });
-    }
-
-
     function resizeGrid() {
 
         var grid = $("#grid");
@@ -145,17 +133,9 @@
         var windowHeight = $(window).innerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 35 - 150 - 50; // -80; // bunu ekleyince window vertical scroll bar gidiyo
+        var calculatedHeight = windowHeight - 235;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
-
-
-
         contentArea.height(finalHeight);
-    //$("#grid").data('kendoGrid')._adjustLockedHorizontalScrollBar();
-    }
-
-    function renderTemplate(ActualOverallEpicCompilation) {
-        return "<div data-role='progress-bar' data-type='percent' data-min='0' data-max='100' data-bind='value: ActualOverallEpicCompilation'></div>";
     }
 
     $(window).resize(function () {
@@ -170,41 +150,8 @@
         grid.refresh();
     }
 
-
-    $(document).ready(function () {
-        var url = window.location.href.split("/")[3];
-        if (url == null || url == "") {
-            $.get('MeasurementGrid/selectDates', function (data) {
-                console.log(data)
-                var i = 0;
-                $.each(data, function (index, value) {
-                    $('<option>').val(value).text(value).appendTo("#form-select-time");
-                    if (value == (@Model.Year + "-" + @Model.Month)) {
-                        document.getElementById("form-select-time").selectedIndex = i;
-                    }
-                    i++;
-                })
-            })
-        }
-        else {
-            $.get('selectDates', function (data) {
-                console.log(data)
-                var i = 0;
-                $.each(data, function (index, value) {
-                    $('<option>').val(value).text(value).appendTo("#form-select-time");
-                    if (value == (@Model.Year + "-" + @Model.Month)) {
-                        document.getElementById("form-select-time").selectedIndex = i;
-                    }
-                    i++;
-                })
-            })
-        }
-
-    })
-
     function dataBound(e) {
         var grid = this;
-        //grid.tbody.find("tr[role='row']").each(function () { $(this).addClass('red'); });
         grid.tbody.find("tr[role='row']").each(function () {
             var model = grid.dataItem(this);
             $(this).find(".progress1").kendoProgressBar({
@@ -222,22 +169,14 @@
         });
 
         var columns = e.sender.columns;
-        //var columnIndex = this.wrapper.find(".k-grid-header [data-field=" + "Deviation" + "]").index();
-        var columnIndex = 32;
+        var columnIndex = 31;
         
-
-        // iterate the table rows and apply custom row and cell styling
         var rows = e.sender.tbody.children();
         for (var j = 0; j < rows.length; j++) {
             var row = $(rows[j]);
             var dataItem = e.sender.dataItem(row);
 
-            var units = dataItem.get("Deviation");
-
-            console.log("row");
-            console.log(row);
-
-            //row.addClass(getUnitsInStockClass(units));
+            var units = dataItem.get("Variance");
             
             var cell = row.children().eq(columnIndex);
             cell.addClass(getUnitsInStockClass(units));
@@ -245,7 +184,7 @@
     }
 
     function getUnitsInStockClass(units) {
-        if (units > 15) {
+        if (units > 0.1) {
             return "critical";
         } else if (units < 0) {
             return "ok";
@@ -253,9 +192,9 @@
             return "warning";
         }
     }
-
-
+    
     $("#showGrid").click(function () {
+        $("#grid").data("kendoGrid").dataSource.filter({});
         $("#grid").data("kendoGrid").dataSource.read();
     });
 
@@ -337,8 +276,6 @@
                 isFSM: FSM,
                 team: team
             };
-
-
         }
         function showData() {
             var yearMonth = document.getElementById("yearMonths").value;
@@ -368,6 +305,7 @@
                     console.log(error);
                 }
             });
+            $("form.k-filter-menu button[type='reset']").slice(0, 32).trigger("click");
             $("#grid").data("kendoGrid").dataSource.read();
         }
         function exportExcel() {

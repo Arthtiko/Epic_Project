@@ -92,11 +92,11 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@Year", measurement.Year);
                     sqlCommand.Parameters.AddWithValue("@Month", measurement.Month);
                     sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", measurement.Type.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", (double)(measurement.RequirementProgress / 100.00));
-                    sqlCommand.Parameters.AddWithValue("@DesignProgress", (double)(measurement.DesignProgress / 100.00));
-                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", (double)(measurement.DevelopmentProgress / 100.00));
-                    sqlCommand.Parameters.AddWithValue("@TestProgress", (double)(measurement.TestProgress / 100.00));
-                    sqlCommand.Parameters.AddWithValue("@UatProgress", (double)(measurement.UatProgress / 100.00));
+                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", Math.Round(measurement.RequirementProgress / 100.00, 2));
+                    sqlCommand.Parameters.AddWithValue("@DesignProgress", Math.Round(measurement.DesignProgress / 100.00, 2));
+                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", Math.Round(measurement.DevelopmentProgress / 100.00, 2));
+                    sqlCommand.Parameters.AddWithValue("@TestProgress", Math.Round(measurement.TestProgress / 100.00, 2));
+                    sqlCommand.Parameters.AddWithValue("@UatProgress", Math.Round(measurement.UatProgress / 100.00, 2));
                     sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", measurement.PreviousMonthCumulativeActualEffort);
                     sqlCommand.Parameters.AddWithValue("@ActualEffort", measurement.ActualEffort);
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
@@ -475,7 +475,7 @@ namespace Epic_Project.Models
             return MeasurementList;
         }
         
-        public IEnumerable<MeasurementLog> GetMeasurementLogs(int epicId, int year, int month, string type)
+        public IEnumerable<MeasurementLog> GetMeasurementLogs(int epicId, int year, int month, string type, string userName)
         {
             List<MeasurementLog> logs = new List<MeasurementLog>();
             DataTable dt = new DataTable();
@@ -486,10 +486,6 @@ namespace Epic_Project.Models
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
-                    if (epicId != 0)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
-                    }
                     if (year != 0)
                     {
                         sqlCommand.Parameters.AddWithValue("@Year", year);
@@ -501,6 +497,26 @@ namespace Epic_Project.Models
                     if (type != null)
                     {
                         sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", null);
+                    }
+                    if (userName != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@UserName", null);
+                    }
+                    if (epicId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", null);
                     }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
@@ -835,11 +851,11 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@Year", updatedMeasurement.Year);
                     sqlCommand.Parameters.AddWithValue("@Month", updatedMeasurement.Month);
                     sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", updatedMeasurement.Type.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", updatedMeasurement.RequirementProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@DesignProgress", updatedMeasurement.DesignProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", updatedMeasurement.DevelopmentProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@TestProgress", updatedMeasurement.TestProgress / 100);
-                    sqlCommand.Parameters.AddWithValue("@UatProgress", updatedMeasurement.UatProgress / 100);
+                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", Math.Round(updatedMeasurement.RequirementProgress / 100, 2));
+                    sqlCommand.Parameters.AddWithValue("@DesignProgress", Math.Round(updatedMeasurement.DesignProgress / 100, 2));
+                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", Math.Round(updatedMeasurement.DevelopmentProgress / 100, 2));
+                    sqlCommand.Parameters.AddWithValue("@TestProgress", Math.Round(updatedMeasurement.TestProgress / 100, 2));
+                    sqlCommand.Parameters.AddWithValue("@UatProgress", Math.Round(updatedMeasurement.UatProgress / 100, 2));
                     sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", updatedMeasurement.PreviousMonthCumulativeActualEffort);
                     sqlCommand.Parameters.AddWithValue("@ActualEffort", updatedMeasurement.ActualEffort);
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);

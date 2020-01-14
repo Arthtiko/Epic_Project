@@ -72,11 +72,21 @@
             dataType: "text",
             url: "/Module/IsVarianceShowed",
             success: function (result) {
-                if (result == "true") {
+                if (result == "11") {
                     $("#grid").data("kendoGrid").showColumn(5);
+                    $("#grid").data("kendoGrid").showColumn(4);
+                }
+                else if (result == "10") {
+                    $("#grid").data("kendoGrid").showColumn(5);
+                    $("#grid").data("kendoGrid").hideColumn(4);
+                }
+                else if (result == "01") {
+                    $("#grid").data("kendoGrid").hideColumn(5);
+                    $("#grid").data("kendoGrid").showColumn(4);
                 }
                 else {
                     $("#grid").data("kendoGrid").hideColumn(5);
+                    $("#grid").data("kendoGrid").hideColumn(4);
                 }
             },
             error: function (error) {

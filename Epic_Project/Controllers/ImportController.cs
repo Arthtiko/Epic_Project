@@ -106,7 +106,7 @@ namespace Epic_Project.Controllers
                     else
                     {
                         Employee emp = _repository.GetEmployeeById(id);
-                        EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(id))[0];
+                        EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(measurement.EpicId))[0];
 
                         if (emp.EmployeeLocation.LocationName == epic.ProjectLocation.LocationName)
                         {

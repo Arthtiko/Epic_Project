@@ -73,25 +73,39 @@ namespace Epic_Project.Controllers
         {
             List<DateControl> dateControlList = (List<DateControl>)_repository.GetDateControl(year, month, null);
             bool isVarianceShowed = true;
-            int idx = 0;
+            bool isEffortShowed = true;
+            int idxVar = 0; int idxEffort = 0;
             for (int i = 0; i < dateControlList.Count(); i++)
             {
                 if (dateControlList[i].Variance.VarianceName == "TRUE")
                 {
-                    idx++;
+                    idxVar++;
+                    idxEffort++;
                 }
             }
-            if (idx != dateControlList.Count())
+            if (idxVar != dateControlList.Count())
             {
                 isVarianceShowed = false;
             }
-            if (isVarianceShowed)
+            if (idxEffort != dateControlList.Count())
             {
-                return "true";
+                isEffortShowed = false;
+            }
+            if (isVarianceShowed && isEffortShowed)
+            {
+                return "11";
+            }
+            else if (isVarianceShowed && !isEffortShowed)
+            {
+                return "10";
+            }
+            else if (!isVarianceShowed && isEffortShowed)
+            {
+                return "01";
             }
             else
             {
-                return "false";
+                return "00";
             }
         }
 

@@ -157,28 +157,6 @@ namespace EPICProject.Controllers
         }
 
         [Authorize]
-        public ActionResult Editing_InLine_Logs(int epicId, int year, int month, string yearMonth)
-        {
-            int y;
-            int m;
-            Date date = _repository.GetDates()[0];
-            if (yearMonth != null)
-            {
-                string yText = yearMonth.Split("-")[0];
-                y = Convert.ToInt32(yText);
-                string mText = yearMonth.Split("-")[1];
-                m = Convert.ToInt32(mText);
-            }
-            else
-            {
-                y = date.Year;
-                m = date.Month;
-            }
-            var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth };
-            return View(model);
-        }
-
-        [Authorize]
         public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int year, int month, string location, string isFSM, string team)
         {
             if (location == "All")
@@ -349,12 +327,6 @@ namespace EPICProject.Controllers
             }
 
             return Json(new[] { measurement }.ToDataSourceResult(request, ModelState));
-        }
-
-        [Authorize]
-        public ActionResult log_read([DataSourceRequest] DataSourceRequest request, int EpicId, int year, int month)
-        {
-            return Json(_repository.GetMeasurementLogs(EpicId, year, month, null).ToDataSourceResult(request));
         }
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
