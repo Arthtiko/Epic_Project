@@ -122,7 +122,6 @@
         @(Html.Kendo().Button()
                    .Name("export")
                    .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
-                   .Events(e => e.Click("exportExcel"))
                    .Content("Export to Excel")
                    .ToClientTemplate()
         )
