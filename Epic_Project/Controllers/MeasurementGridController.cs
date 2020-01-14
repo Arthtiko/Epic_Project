@@ -545,14 +545,17 @@ namespace EPICProject.Controllers
             return Json(selectList);
         }
         [Authorize]
-        public JsonResult selectTeams()
+        public JsonResult selectTeams(string location)
         {
             TeamList = (List<Team>)_repository.GetTeamAll(0, null, 0, 0);
             List<string> selectList = new List<string>();
             selectList.Add("All");
             for (int i = 0; i < TeamList.Count(); i++)
             {
-                selectList.Add(TeamList[i].TeamName);
+                if (TeamList[i].TeamLocation == location)
+                {
+                    selectList.Add(TeamList[i].TeamName);
+                }
             }
             return Json(selectList);
         }

@@ -237,8 +237,8 @@
                .Name("team")
                .DataSource(ds =>
                {
-                   ds.Read("selectTeams", "MeasurementGrid");
-               })
+               ds.Read("selectTeams", "MeasurementGrid");
+            })
                .ToClientTemplate()
             )
             @(Html.Kendo().Button()
@@ -307,6 +307,9 @@
             });
             $("form.k-filter-menu button[type='reset']").slice(0, 32).trigger("click");
             $("#grid").data("kendoGrid").dataSource.read();
+        }
+        function getLocation() {
+            return document.getElementById("locations").value;
         }
         function exportExcel() {
             window.location.href = "#";
