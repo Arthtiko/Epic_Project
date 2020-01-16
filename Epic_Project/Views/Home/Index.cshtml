@@ -993,7 +993,6 @@
         var url = window.location.href.split("/")[3];
         if (url == null || url == "") {
             $.get('Home/selectDates', function (data) {
-                console.log(data)
                 var i = 0;
                 $.each(data, function (index, value) {
                     $('<option>').val(value).text(value).appendTo("#form-select-time");
@@ -1006,7 +1005,6 @@
         }
         else {
             $.get('selectDates', function (data) {
-                console.log(data)
                 var i = 0;
                 $.each(data, function (index, value) {
                     $('<option>').val(value).text(value).appendTo("#form-select-time");

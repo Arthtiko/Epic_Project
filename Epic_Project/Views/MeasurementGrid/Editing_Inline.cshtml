@@ -144,56 +144,6 @@
         })
     }
 
-    $(document).ready(function () {
-        var url = window.location.href.split("/")[3];
-        if (url == null || url == "") {
-            $.get('MeasurementGrid/selectDates', function (data) {
-                console.log(data)
-                var i = 0;
-                $.each(data, function (index, value) {
-                    $('<option>').val(value).text(value).appendTo("#form-select-time");
-                    if (value == (@Model.Year + "-" + @Model.Month)) {
-                        document.getElementById("form-select-time").selectedIndex = i;
-                    }
-                    i++;
-                })
-            })
-            $(document).ready(function () {
-                $.get('MeasurementGrid/SelectTeams', function (data) {
-                    console.log(data)
-                    var i = 0;
-                    $.each(data, function (index, value) {
-                        $('<option>').val(value).text(value).appendTo("#form-select-team");
-                    })
-                })
-            })
-        }
-        else {
-            $.get('selectDates', function (data) {
-                console.log(data)
-                var i = 0;
-                $.each(data, function (index, value) {
-                    $('<option>').val(value).text(value).appendTo("#form-select-time");
-                    if (value == (@Model.Year + "-" + @Model.Month)) {
-                        document.getElementById("form-select-time").selectedIndex = i;
-                    }
-                    i++;
-                })
-            })
-            $(document).ready(function () {
-                $.get('SelectTeams', function (data) {
-                    console.log(data)
-                    var i = 0;
-                    $.each(data, function (index, value) {
-                        $('<option>').val(value).text(value).appendTo("#form-select-team");
-                    })
-                })
-            })
-        }
-
-    })
-
-
     function resizeGrid() {
         //Define Elements Needed
         var header = $("#header-content");
