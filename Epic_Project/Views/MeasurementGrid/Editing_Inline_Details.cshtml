@@ -61,7 +61,7 @@
     })
     .ToolBar(toolbar => toolbar.ClientTemplateId("GridToolbarTemplate"))
     .Groupable()
-    .Scrollable(scrollable => scrollable.Virtual(true))
+    .Scrollable()
     .Sortable()
     .Filterable()
     .Events(e => e.DataBound("dataBound"))
@@ -217,6 +217,7 @@
             <text class="filter-gap">Location: </text>
             @(Html.Kendo().DropDownList()
                .Name("locations")
+               .Events(e => e.Change("locationChange"))
                .DataSource(ds =>
                {
                    ds.Read("selectLocations", "MeasurementGrid");
@@ -237,8 +238,8 @@
                .Name("team")
                .DataSource(ds =>
                {
-               ds.Read("selectTeams", "MeasurementGrid");
-            })
+                   ds.Read(read => read.Action("selectTeams", "MeasurementGrid").Data("getTeamsData"));
+               })
                .ToClientTemplate()
             )
             @(Html.Kendo().Button()
@@ -276,6 +277,15 @@
                 isFSM: FSM,
                 team: team
             };
+        }
+        function getTeamsData() {
+            return {
+                location: document.getElementById("locations").value
+            };
+        }
+        function locationChange() {
+            $("#team").data("kendoDropDownList").dataSource.read();
+            $("#team").data("kendoDropDownList").value("All")
         }
         function showData() {
             var yearMonth = document.getElementById("yearMonths").value;

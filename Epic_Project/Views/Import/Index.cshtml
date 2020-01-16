@@ -301,8 +301,8 @@
         .Name("dialog")
         .Title("Import Report")
         .Visible(false)
-        .Width(500)
-        .Height(750)
+        //.Width(500)
+        .MaxHeight(750)
         .Modal(true)
     )
 
@@ -326,6 +326,7 @@
         var sheet = spreadsheet.sheetByIndex(0);
         var data = sheet.toJSON();
         var obj;
+        var indexes = [];
         var failedEpics = [];
         var failedYears = [];
         var failedMonths = [];
@@ -342,7 +343,8 @@
 
             console.log(obj);
 
-            if (@Model.Mode == 1) {
+            if (obj[0].value != null && obj[0].value != undefined) {
+                if (@Model.Mode == 1) {
                 epicId = obj[0].value;
                 year = obj[1].value;
                 month = obj[2].value;
@@ -396,6 +398,7 @@
                 success: function (result) {
                     console.log("result");
                     if (result != "Success") {
+                        indexes[failedEpicCount] = i;
                         failedEpics[failedEpicCount] = epicId;
                         failedYears[failedEpicCount] = year;
                         failedMonths[failedEpicCount] = month;
@@ -408,22 +411,67 @@
                     console.log("error");
                 }
             });
+            }
         }
 
         var content = "";
+
+
         if (failedEpicCount > 0) {
-            //content = content + "Epic IDs of Failed Requests:\n"
+            content = content + "<table id='issues'>";
             $("#dialog").data("kendoDialog").title("Failed Requests");
-            for (let i = 0; i < failedEpicCount; i++) {
-                let t;
-                if (type == 1) {
-                    t = "Target";
+            if (@Model.Mode == 1) {
+                content = content + "<tr><td>EpicId</td><td>Year</td><td>Month</td><td>Type</td><td>Req. Prog.</td><td>Des. Prog.</td><td>Dev. Prog.</td><td>Test Prog.</td><td>Uat Prog.</td><td>Issues</td></tr>";
+                for (let i = 0; i < failedEpicCount; i++) {
+                    obj = data.rows[indexes[i]].cells;
+                    content = content + "<tr>" +
+                        "<td>" + obj[0].value + "</td>" +
+                        "<td>" + obj[1].value + "</td>" +
+                        "<td>" + obj[2].value + "</td>" +
+                        "<td>" + obj[3].value + "</td>" +
+                        "<td>" + obj[4].value + "</td>" +
+                        "<td>" + obj[5].value + "</td>" +
+                        "<td>" + obj[6].value + "</td>" +
+                        "<td>" + obj[7].value + "</td>" +
+                        "<td>" + obj[8].value + "</td>" +
+                        "<td>" + issues[i] + "</td>" +
+                        "</tr>";
                 }
-                else {
-                    t = "Actual";
-                }
-                content = content + "<pre>EPIC: " + failedEpics[i] + ", " + failedYears[i] + "-" + failedMonths[i] + ", " + t + "\nIssue: " + issues[i] + "</pre>";
             }
+            if (@Model.Mode == 2) {
+                content = content + "<tr><td>EpicId</td><td>Year</td><td>Month</td><td>Type</td><td>Actual Effort</td><td>Issues</td></tr>";
+                for (let i = 0; i < failedEpicCount; i++) {
+                    obj = data.rows[indexes[i]].cells;
+                    content = content + "<tr>" +
+                        "<td>" + obj[0].value + "</td>" +
+                        "<td>" + obj[1].value + "</td>" +
+                        "<td>" + obj[2].value + "</td>" +
+                        "<td>" + obj[3].value + "</td>" +
+                        "<td>" + obj[4].value + "</td>" +
+                        "<td>" + issues[i] + "</td>" +
+                        "</tr>";
+                }
+            }
+            if (@Model.Mode == 3) {
+                content = content + "<tr><td>EpicId</td><td>Year</td><td>Month</td><td>Type</td><td>Req. Prog.</td><td>Des. Prog.</td><td>Dev. Prog.</td><td>Test Prog.</td><td>Uat Prog.</td><td>Actual Effort</td><td>Issues</td></tr>";
+                for (let i = 0; i < failedEpicCount; i++) {
+                    obj = data.rows[indexes[i]].cells;
+                    content = content + "<tr>" +
+                        "<td>" + obj[0].value + "</td>" +
+                        "<td>" + obj[1].value + "</td>" +
+                        "<td>" + obj[2].value + "</td>" +
+                        "<td>" + obj[3].value + "</td>" +
+                        "<td>" + obj[4].value + "</td>" +
+                        "<td>" + obj[5].value + "</td>" +
+                        "<td>" + obj[6].value + "</td>" +
+                        "<td>" + obj[7].value + "</td>" +
+                        "<td>" + obj[8].value + "</td>" +
+                        "<td>" + obj[9].value + "</td>" +
+                        "<td>" + issues[i] + "</td>" +
+                        "</tr>";
+                }
+            }
+            content = content + "</table>";
         }
         else {
             $("#dialog").data("kendoDialog").title("Import Report");
@@ -438,5 +486,31 @@
 <style>
     .k-tabstrip-wrapper {
         display: none;
+    }
+    #issues {
+        font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    #issues td, #issues th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #issues tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    #issues tr:hover {
+        background-color: #ddd;
+    }
+
+    #issues th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #4CAF50;
+        color: white;
     }
 </style>

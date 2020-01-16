@@ -11,11 +11,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Epic_Project.Controllers
 {
     [Authorize(Roles = "Admin, Project Manager, Program Manager")]
-    public class LogController : Controller
+    public class LogGridController : Controller
     {
         private readonly IRepository _repository;
 
-        public LogController(IRepository repository)
+        public LogGridController(IRepository repository)
         {
             _repository = repository;
         }
@@ -43,6 +43,8 @@ namespace Epic_Project.Controllers
             return Json(measurementLogs.ToDataSourceResult(request));
         }
 
+        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
+        [HttpPost]
         public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
             var fileContents = Convert.FromBase64String(base64);

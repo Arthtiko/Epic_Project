@@ -43,88 +43,100 @@ namespace Epic_Project.Controllers
         {
             Measurement measurement = new Measurement();
             string ipAddress = _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
-            Date date = new Date() { Year = DateTime.Today.Year, Month = DateTime.Today.Month };
-            if ((date.Year == year && date.Month - month <= 1 && date.Month - month >= 0) || (date.Year == year + 1 && month == 12))
+            List<Date> dates = _repository.GetDates();
+            Date currentDate = null;
+            Date previousDate = null;
+            if (dates.Count() > 0)
             {
-                measurement = new Measurement()
+                currentDate = dates[0];
+            }
+            if (dates.Count() > 1)
+            {
+                previousDate = dates[1];
+            }
+            if (!((currentDate != null && year == currentDate.Year && month == currentDate.Month) || (previousDate != null && year == previousDate.Year && month == previousDate.Month)))
+            {
+                return "You can only import to last or previous created month.";
+            }
+            measurement = new Measurement()
+            {
+                EpicId = epicId,
+                Year = year,
+                Month = month,
+                Type = new MeasurementTypeViewModel()
                 {
-                    EpicId = epicId,
-                    Year = year,
-                    Month = month,
-                    Type = new MeasurementTypeViewModel()
-                    {
-                        TypeName = type == 1 ? "Target" : "Actual",
-                        TypeValue = type
-                    },
-                    RequirementProgress = req,
-                    DesignProgress = des,
-                    DevelopmentProgress = dev,
-                    TestProgress = test,
-                    UatProgress = uat,
-                    ActualEffort = effort
-                };
+                    TypeName = type == 1 ? "Target" : "Actual",
+                    TypeValue = type
+                },
+                RequirementProgress = req,
+                DesignProgress = des,
+                DevelopmentProgress = dev,
+                TestProgress = test,
+                UatProgress = uat,
+                ActualEffort = effort
+            };
 
-                EpicBaseLine temp = epics.Find(e => e.EPICId == epicId);
-                if (temp == null)
+            EpicBaseLine temp = epics.Find(e => e.EPICId == epicId);
+            if (temp == null)
+            {
+                return "Epic could not found.";
+            }
+
+            if (measurement.Type.TypeValue != 1 && measurement.Type.TypeValue != 2)
+            {
+                return "Invalid Type";
+            }
+
+            measurement = CreateMeasurementForImport(measurement, mode);
+            if (measurement != null)
+            {
+                int id = _repository.GetEmployeeId(UserId);
+
+                if (id == 1001)
                 {
-                    return "Epic could not found.";
-                }
-
-                measurement = CreateMeasurementForImport(measurement, mode);
-                if (measurement != null)
-                {
-                    int id = _repository.GetEmployeeId(UserId);
-
-                    if (id == 1001)
+                    EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(epicId))[0];
+                    if (epic.ProjectLocation.LocationName == "Turkey")
                     {
-                        EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(epicId))[0];
-
-                        if (epic.ProjectLocation.LocationName == "Turkey")
-                        {
-                            _repository.UpdateMeasurement(measurement, "Turkey Test Admin", ipAddress);
-                            return "Success";
-                        }
-                        else
-                        {
-                            return "Invalid Epic Location";
-                        }
-                    }
-                    else if (id == 2001)
-                    {
-                        EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(epicId))[0];
-
-                        if (epic.ProjectLocation.LocationName == "Egypt")
-                        {
-                            _repository.UpdateMeasurement(measurement, "Egypt Test Admin", ipAddress);
-                            return "Success";
-                        }
-                        else
-                        {
-                            return "Invalid Epic Location";
-                        }
+                        _repository.UpdateMeasurement(measurement, "Turkey Test Admin", ipAddress);
+                        return "Success";
                     }
                     else
                     {
-                        Employee emp = _repository.GetEmployeeById(id);
-                        EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(measurement.EpicId))[0];
-
-                        if (emp.EmployeeLocation.LocationName == epic.ProjectLocation.LocationName)
-                        {
-                            _repository.UpdateMeasurement(measurement, emp.EmployeeName, ipAddress);
-                            return "Success";
-                        }
-                        else
-                        {
-                            return "Invalid Epic Location";
-                        }
+                        return "Invalid Epic Location";
+                    }
+                }
+                else if (id == 2001)
+                {
+                    EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(epicId))[0];
+                    if (epic.ProjectLocation.LocationName == "Egypt")
+                    {
+                        _repository.UpdateMeasurement(measurement, "Egypt Test Admin", ipAddress);
+                        return "Success";
+                    }
+                    else
+                    {
+                        return "Invalid Epic Location";
                     }
                 }
                 else
                 {
-                    return "Invalid ID, Year, Month or Type.";
+                    Employee emp = _repository.GetEmployeeById(id);
+                    EpicBaseLine epic = ((List<EpicBaseLine>)_repository.GetEpicBaseLineAll(measurement.EpicId))[0];
+                    if (emp.EmployeeLocation.LocationName == epic.ProjectLocation.LocationName)
+                    {
+                        _repository.UpdateMeasurement(measurement, emp.EmployeeName, ipAddress);
+                        return "Success";
+                    }
+                    else
+                    {
+                        return "Invalid Epic Location";
+                    }
                 }
             }
-            return "Can only import to current and previous month.";
+            else
+            {
+                return "Invalid ID, Year, Month or Type.";
+            }
         }
 
         [HttpPost]

@@ -552,7 +552,7 @@ namespace EPICProject.Controllers
             selectList.Add("All");
             for (int i = 0; i < TeamList.Count(); i++)
             {
-                if (TeamList[i].TeamLocation == location)
+                if (TeamList[i].TeamLocation == location || location == "All" || location == null)
                 {
                     selectList.Add(TeamList[i].TeamName);
                 }

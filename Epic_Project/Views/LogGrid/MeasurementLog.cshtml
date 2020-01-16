@@ -26,10 +26,10 @@
        .Scrollable()
        .Sortable()
        .Filterable()
-       .Excel(excel => excel.FileName("MeasurementLog " + DateTime.Now.Year + "-" + DateTime.Now.Month + " " + DateTime.Now.Hour + ":" + DateTime.Now.Minute + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Log")))
        .Resizable(resizable => resizable.Columns(true))
        .Reorderable(reorderable => reorderable.Columns(true))
        .HtmlAttributes(new { style = "background-color: Gainsboro" })
+       .Excel(excel => excel.FileName("MeasurementLog " + DateTime.Now.Year + "-" + DateTime.Now.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "MeasurementGrid")))
        .DataSource(dataSource => dataSource
            .Ajax()
            .Events(events => events.Error("error_handler"))
@@ -37,7 +37,7 @@
            {
                model.Id(e => e.EpicId);
            })
-           .Read(read => read.Action("MeasurementLog_Read", "Log").Data("getReadData"))
+           .Read(read => read.Action("MeasurementLog_Read", "LogGrid").Data("getReadData"))
        )
 )
 <script type="text/javascript">
@@ -80,7 +80,7 @@
                    .Name("IDs")
                    .DataSource(ds =>
                    {
-                       ds.Read("selectIDs", "Log");
+                       ds.Read("selectIDs", "LogGrid");
                    })
                    .ToClientTemplate()
         )
@@ -89,7 +89,7 @@
                    .Name("yearMonths")
                    .DataSource(ds =>
                    {
-                       ds.Read("selectDates", "Log");
+                       ds.Read("selectDates", "LogGrid");
                    })
                    .ToClientTemplate()
         )
@@ -98,7 +98,7 @@
                    .Name("types")
                    .DataSource(ds =>
                    {
-                       ds.Read("selectTypes", "Log");
+                       ds.Read("selectTypes", "LogGrid");
                    })
                    .ToClientTemplate()
         )
@@ -107,7 +107,7 @@
                    .Name("users")
                    .DataSource(ds =>
                    {
-                       ds.Read("selectUsers", "Log");
+                       ds.Read("selectUsers", "LogGrid");
                    })
                    .ToClientTemplate()
         )
@@ -120,7 +120,7 @@
     </div>
     <div class="toolbar">
         @(Html.Kendo().Button()
-                   .Name("export")
+                   .Name("excel")
                    .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
                    .Content("Export to Excel")
                    .ToClientTemplate()
@@ -151,10 +151,9 @@
         $("form.k-filter-menu button[type='reset']").slice(0, 32).trigger("click");
         $("#grid").data("kendoGrid").dataSource.read();
     }
-    $("#export").click(function (e) {
-        var grid = $("#grid").data("kendoGrid");
-        grid.saveAsExcel();
-    });
+    function exportExcel() {
+        window.location.href = "#";
+    }
 </script>
 
 <style>
