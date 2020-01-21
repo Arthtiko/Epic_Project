@@ -20,7 +20,7 @@ namespace Epic_Project
                 .UseStartup<Startup>()
                 .UseIISIntegration()
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseUrls("http://*:5050")
+                .UseUrls("http://*:81")
                 .Build();
             host.Run();
         }

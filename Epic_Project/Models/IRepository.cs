@@ -36,7 +36,7 @@ namespace Epic_Project.Models
         void DeleteMeasurement(int epicId, int year, int month, int type, string userName, string ipAddress);
         Measurement InsertMeasurement(Measurement measurement, string userName, string ipAddress);
         Measurement UpdateMeasurement(Measurement measurement, string userName, string ipAddress);
-        IEnumerable<MeasurementLog> GetMeasurementLogs(int epicId, int year, int month, string type, string userName);
+        IEnumerable<MeasurementLogModel> GetLogMeasurement(int epicId, int year, int month, string type, string user);
         #endregion
 
         #region Employee
@@ -95,5 +95,7 @@ namespace Epic_Project.Models
         float GetEpicWeight(string location, string isFirstSellableModule);
         List<int> GetEpicBaseLineIdByLocation(string location);
         #endregion
+
+        IEnumerable<MeasurementLogModel> mahmut();
     }
 }

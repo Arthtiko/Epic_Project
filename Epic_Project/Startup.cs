@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Epic_Project.Models;
 using Newtonsoft.Json.Serialization;
 
+
 namespace Epic_Project
 {
     public class Startup
@@ -38,13 +39,9 @@ namespace Epic_Project
 
             string conStr = ConnString.IdentityConnectionString;
 
-            //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("Server=68.183.222.62;Database=EPICDB;User Id=SA;Password=Arch1234;"));
-            //services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=aspnet-Epic_Project-5699E43C-A911-4672-9DD1-E6F31459C896;Trusted_Connection=True;MultipleActiveResultSets=true"));
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(conStr));
 
-            //services.AddDefaultIdentity<IdentityUser>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>();
-
+            //services.Configure<OptionsModel>(Configuration.GetSection("ConnectionStrings"));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(
                 options => options.Stores.MaxLengthForKeys = 128)

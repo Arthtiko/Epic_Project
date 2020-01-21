@@ -5,8 +5,12 @@ using System.Threading.Tasks;
 
 namespace Epic_Project.Models
 {
-    public class MeasurementLog
+    public class MeasurementLogModel
     {
+        public MeasurementLogModel()
+        {
+            
+        }
         public int EpicId { get; set; }
         public string EpicName { get; set; }
         public string Module { get; set; }

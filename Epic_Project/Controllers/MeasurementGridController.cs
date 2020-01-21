@@ -155,6 +155,7 @@ namespace EPICProject.Controllers
             var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, Location = location, Type = type, TeamName = teamName };
             return View(model);
         }
+        
 
         [Authorize]
         public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int year, int month, string location, string isFSM, string team)

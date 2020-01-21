@@ -1,0 +1,185 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@(Html.Kendo().Grid<MeasurementLogModel>()
+    .Name("grid")
+    .AutoBind(false)
+    .Columns(columns =>
+    {
+        columns.Bound(m => m.EpicId).Filterable(ftb => ftb.Multi(true).Search(true)).Width(120).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).Locked(true);
+        columns.Bound(m => m.EpicName).Filterable(ftb => ftb.Multi(true).Search(true)).Width(270).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).Locked(true);
+        columns.Bound(m => m.Module).Filterable(ftb => ftb.Multi(true).Search(true)).Width(240).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.Year).Filterable(false).Width(90).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.Month).Filterable(false).Width(90).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.Type).Filterable(false).Width(105).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.Team).Filterable(false).Width(105).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.RequirementProgress).Filterable(false).Width(135).Format("{0:0.00 \\ '%'}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.DesignProgress).Filterable(false).Width(135).Format("{0:0.00 \\ '%'}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.DevelopmentProgress).Filterable(false).Width(135).Format("{0:0.00 \\ '%'}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.TestProgress).Filterable(false).Width(135).Format("{0:0.00 \\ '%'}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.UatProgress).Filterable(false).Width(135).Format("{0:0.00 \\ '%'}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.PreviousMonthCumulativeActualEffort).Filterable(false).Width(135).Format("{0:0.00}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.ActualEffort).Filterable(false).Width(120).Format("{0:0.00}").HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.UserName).Filterable(ftb => ftb.Multi(true).Search(true)).Width(135).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.Time).Filterable(false).Width(135).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+        columns.Bound(m => m.UserIp).Filterable(false).Width(135).HtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" }).HeaderHtmlAttributes(new { style = "text-align: center; height: auto; white-space: normal;" });
+    })
+    .ToolBar(toolbar => toolbar.ClientTemplateId("GridToolbarTemplate"))
+    //.ToolBar(t => t.Excel())
+    .Groupable()
+    .Scrollable()
+    .Sortable()
+    .Filterable()
+    .Resizable(res => res.Columns(true))
+    .Reorderable(reo => reo.Columns(true))
+    .HtmlAttributes(new { style = "background-color: Gainsboro" })
+    .Excel(excel => excel.FileName("MeasurementLog " + DateTime.Now.Year + "-" + DateTime.Now.Month + ".xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "LogGrid")))
+    .DataSource(ds => ds
+        .Ajax()
+        .Events(events => events.Error("error_handler"))
+        .Model(model =>
+        {
+            model.Id(m => m.EpicId);
+        })
+        .Read(read => read.Action("Measurement_Read", "LogGrid").Data("getReadData"))
+    )
+)
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+        }
+    }
+
+    function resizeGrid() {
+        var grid = $("#grid");
+        var minimumAcceptableGridHeight = 300;
+        var windowHeight = $(window).innerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 165;
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+</script>
+
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Epic Id: </text>
+        @(Html.Kendo().DropDownList()
+            .Name("IDs")
+            .DataSource(ds =>
+            {
+                ds.Read("selectIDs", "LogGrid");
+            })
+            .ToClientTemplate()
+        )
+        <text class="filter-gap">Date: </text>
+        @(Html.Kendo().DropDownList()
+            .Name("yearMonths")
+            .DataSource(ds =>
+            {
+                ds.Read("selectDates", "LogGrid");
+            })
+            .ToClientTemplate()
+        )
+        <text class="filter-gap">Type: </text>
+        @(Html.Kendo().DropDownList()
+            .Name("types")
+            .DataSource(ds =>
+            {
+                ds.Read("selectTypes", "LogGrid");
+            })
+            .ToClientTemplate()
+        )
+        <text class="filter-gap">User: </text>
+        @(Html.Kendo().DropDownList()
+            .Name("users")
+            .DataSource(ds =>
+            {
+                ds.Read("selectUsers", "LogGrid");
+            })
+            .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+            .Name("show-data")
+            .Content("Show Data")
+            .Events(e => e.Click("showData"))
+            .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+                       .Name("excel")
+                       .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
+                       .Content("Export to Excel")
+                       .ToClientTemplate()
+        )
+    </div>
+</script>
+
+<script type="text/javascript">
+    function getReadData() {
+        var yearMonth = document.getElementById("yearMonths").value;
+        var year = yearMonth.split("-")[0];
+        var month = yearMonth.split("-")[1];
+
+        var type = document.getElementById("types").value;
+
+        var user = document.getElementById("users").value;
+
+        var epicId = document.getElementById("IDs").value;
+
+        return {
+            epicId: epicId,
+            year: year,
+            month: month,
+            type: type,
+            user: user
+        };
+    }
+    function showData() {
+        $("form.k-filter-menu button[type='reset']").slice(0, 32).trigger("click");
+        $("#grid").data("kendoGrid").dataSource.read();
+    }
+    function exportExcel() {
+        window.location.href = "#";
+    }
+</script>
+
+<style>
+    .k-grid tbody tr {
+        height: 40px;
+    }
+    .dateListContainer {
+        margin-left: 12px;
+        display: inline-block;
+    }
+    .toolbar {
+        float: right;
+    }
+    .filter-gap {
+        margin-left: 12px;
+    }
+    .row-style-default {
+        text-align: center;
+        height: auto;
+        white-space: normal;
+    }
+</style>

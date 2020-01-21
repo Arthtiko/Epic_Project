@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -11,8 +12,6 @@ namespace Epic_Project.Models
 {
     public class SQLRepository : IRepository
     {
-        private readonly IConfiguration _configuration;
-
         private string defConnectionString = ConnString.IdentityConnectionString;
         private string connectionString = ConnString.EpicDBConnectionString;
 
@@ -24,12 +23,9 @@ namespace Epic_Project.Models
         private List<Parameter> ParameterList = new List<Parameter>();
         private List<Date> DateList = new List<Date>();
 
-
-        public SQLRepository(IConfiguration configuration)
+        public SQLRepository()
         {
-            _configuration = configuration;
-            //connectionString = _configuration.GetConnectionString("EPICDBConnection");
-            //defConnectionString = _configuration.GetConnectionString("DefaultConnection");
+
         }
 
         #region Insert
@@ -474,12 +470,11 @@ namespace Epic_Project.Models
             }
             return MeasurementList;
         }
-        
-        public IEnumerable<MeasurementLog> GetMeasurementLogs(int epicId, int year, int month, string type, string userName)
-        {
-            List<MeasurementLog> logs = new List<MeasurementLog>();
-            DataTable dt = new DataTable();
 
+        public IEnumerable<MeasurementLogModel> GetLogMeasurement(int epicId, int year, int month, string type, string user)
+        {
+            List<MeasurementLogModel> logList = new List<MeasurementLogModel>();
+            DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
                 string procName = "[sel_Measurement_Logs]";
@@ -494,29 +489,25 @@ namespace Epic_Project.Models
                     {
                         sqlCommand.Parameters.AddWithValue("@Month", month);
                     }
-                    if (type != null)
-                    {
-                        sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
-                    }
-                    else
+                    if (type == null)
                     {
                         sqlCommand.Parameters.AddWithValue("@Type", null);
                     }
-                    if (userName != null)
+                    else
                     {
-                        sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                        sqlCommand.Parameters.AddWithValue("@Type", type);
+                    }
+                    if (user == null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@UserName", null);
                     }
                     else
                     {
-                        sqlCommand.Parameters.AddWithValue("@UserName", null);
+                        sqlCommand.Parameters.AddWithValue("@UserName", user);
                     }
                     if (epicId != 0)
                     {
                         sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
-                    }
-                    else
-                    {
-                        sqlCommand.Parameters.AddWithValue("@EpicId", null);
                     }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
@@ -527,27 +518,36 @@ namespace Epic_Project.Models
             }
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                MeasurementLog temp = new MeasurementLog();
-                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
-                temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
-                temp.Module = Convert.ToString(dt.Rows[i]["ModuleName"]);
-                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
-                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
-                temp.Type = Convert.ToString(dt.Rows[i]["TypeName"]);
-                temp.Team = Convert.ToString(dt.Rows[i]["TeamName"]);
-                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
-                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
-                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
-                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
-                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
-                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
-                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
-                temp.UserName = Convert.ToString(dt.Rows[i]["UserName"]);
-                temp.Time = (Convert.ToDateTime(dt.Rows[i]["Time"]).ToLocalTime()).ToString("dd/MM/yyyy HH:mm");
-                temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
-                logs.Add(temp);
+                if (Convert.ToString(dt.Rows[i]["UserName"]) != "Egypt Test Admin" && Convert.ToString(dt.Rows[i]["UserName"]) != "Turkey Test Admin")
+                {
+                    MeasurementLogModel temp = new MeasurementLogModel();
+                    temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                    temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
+                    temp.Module = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                    temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                    temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                    temp.Type = Convert.ToString(dt.Rows[i]["TypeName"]);
+                    temp.Team = Convert.ToString(dt.Rows[i]["TeamName"]);
+                    temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
+                    temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
+                    temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
+                    temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
+                    temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
+                    temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
+                    temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                    if (!Convert.IsDBNull(dt.Rows[i]["UserName"]))
+                    {
+                        temp.UserName = Convert.ToString(dt.Rows[i]["UserName"]);
+                    }
+                    temp.Time = Convert.ToDateTime(dt.Rows[i]["Time"]).ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+                    if (!Convert.IsDBNull(dt.Rows[i]["UserName"]))
+                    {
+                        temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
+                    }
+                    logList.Add(temp);
+                }
             }
-            return logs;
+            return logList;
         }
 
         public IEnumerable<Module> GetModuleAll()
@@ -2190,5 +2190,10 @@ namespace Epic_Project.Models
             return highLevelProgresses;
         }
 
+        public IEnumerable<MeasurementLogModel> mahmut()
+        {
+            IEnumerable<MeasurementLogModel> logs = GetLogMeasurement(0, 2020, 1, null, null);
+            return logs;
+        }
     }
 }

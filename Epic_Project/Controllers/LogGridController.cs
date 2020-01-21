@@ -19,17 +19,22 @@ namespace Epic_Project.Controllers
         {
             _repository = repository;
         }
+        
 
-        public IActionResult MeasurementLog()
+        public IActionResult Measurement()
         {
             return View();
         }
-        
-        public ActionResult MeasurementLog_Read([DataSourceRequest] DataSourceRequest request, string epicId, int year, int month, string type, string user)
+        public ActionResult Measurement_Read([DataSourceRequest] DataSourceRequest request, string epicId, int year, int month, string type, string user)
         {
-            if (epicId == "All" || epicId == null)
+            int id;
+            if (epicId == "All")
             {
-                epicId = "0";
+                id = 0;
+            }
+            else
+            {
+                id = Convert.ToInt32(epicId);
             }
             if (type == "All")
             {
@@ -39,11 +44,11 @@ namespace Epic_Project.Controllers
             {
                 user = null;
             }
-            List<MeasurementLog> measurementLogs = (List<MeasurementLog>)_repository.GetMeasurementLogs(Convert.ToInt32(epicId), year, month, type, user);
-            return Json(measurementLogs.ToDataSourceResult(request));
+            var x = _repository.GetLogMeasurement(id, year, month, type, user);
+            return Json(x.ToDataSourceResult(request));
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
+        [Authorize(Roles = "Admin, Project Manager, Program Manager, Team Leader")]
         [HttpPost]
         public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
