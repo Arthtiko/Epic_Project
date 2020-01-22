@@ -540,7 +540,7 @@ namespace Epic_Project.Models
                         temp.UserName = Convert.ToString(dt.Rows[i]["UserName"]);
                     }
                     temp.Time = Convert.ToDateTime(dt.Rows[i]["Time"]).ToLocalTime().ToString("dd/MM/yyyy HH:mm");
-                    if (!Convert.IsDBNull(dt.Rows[i]["UserName"]))
+                    if (!Convert.IsDBNull(dt.Rows[i]["UserIp"]))
                     {
                         temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
                     }
@@ -2189,11 +2189,6 @@ namespace Epic_Project.Models
 
             return highLevelProgresses;
         }
-
-        public IEnumerable<MeasurementLogModel> mahmut()
-        {
-            IEnumerable<MeasurementLogModel> logs = GetLogMeasurement(0, 2020, 1, null, null);
-            return logs;
-        }
+        
     }
 }

@@ -95,7 +95,6 @@ namespace Epic_Project.Models
         float GetEpicWeight(string location, string isFirstSellableModule);
         List<int> GetEpicBaseLineIdByLocation(string location);
         #endregion
-
-        IEnumerable<MeasurementLogModel> mahmut();
+        
     }
 }
