@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,8 +13,8 @@ namespace Epic_Project.Models
 {
     public class SQLRepository : IRepository
     {
-        private string defConnectionString = ConnString.IdentityConnectionString;
-        private string connectionString = ConnString.EpicDBConnectionString;
+        private string defConnectionString = GetIdentityConnectionString();
+        private string connectionString = GetEPICDBConnectionString();
 
         private List<Team> TeamList = new List<Team>();
         private List<Module> ModuleList = new List<Module>();
@@ -26,6 +27,16 @@ namespace Epic_Project.Models
         public SQLRepository()
         {
 
+        }
+
+
+        public static string GetEPICDBConnectionString()
+        {
+            return Startup.EPICDBConnectionString;
+        }
+        public static string GetIdentityConnectionString()
+        {
+            return Startup.IdentityConnectionString;
         }
 
         #region Insert
@@ -227,6 +238,40 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@Type", type);
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
                     sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public void DeleteMeasurementLog(int epicId, int year, int month, int type)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_Measurement_Log]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (epicId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    if (type != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", type);
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -473,7 +518,9 @@ namespace Epic_Project.Models
 
         public IEnumerable<MeasurementLogModel> GetLogMeasurement(int epicId, int year, int month, string type, string user)
         {
+            List<EpicBaseLine> epics = (List<EpicBaseLine>)GetEpicBaseLineAll(0);
             List<MeasurementLogModel> logList = new List<MeasurementLogModel>();
+            List<MeasurementLog> longLogList = new List<MeasurementLog>();
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -495,7 +542,7 @@ namespace Epic_Project.Models
                     }
                     else
                     {
-                        sqlCommand.Parameters.AddWithValue("@Type", type);
+                        sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
                     }
                     if (user == null)
                     {
@@ -540,13 +587,73 @@ namespace Epic_Project.Models
                         temp.UserName = Convert.ToString(dt.Rows[i]["UserName"]);
                     }
                     temp.Time = Convert.ToDateTime(dt.Rows[i]["Time"]).ToLocalTime().ToString("dd/MM/yyyy HH:mm");
-                    if (!Convert.IsDBNull(dt.Rows[i]["UserIp"]))
-                    {
-                        temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
-                    }
+                    //if (!Convert.IsDBNull(dt.Rows[i]["UserIp"]))
+                    //{
+                    //    temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
+                    //}
                     logList.Add(temp);
                 }
             }
+            for (int j = 0; j < epics.Count(); j++)
+            {
+                List<MeasurementLogModel> modelList = logList.FindAll(l => l.EpicId == epics[j].EPICId && l.Type == "Target");
+                for (int k = 0; k < modelList.Count() -1; k++)
+                {
+                    MeasurementLog temp = new MeasurementLog();
+                    temp.EpicId = modelList[k].EpicId;
+                    temp.Year = modelList[k].EpicId;
+                    temp.Month = modelList[k].Month;
+                    temp.Type = modelList[k].Type;
+                    temp.NewValues = new MeasurementValues();
+                    temp.NewValues.RequirementProgress = modelList[k].RequirementProgress;
+                    temp.NewValues.DesignProgress = modelList[k].DesignProgress;
+                    temp.NewValues.DevelopmentProgress = modelList[k].DevelopmentProgress;
+                    temp.NewValues.TestProgress = modelList[k].TestProgress;
+                    temp.NewValues.UatProgress = modelList[k].UatProgress;
+                    temp.NewValues.PreviousMonthCumulativeActualEffort = modelList[k].PreviousMonthCumulativeActualEffort;
+                    temp.OldValues = new MeasurementValues();
+                    temp.OldValues.ActualEffort = modelList[k].ActualEffort;
+                    temp.OldValues.RequirementProgress = modelList[k + 1].RequirementProgress;
+                    temp.OldValues.DesignProgress = modelList[k + 1].DesignProgress;
+                    temp.OldValues.DevelopmentProgress = modelList[k + 1].DevelopmentProgress;
+                    temp.OldValues.TestProgress = modelList[k + 1].TestProgress;
+                    temp.OldValues.UatProgress = modelList[k + 1].UatProgress;
+                    temp.OldValues.PreviousMonthCumulativeActualEffort = modelList[k + 1].PreviousMonthCumulativeActualEffort;
+                    temp.OldValues.ActualEffort = modelList[k + 1].ActualEffort;
+                    temp.UserName = modelList[k].UserName;
+                    temp.Time = modelList[k].Time;
+                    longLogList.Add(temp);
+                }
+                modelList = logList.FindAll(l => l.EpicId == epics[j].EPICId && l.Type == "Actual");
+                for (int k = 0; k < modelList.Count()-1; k++)
+                {
+                    MeasurementLog temp = new MeasurementLog();
+                    temp.EpicId = modelList[k].EpicId;
+                    temp.Year = modelList[k].EpicId;
+                    temp.Month = modelList[k].Month;
+                    temp.Type = modelList[k].Type;
+                    temp.NewValues = new MeasurementValues();
+                    temp.NewValues.RequirementProgress = modelList[k].RequirementProgress;
+                    temp.NewValues.DesignProgress = modelList[k].DesignProgress;
+                    temp.NewValues.DevelopmentProgress = modelList[k].DevelopmentProgress;
+                    temp.NewValues.TestProgress = modelList[k].TestProgress;
+                    temp.NewValues.UatProgress = modelList[k].UatProgress;
+                    temp.NewValues.PreviousMonthCumulativeActualEffort = modelList[k].PreviousMonthCumulativeActualEffort;
+                    temp.NewValues.ActualEffort = modelList[k].ActualEffort;
+                    temp.OldValues = new MeasurementValues();
+                    temp.OldValues.RequirementProgress = modelList[k + 1].RequirementProgress;
+                    temp.OldValues.DesignProgress = modelList[k + 1].DesignProgress;
+                    temp.OldValues.DevelopmentProgress = modelList[k + 1].DevelopmentProgress;
+                    temp.OldValues.TestProgress = modelList[k + 1].TestProgress;
+                    temp.OldValues.UatProgress = modelList[k + 1].UatProgress;
+                    temp.OldValues.PreviousMonthCumulativeActualEffort = modelList[k + 1].PreviousMonthCumulativeActualEffort;
+                    temp.OldValues.ActualEffort = modelList[k + 1].ActualEffort;
+                    temp.UserName = modelList[k].UserName;
+                    temp.Time = modelList[k].Time;
+                    longLogList.Add(temp);
+                }
+            }
+            
             return logList;
         }
 
@@ -851,11 +958,11 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@Year", updatedMeasurement.Year);
                     sqlCommand.Parameters.AddWithValue("@Month", updatedMeasurement.Month);
                     sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", updatedMeasurement.Type.TypeName));
-                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", Math.Round(updatedMeasurement.RequirementProgress / 100, 2));
-                    sqlCommand.Parameters.AddWithValue("@DesignProgress", Math.Round(updatedMeasurement.DesignProgress / 100, 2));
-                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", Math.Round(updatedMeasurement.DevelopmentProgress / 100, 2));
-                    sqlCommand.Parameters.AddWithValue("@TestProgress", Math.Round(updatedMeasurement.TestProgress / 100, 2));
-                    sqlCommand.Parameters.AddWithValue("@UatProgress", Math.Round(updatedMeasurement.UatProgress / 100, 2));
+                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", Math.Round(updatedMeasurement.RequirementProgress / 100, 4));
+                    sqlCommand.Parameters.AddWithValue("@DesignProgress", Math.Round(updatedMeasurement.DesignProgress / 100, 4));
+                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", Math.Round(updatedMeasurement.DevelopmentProgress / 100, 4));
+                    sqlCommand.Parameters.AddWithValue("@TestProgress", Math.Round(updatedMeasurement.TestProgress / 100, 4));
+                    sqlCommand.Parameters.AddWithValue("@UatProgress", Math.Round(updatedMeasurement.UatProgress / 100, 4));
                     sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", updatedMeasurement.PreviousMonthCumulativeActualEffort);
                     sqlCommand.Parameters.AddWithValue("@ActualEffort", updatedMeasurement.ActualEffort);
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
@@ -1732,6 +1839,7 @@ namespace Epic_Project.Models
             {
                 DeleteMeasurement(LastmonthMeasurement[i].EpicId, prevYear, prevMonth, LastmonthMeasurement[i].Type.TypeValue, userName, ipAddress);
             }
+            DeleteMeasurementLog(0, prevYear, prevMonth, 0);
         }
         
         public List<Measurement> SearchMeasurement(int year, int month, string location, string type, string teamName)
@@ -2189,6 +2297,291 @@ namespace Epic_Project.Models
 
             return highLevelProgresses;
         }
-        
+        public string GetBackup(string command)
+        {
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = command,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string output = process.StandardOutput.ReadToEnd();
+            string error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (string.IsNullOrEmpty(error)) { return output; }
+            else { return error; }
+        }
+
+        public void MeasurementLogOldToNew(int epicId, int year, int month, int type)
+        {
+            List<EpicBaseLine> epics = (List<EpicBaseLine>)GetEpicBaseLineAll(0);
+
+            for (int i = 0; i < epics.Count(); i++)
+            {
+                List<MeasurementLogModel> logs = (List<MeasurementLogModel>)GetLogMeasurement(epics[i].EPICId, 2020, 1, "Target", null);
+                for (int j = 0; j < logs.Count() - 1; j++)
+                {
+                    MeasurementLog temp = new MeasurementLog();
+                    temp.EpicId = logs[i].EpicId;
+                    temp.Year = logs[i].EpicId;
+                    temp.Month = logs[i].Month;
+                    temp.Type = logs[i].Type;
+                    temp.OldValues.RequirementProgress = logs[i].RequirementProgress;
+                    temp.OldValues.DesignProgress = logs[i].DesignProgress;
+                    temp.OldValues.DevelopmentProgress = logs[i].DevelopmentProgress;
+                    temp.OldValues.TestProgress = logs[i].TestProgress;
+                    temp.OldValues.UatProgress = logs[i].UatProgress;
+                    temp.OldValues.PreviousMonthCumulativeActualEffort = logs[i].PreviousMonthCumulativeActualEffort;
+                    temp.OldValues.ActualEffort = logs[i].ActualEffort;
+                    temp.NewValues.RequirementProgress = logs[i+1].RequirementProgress;
+                    temp.NewValues.DesignProgress = logs[i + 1].DesignProgress;
+                    temp.NewValues.DevelopmentProgress = logs[i + 1].DevelopmentProgress;
+                    temp.NewValues.TestProgress = logs[i + 1].TestProgress;
+                    temp.NewValues.UatProgress = logs[i + 1].UatProgress;
+                    temp.NewValues.PreviousMonthCumulativeActualEffort = logs[i + 1].PreviousMonthCumulativeActualEffort;
+                    temp.NewValues.ActualEffort = logs[i + 1].ActualEffort;
+                    temp.UserName = logs[i].UserName;
+                    temp.Time = logs[i].Time;
+                }
+            }
+        }
+        public List<MeasurementLog> GetLogMeasurement2(int epicId, int year, int month, string type, string user)
+        {
+            List<EpicBaseLine> epics = (List<EpicBaseLine>)GetEpicBaseLineAll(0);
+            List<MeasurementLogModel> logList = new List<MeasurementLogModel>();
+            List<MeasurementLog> longLogList = new List<MeasurementLog>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Measurement_Logs]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    if (type == null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", null);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
+                    }
+                    if (user == null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@UserName", null);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@UserName", user);
+                    }
+                    if (epicId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                if (Convert.ToString(dt.Rows[i]["UserName"]) != "Egypt Test Admin" && Convert.ToString(dt.Rows[i]["UserName"]) != "Turkey Test Admin")
+                {
+                    MeasurementLogModel temp = new MeasurementLogModel();
+                    temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                    temp.EpicName = Convert.ToString(dt.Rows[i]["EpicName"]);
+                    temp.Module = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                    temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                    temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                    temp.Type = Convert.ToString(dt.Rows[i]["TypeName"]);
+                    temp.Team = Convert.ToString(dt.Rows[i]["TeamName"]);
+                    temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
+                    temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
+                    temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
+                    temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
+                    temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
+                    temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
+                    temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                    if (!Convert.IsDBNull(dt.Rows[i]["UserName"]))
+                    {
+                        temp.UserName = Convert.ToString(dt.Rows[i]["UserName"]);
+                    }
+                    temp.Time = Convert.ToDateTime(dt.Rows[i]["Time"]).ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+                    //if (!Convert.IsDBNull(dt.Rows[i]["UserIp"]))
+                    //{
+                    //    temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
+                    //}
+                    logList.Add(temp);
+                }
+            }
+            for (int j = 0; j < epics.Count(); j++)
+            {
+                List<MeasurementLogModel> modelList = logList.FindAll(l => l.EpicId == epics[j].EPICId && l.Type == "Target");
+                for (int k = 0; k < modelList.Count()-1; k++)
+                {
+                    MeasurementLog temp = new MeasurementLog();
+                    temp.EpicId = modelList[k].EpicId;
+                    temp.EpicName = modelList[k].EpicName;
+                    temp.Year = modelList[k].Year;
+                    temp.Month = modelList[k].Month;
+                    temp.Module = modelList[k].Module;
+                    temp.Team = modelList[k].Team;
+                    temp.Type = modelList[k].Type;
+                    temp.NewValues.RequirementProgress = modelList[k].RequirementProgress;
+                    temp.NewValues.DesignProgress = modelList[k].DesignProgress;
+                    temp.NewValues.DevelopmentProgress = modelList[k].DevelopmentProgress;
+                    temp.NewValues.TestProgress = modelList[k].TestProgress;
+                    temp.NewValues.UatProgress = modelList[k].UatProgress;
+                    temp.NewValues.PreviousMonthCumulativeActualEffort = modelList[k].PreviousMonthCumulativeActualEffort;
+                    temp.NewValues.ActualEffort = modelList[k].ActualEffort;
+                    temp.OldValues.RequirementProgress = modelList[k + 1].RequirementProgress;
+                    temp.OldValues.DesignProgress = modelList[k + 1].DesignProgress;
+                    temp.OldValues.DevelopmentProgress = modelList[k + 1].DevelopmentProgress;
+                    temp.OldValues.TestProgress = modelList[k + 1].TestProgress;
+                    temp.OldValues.UatProgress = modelList[k + 1].UatProgress;
+                    temp.OldValues.PreviousMonthCumulativeActualEffort = modelList[k + 1].PreviousMonthCumulativeActualEffort;
+                    temp.OldValues.ActualEffort = modelList[k + 1].ActualEffort;
+                    temp.UserName = modelList[k].UserName;
+                    temp.Time = modelList[k].Time;
+                    longLogList.Add(temp);
+                }
+                if (modelList.Count() > 0)
+                {
+                    List<Date> dates = GetDates();
+                    Date temp = null;
+                    Measurement m = new Measurement();
+                    for (int l = 0; l < dates.Count(); l++)
+                    {
+                        if ((dates[l].Year == year && dates[l].Month == month) && (dates[l+1] != null))
+                        {
+                            temp = dates[l + 1];
+                        }
+                    }
+                    if (temp != null)
+                    {
+                        m = ((List<Measurement>)GetMeasurementAll(modelList[0].EpicId, temp.Year, temp.Month, "Target"))[0];
+                    }
+                    MeasurementLog t = new MeasurementLog();
+                    t.EpicId = modelList[0].EpicId;
+                    t.EpicName = modelList[0].EpicName;
+                    t.Year = modelList[0].Year;
+                    t.Month = modelList[0].Month;
+                    t.Module = modelList[0].Module;
+                    t.Team = modelList[0].Team;
+                    t.Type = modelList[0].Type;
+                    int idx = modelList.Count() - 1;
+                    t.NewValues.RequirementProgress = modelList[idx].RequirementProgress;
+                    t.NewValues.DesignProgress = modelList[idx].DesignProgress;
+                    t.NewValues.DevelopmentProgress = modelList[idx].DevelopmentProgress;
+                    t.NewValues.TestProgress = modelList[idx].TestProgress;
+                    t.NewValues.UatProgress = modelList[idx].UatProgress;
+                    t.NewValues.PreviousMonthCumulativeActualEffort = modelList[idx].PreviousMonthCumulativeActualEffort;
+                    t.NewValues.ActualEffort = modelList[idx].ActualEffort;
+                    t.OldValues.RequirementProgress = m.RequirementProgress;
+                    t.OldValues.DesignProgress = m.DesignProgress;
+                    t.OldValues.DevelopmentProgress = m.DevelopmentProgress;
+                    t.OldValues.TestProgress = m.TestProgress;
+                    t.OldValues.UatProgress = m.UatProgress;
+                    t.OldValues.PreviousMonthCumulativeActualEffort = m.PreviousMonthCumulativeActualEffort;
+                    t.OldValues.ActualEffort = m.ActualEffort;
+                    t.UserName = modelList[idx].UserName;
+                    t.Time = modelList[idx].Time;
+                    longLogList.Add(t);
+                }
+
+
+                modelList = logList.FindAll(l => l.EpicId == epics[j].EPICId && l.Type == "Actual");
+                for (int k = 0; k < modelList.Count()-1; k++)
+                {
+                    MeasurementLog temp = new MeasurementLog();
+                    temp.EpicId = modelList[k].EpicId;
+                    temp.EpicName = modelList[k].EpicName;
+                    temp.Year = modelList[k].Year;
+                    temp.Month = modelList[k].Month;
+                    temp.Type = modelList[k].Type;
+                    temp.Module = modelList[k].Module;
+                    temp.Team = modelList[k].Team;
+                    temp.NewValues.RequirementProgress = modelList[k].RequirementProgress;
+                    temp.NewValues.DesignProgress = modelList[k].DesignProgress;
+                    temp.NewValues.DevelopmentProgress = modelList[k].DevelopmentProgress;
+                    temp.NewValues.TestProgress = modelList[k].TestProgress;
+                    temp.NewValues.UatProgress = modelList[k].UatProgress;
+                    temp.NewValues.PreviousMonthCumulativeActualEffort = modelList[k].PreviousMonthCumulativeActualEffort;
+                    temp.NewValues.ActualEffort = modelList[k].ActualEffort;
+                    temp.OldValues.RequirementProgress = modelList[k + 1].RequirementProgress;
+                    temp.OldValues.DesignProgress = modelList[k + 1].DesignProgress;
+                    temp.OldValues.DevelopmentProgress = modelList[k + 1].DevelopmentProgress;
+                    temp.OldValues.TestProgress = modelList[k + 1].TestProgress;
+                    temp.OldValues.UatProgress = modelList[k + 1].UatProgress;
+                    temp.OldValues.PreviousMonthCumulativeActualEffort = modelList[k + 1].PreviousMonthCumulativeActualEffort;
+                    temp.OldValues.ActualEffort = modelList[k + 1].ActualEffort;
+                    temp.UserName = modelList[k].UserName;
+                    temp.Time = modelList[k].Time;
+                    longLogList.Add(temp);
+                }
+
+                if (modelList.Count() > 0)
+                {
+                    List<Date> dates = GetDates();
+                    Date temp = null;
+                    Measurement m = new Measurement();
+                    for (int l = 0; l < dates.Count(); l++)
+                    {
+                        if ((dates[l].Year == year && dates[l].Month == month) && (dates[l + 1] != null))
+                        {
+                            temp = dates[l + 1];
+                        }
+                    }
+                    if (temp != null)
+                    {
+                        m = ((List<Measurement>)GetMeasurementAll(modelList[0].EpicId, temp.Year, temp.Month, "Actual"))[0];
+                    }
+                    MeasurementLog t = new MeasurementLog();
+                    t.EpicId = modelList[0].EpicId;
+                    t.EpicName = modelList[0].EpicName;
+                    t.Year = modelList[0].Year;
+                    t.Month = modelList[0].Month;
+                    t.Module = modelList[0].Module;
+                    t.Team = modelList[0].Team;
+                    t.Type = modelList[0].Type;
+                    int idx = modelList.Count() - 1;
+                    t.NewValues.RequirementProgress = modelList[idx].RequirementProgress;
+                    t.NewValues.DesignProgress = modelList[idx].DesignProgress;
+                    t.NewValues.DevelopmentProgress = modelList[idx].DevelopmentProgress;
+                    t.NewValues.TestProgress = modelList[idx].TestProgress;
+                    t.NewValues.UatProgress = modelList[idx].UatProgress;
+                    t.NewValues.PreviousMonthCumulativeActualEffort = modelList[idx].PreviousMonthCumulativeActualEffort;
+                    t.NewValues.ActualEffort = modelList[idx].ActualEffort;
+                    t.OldValues.RequirementProgress = m.RequirementProgress;
+                    t.OldValues.DesignProgress = m.DesignProgress;
+                    t.OldValues.DevelopmentProgress = m.DevelopmentProgress;
+                    t.OldValues.TestProgress = m.TestProgress;
+                    t.OldValues.UatProgress = m.UatProgress;
+                    t.OldValues.PreviousMonthCumulativeActualEffort = m.PreviousMonthCumulativeActualEffort;
+                    t.OldValues.ActualEffort = m.ActualEffort;
+                    t.UserName = modelList[idx].UserName;
+                    t.Time = modelList[idx].Time;
+                    longLogList.Add(t);
+                }
+            }
+
+            return longLogList;
+        }
     }
 }

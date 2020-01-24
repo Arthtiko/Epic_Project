@@ -2,6 +2,12 @@
 @using Kendo.Mvc.UI
 
 <div>
+    @if (User.IsInRole("Admin"))
+    {
+    <form class="k-form" asp-controller="Profile" asp-action="GetBackup" method="post">
+         <button class="k-button" type="submit">BACKUP</button>
+    </form>
+    }
     <table>
         <tr>
             <td>
@@ -12,16 +18,16 @@
                     <div class="card-body m-0 p-0">
                         <div>
                             @(Html.Kendo().Grid(Model)
-                                                   .Name("grid-employee")
-                                                   .Columns(columns =>
-                                                   {
-                                                       columns.Bound(p => p.TitleName).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
-                                                       columns.Bound(p => p.TitleValue).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
-                                                   })
-                                                   .DataSource(ds => ds
-                                                       .Ajax()
-                                                       .Read(read => read.Action("Index_Read", "Profile"))
-                                                   )
+                                                           .Name("grid-employee")
+                                                           .Columns(columns =>
+                                                           {
+                                                               columns.Bound(p => p.TitleName).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
+                                                               columns.Bound(p => p.TitleValue).HtmlAttributes(new { style = "height:auto; white-space:normal; font-size: 18px; padding: 10px;" });
+                                                           })
+                                                           .DataSource(ds => ds
+                                                               .Ajax()
+                                                               .Read(read => read.Action("Index_Read", "Profile"))
+                                                           )
                             )
                         </div>
                         <div>

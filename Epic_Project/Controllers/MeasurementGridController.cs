@@ -11,7 +11,7 @@ using Kendo.Mvc.UI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Extensions.Options;
 
 namespace EPICProject.Controllers
 {
@@ -20,6 +20,7 @@ namespace EPICProject.Controllers
     {
         private IHttpContextAccessor _accessor;
         private readonly IRepository _repository;
+        private readonly ConnectionStrings _connectionStrings;
         private string UserId;
         private List<MeasurementDetailsViewModel> MeasurementDetailList = new List<MeasurementDetailsViewModel>();
         private List<Date> DateList = new List<Date>();
@@ -28,11 +29,12 @@ namespace EPICProject.Controllers
         private int StartYear;
         private int NextMonth;
         private int NextYear;
-        public MeasurementGridController(IRepository repository, IHttpContextAccessor httpContextAccessor)
+        public MeasurementGridController(IRepository repository, IHttpContextAccessor httpContextAccessor, IOptions<ConnectionStrings> connectionStrings)
         {
             _accessor = httpContextAccessor;
             _repository = repository;
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            _connectionStrings = connectionStrings.Value;
         }
 
         [Authorize]

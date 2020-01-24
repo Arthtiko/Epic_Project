@@ -39,7 +39,10 @@
                 {
                     model.Id(e => e.EPICId);
                     model.Field(e => e.EPICId).Editable(false);
-                    model.Field(e => e.EPICName).Editable(false);
+                    if (!(User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager")))
+                    {
+                        model.Field(e => e.EPICName).Editable(false);
+                    }
                     model.Field(e => e.ModuleName.ModuleName).Editable(false);
                     model.Field(e => e.EpicType.TypeName).Editable(false);
                     model.Field(e => e.Estimation).Editable(false);

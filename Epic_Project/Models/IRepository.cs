@@ -37,6 +37,7 @@ namespace Epic_Project.Models
         Measurement InsertMeasurement(Measurement measurement, string userName, string ipAddress);
         Measurement UpdateMeasurement(Measurement measurement, string userName, string ipAddress);
         IEnumerable<MeasurementLogModel> GetLogMeasurement(int epicId, int year, int month, string type, string user);
+        List<MeasurementLog> GetLogMeasurement2(int epicId, int year, int month, string type, string user);
         #endregion
 
         #region Employee
@@ -94,7 +95,8 @@ namespace Epic_Project.Models
         List<Date> GetDates();
         float GetEpicWeight(string location, string isFirstSellableModule);
         List<int> GetEpicBaseLineIdByLocation(string location);
+        string GetBackup(string command);
         #endregion
-        
+
     }
 }

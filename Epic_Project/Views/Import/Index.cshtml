@@ -341,7 +341,7 @@
         for (let i = 2; i < totalRowsCount; i++) {
             obj = data.rows[i].cells;
 
-            console.log(obj);
+            //console.log(obj);
 
             if (obj[0].value != null && obj[0].value != undefined) {
                 if (@Model.Mode == 1) {
@@ -396,7 +396,7 @@
                 dataType: "text",
                 url: "/Import/ImportMeasurement",
                 success: function (result) {
-                    console.log("result");
+                    //console.log("result");
                     if (result != "Success") {
                         indexes[failedEpicCount] = i;
                         failedEpics[failedEpicCount] = epicId;
@@ -408,7 +408,7 @@
                     }
                 },
                 error: function (error) {
-                    console.log("error");
+                    //console.log("error");
                 }
             });
             }

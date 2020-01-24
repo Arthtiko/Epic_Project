@@ -122,5 +122,13 @@ namespace Epic_Project.Controllers
             }
             return model;
         }
+
+        
+        public ActionResult GetBackup()
+        {
+            string command = "sqlcmd -S localhost -U SA -Q \"BACKUP DATABASE [EPICDB] TO DISK = N'/var/opt/mssql/data/EPICDB.bak' WITH NOFORMAT, NOINIT, NAME = 'epicdb-full', SKIP, NOREWIND, NOUNLOAD, STATS = 10\"";
+            _repository.GetBackup(command);
+            return RedirectToAction("Index");
+        }
     }
 }

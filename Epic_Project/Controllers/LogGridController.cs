@@ -19,12 +19,11 @@ namespace Epic_Project.Controllers
         {
             _repository = repository;
         }
-        
-
         public IActionResult Measurement()
         {
             return View();
         }
+        
         public ActionResult Measurement_Read([DataSourceRequest] DataSourceRequest request, string epicId, int year, int month, string type, string user)
         {
             int id;
@@ -44,11 +43,10 @@ namespace Epic_Project.Controllers
             {
                 user = null;
             }
-            var x = _repository.GetLogMeasurement(id, year, month, type, user);
+            var x = _repository.GetLogMeasurement2(id, year, month, type, user);
             return Json(x.ToDataSourceResult(request));
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager, Team Leader")]
         [HttpPost]
         public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
@@ -102,6 +100,14 @@ namespace Epic_Project.Controllers
                 selectList.Add(employees[i].EmployeeName);
             }
             return Json(selectList);
+        }
+
+
+
+        public ActionResult EpicIdFilterList([DataSourceRequest] DataSourceRequest request)
+        {
+            List<EpicBaseLine> list = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
+            return Json(list.ToDataSourceResult(request));
         }
     }
 }

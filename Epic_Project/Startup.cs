@@ -20,12 +20,28 @@ namespace Epic_Project
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            config = new ConfigurationBuilder().SetBasePath(env.ContentRootPath).AddJsonFile("appsettings.json").Build();
         }
 
         public IConfiguration Configuration { get; }
+        public IConfigurationRoot config
+        {
+            get;
+            set;
+        }
+        public static string EPICDBConnectionString
+        {
+            get;
+            private set;
+        }
+        public static string IdentityConnectionString
+        {
+            get;
+            private set;
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -36,12 +52,9 @@ namespace Epic_Project
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
+            
 
-            string conStr = ConnString.IdentityConnectionString;
-
-            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(conStr));
-
-            //services.Configure<OptionsModel>(Configuration.GetSection("ConnectionStrings"));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(config["ConnectionStrings:IdentityConnection"]));
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(
                 options => options.Stores.MaxLengthForKeys = 128)
@@ -75,12 +88,14 @@ namespace Epic_Project
 
             app.UseAuthentication();
 
+            EPICDBConnectionString = config["ConnectionStrings:EPICDBConnection"];
+            IdentityConnectionString = config["ConnectionStrings:IdentityConnection"];
+
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
-                    //template: "{controller=MeasurementGrid}/{action=Editing_Inline_Details}/{id?}");
             });
             
             //DummyData.Initialize(context, userManager, roleManager).Wait();
