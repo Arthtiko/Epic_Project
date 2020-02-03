@@ -3,8 +3,6 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<script src="https://kendo.cdn.telerik.com/2020.1.114/js/jszip.min.js"></script>
-
 @(Html.Kendo().Grid<MeasurementLog>()
             .Name("grid")
             .AutoBind(false)

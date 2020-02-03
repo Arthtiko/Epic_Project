@@ -4,9 +4,6 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/jszip/2.4.0/jszip.min.js"></script>
-
-
 @(Html.Kendo().Grid<MeasurementDetailsViewModel>
     ()
     .Name("grid")
@@ -65,6 +62,7 @@
     .Sortable()
     .Filterable()
     .Events(e => e.DataBound("dataBound"))
+    .Events(e => e.ExcelExport("excelExport"))
     .Resizable(resizable => resizable.Columns(true))
     .Reorderable(reorderable => reorderable.Columns(true))
     .HtmlAttributes(new { style = "background-color: Gainsboro;" })
@@ -121,7 +119,33 @@
             });
             alert(message);
         }
-    }
+        }
+
+        function excelExport(e) {
+            var yearMonth = document.getElementById("yearMonths").value;
+            var location = document.getElementById("locations").value;
+            var fsm = document.getElementById("isFSM").value;
+            var team = document.getElementById("team").value;
+            var filename = "Measurement Report " + yearMonth;
+
+            if (location != "All") {
+                filename = filename + "/" + location;
+            }
+            if (fsm != "All") {
+                if (fsm == "TRUE") {
+                    filename = filename + "/FSM";
+                }
+                else {
+                    filename = filename + "/Not FSM";
+                }
+            }
+            if (team != "All") {
+                filename = filename + "/" + team;
+            }
+
+            filename = filename + ".xlsx";
+            e.workbook.fileName = filename;
+        }
 
     function resizeGrid() {
 

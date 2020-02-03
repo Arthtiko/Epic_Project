@@ -17,7 +17,7 @@ namespace Epic_Project.Models
 
         #region Module
         IEnumerable<Module> GetModuleAll();
-        List<Module> GetModuleProgress(int year, int month);
+        List<Module> GetModuleProgress(int year, int month, int isFSM, string location);
         void DeleteModule(int id);
         Module InsertModule(Module module);
         Module UpdateModule(Module module);

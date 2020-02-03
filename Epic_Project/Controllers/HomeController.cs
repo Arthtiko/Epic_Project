@@ -32,12 +32,19 @@ namespace Epic_Project.Controllers
         private int NextYear;
         private static int afterComma = 2;
         private static float TurkeyFSMTotal = 0.403F;
+
+
+        #region Constructor
+
         public HomeController(IRepository repository)
         {
             _repository = repository;
         }
 
-        [Authorize]
+        #endregion
+
+        #region Views
+
         public IActionResult Index(int epicId, int year, int month, string yearMonth, string type, string teamName)
         {
             List<Date> DateList = new List<Date>();
@@ -179,7 +186,8 @@ namespace Epic_Project.Controllers
                 tName = teamName.Split('-')[0];
                 teamId = Convert.ToInt32(tName);
             }
-            var model = new MeasurementSearchModel() {
+            var model = new MeasurementSearchModel()
+            {
                 Year = y,
                 Month = m,
                 YearMonth = yearMonth,
@@ -198,6 +206,8 @@ namespace Epic_Project.Controllers
             };
             return View(model);
         }
+
+        #endregion
 
         #region Graph
 
@@ -577,7 +587,8 @@ namespace Epic_Project.Controllers
 
         #endregion
 
-        [Authorize]
+        #region Operations
+
         public JsonResult selectDates()
         {
             List<Date> DateList = new List<Date>();
@@ -587,42 +598,9 @@ namespace Epic_Project.Controllers
             {
                 selectList.Add(DateList[i].Year.ToString() + "-" + DateList[i].Month.ToString());
             }
-            if (selectList != null || selectList.Count() > 0)
-            {
-                int m = DateList[0].Month;
-                int y = DateList[0].Year;
-                if (m >= 12)
-                {
-                    m = 1;
-                    y++;
-                }
-                else
-                {
-                    m++;
-                }
-                NextMonth = m;
-                NextYear = y;
-            }
-            else
-            {
-                int m = DateTime.Today.Month;
-                int y = DateTime.Today.Year;
-                if (m >= 12)
-                {
-                    m = 1;
-                    y++;
-                }
-                else
-                {
-                    m++;
-                }
-                NextMonth = m;
-                NextYear = y;
-            }
             return Json(selectList);
         }
 
-        [Authorize]
         public JsonResult SelectTeams()
         {
             List<Team> TeamList = new List<Team>();
@@ -636,5 +614,6 @@ namespace Epic_Project.Controllers
             return Json(selectList);
         }
 
+        #endregion
     }
 }

@@ -12,12 +12,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Epic_Project.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin, Project Manager, Program Manager")]
     public class FinanceController : Controller
     {
         private IHttpContextAccessor _accessor;
         private readonly IRepository _repository;
         private string UserId;
+
+        #region Constructor
 
         public FinanceController(IRepository repository, IHttpContextAccessor httpContextAccessor)
         {
@@ -26,8 +28,10 @@ namespace Epic_Project.Controllers
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
 
+        #endregion
 
-        [Authorize]
+        #region Views
+
         public ActionResult Finance_Management(int year, int month, string yearMonth)
         {
             var model = new FinanceSearchModel();
@@ -71,7 +75,6 @@ namespace Epic_Project.Controllers
             return View(model);
         }
 
-        [Authorize]
         public ActionResult Finance_Report(int year, int month, string yearMonth)
         {
             var model = new FinanceSearchModel();
@@ -136,29 +139,23 @@ namespace Epic_Project.Controllers
             return View(model);
         }
 
-        [Authorize]
         public ActionResult Finance_Graph()
         {
             return View();
         }
 
-        [Authorize]
+        #endregion
+
+        #region Reads
+
         public ActionResult Finance_Management_Read([DataSourceRequest] DataSourceRequest request, int year, int month)
         {
             return Json(_repository.GetFinanceAll(null, year, month).ToDataSourceResult(request));
         }
 
-        [Authorize]
         public ActionResult Finance_Report_Read([DataSourceRequest] DataSourceRequest request, int year, int month)
         {
             return Json(_repository.GetFinanceReport(null, year, month).ToDataSourceResult(request));
-        }
-
-        [Authorize]
-        public ActionResult Finance_Management_Update([DataSourceRequest] DataSourceRequest request, Finance finance)
-        {
-            Finance newFinance = _repository.UpdateFinanceAll(finance);
-            return Json(new[] { newFinance }.ToDataSourceResult(request));
         }
 
         [HttpPost]
@@ -175,16 +172,27 @@ namespace Epic_Project.Controllers
             return Json(model);
         }
 
-        [Authorize]
+        #endregion
+
+        #region Updates
+
+        public ActionResult Finance_Management_Update([DataSourceRequest] DataSourceRequest request, Finance finance)
+        {
+            Finance newFinance = _repository.UpdateFinanceAll(finance);
+            return Json(new[] { newFinance }.ToDataSourceResult(request));
+        }
+
+        #endregion
+
+        #region Operations
+
         [HttpPost]
         public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
             var fileContents = Convert.FromBase64String(base64);
-
             return File(fileContents, contentType, fileName);
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         public IActionResult GenerateNextMonth()
         {
             _repository.GenerateNewFinanceMonth();
@@ -192,7 +200,6 @@ namespace Epic_Project.Controllers
             return RedirectToAction("Finance_Management", "Finance");
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         public IActionResult DeleteLastMonth()
         {
             _repository.DeleteLastFinanceMonth();
@@ -200,51 +207,17 @@ namespace Epic_Project.Controllers
             return RedirectToAction("Finance_Management", "Finance");
         }
 
-        [Authorize]
         public JsonResult selectDates()
         {
-            List<Date> DateList;
-            int NextMonth;
-            int NextYear;
-            DateList = _repository.GetFinanceDates();
+            List<Date> DateList = _repository.GetFinanceDates();
             List<string> selectList = new List<string>();
             for (int i = 0; i < DateList.Count(); i++)
             {
                 selectList.Add(DateList[i].Year.ToString() + "-" + DateList[i].Month.ToString());
             }
-            if (selectList != null || selectList.Count() > 0)
-            {
-                int m = DateList[0].Month;
-                int y = DateList[0].Year;
-                if (m >= 12)
-                {
-                    m = 1;
-                    y++;
-                }
-                else
-                {
-                    m++;
-                }
-                NextMonth = m;
-                NextYear = y;
-            }
-            else
-            {
-                int m = DateTime.Today.Month;
-                int y = DateTime.Today.Year;
-                if (m >= 12)
-                {
-                    m = 1;
-                    y++;
-                }
-                else
-                {
-                    m++;
-                }
-                NextMonth = m;
-                NextYear = y;
-            }
             return Json(selectList);
         }
+
+        #endregion
     }
 }

@@ -1968,10 +1968,11 @@ namespace Epic_Project.Models
             return sum;
         }
 
-        public List<Module> GetModuleProgress(int year, int month)
+        public List<Module> GetModuleProgress(int year, int month, int isFSM, string location)
         {
             List<Module> modules = (List<Module>)GetModuleAll();
-            List<Module> moduleAggregates = GetModuleAggregates(year, month);
+            List<Module> moduleAggregates = GetModuleAggregates(year, month, isFSM, location);
+            List<Module> epics = new List<Module>(); 
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -1981,6 +1982,10 @@ namespace Epic_Project.Models
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.AddWithValue("@Year", year);
                     sqlCommand.Parameters.AddWithValue("@Month", month);
+                    if (isFSM == 1 || isFSM == 2)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -1993,29 +1998,51 @@ namespace Epic_Project.Models
                 Module temp = new Module();
                 temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
                 temp.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
-                temp.Progress = (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
+                temp.Progress = (float)Convert.ToDouble(dt.Rows[i]["EpicProgress"]);
                 temp.Weight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
                 temp.Variance = (float)Convert.ToDouble(dt.Rows[i]["Variance"]);
                 temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
                 temp.WeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
+                temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
+                epics.Add(temp); 
+            }
+            
+            for (int i = 0; i < epics.Count(); i++)
+            {
                 for (int j = 0; j < modules.Count(); j++)
                 {
-                    if (modules[j].ModuleId == temp.ModuleId)
+                    if (modules[j].ModuleId == epics[i].ModuleId)
                     {
-                        modules[j].WeightedOverallProgress = modules[j].WeightedOverallProgress + temp.WeightedOverallProgress;
-                        modules[j].Progress = modules[j].Progress + temp.Progress;
-                        modules[j].Weight = modules[j].Weight + temp.Weight;
-                        modules[j].Variance = modules[j].Variance + temp.Variance;
-                        modules[j].ActualEffort = modules[j].ActualEffort + temp.ActualEffort;
+                        modules[j].WeightedOverallProgress = modules[j].WeightedOverallProgress + epics[i].WeightedOverallProgress;
+                        modules[j].Weight = modules[j].Weight + epics[i].Weight;
+                        modules[j].Variance = modules[j].Variance + epics[i].Variance;
+                        modules[j].ActualEffort = modules[j].ActualEffort + epics[i].ActualEffort;
                     }
                 }
             }
-
-            for (int i = 0; i < modules.Count(); i++)
+            for (int i = 0; i < epics.Count(); i++)
             {
-                modules[i].Progress = (float)Math.Round(modules[i].Progress / modules[i].Weight, 2);
+                float prog = epics[i].Progress;
+                if (isFSM == 1)
+                {
+                    epics[i].Weight = epics[i].Weight * (epics[i].FSMPercentage / 100);
+                    if (epics[i].Progress >= epics[i].FSMPercentage)
+                    {
+                        prog = 100;
+                    }
+                    else
+                    {
+                        prog = (epics[i].Progress * 100)/epics[i].FSMPercentage;
+                    }
+                }
+                for (int j = 0; j < modules.Count(); j++)
+                {
+                    if (modules[j].ModuleId == epics[i].ModuleId)
+                    {
+                        modules[j].Progress = modules[j].Progress + prog * (epics[i].Weight / modules[j].Weight);
+                    }
+                }
             }
-
             List<Module> SortedList = modules.OrderByDescending(mo => mo.Progress).ToList();
             for (int i = 0; i < SortedList.Count(); i++)
             {
@@ -2028,16 +2055,28 @@ namespace Epic_Project.Models
                     }
                 }
             }
+            List<Module> ms = new List<Module>();
+            for (int i = 0; i < SortedList.Count(); i++)
+            {
+                if (SortedList[i].EpicCount == 0)
+                {
+                    ms.Add(SortedList[i]);
+                }
+            }
+            for (int i = 0; i < ms.Count(); i++)
+            {
+                SortedList.Remove(ms[i]);
+            }
             return SortedList;
         }
 
-        public List<Module> GetModuleAggregates(int year, int month)
+        public List<Module> GetModuleAggregates(int year, int month, int isFSM, string location)
         {
             List<Module> moduleList = new List<Module>();
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
-                string procName = "[sel_ModuleAggregate]";
+                string procName = "[sel_ModuleEpicCount]";
                 using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                 {
                     sqlCommand.CommandType = CommandType.StoredProcedure;
@@ -2048,6 +2087,14 @@ namespace Epic_Project.Models
                     if (month != 0)
                     {
                         sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    if (isFSM == 1 || isFSM == 2)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
+                    }
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", location));
                     }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
@@ -2061,9 +2108,68 @@ namespace Epic_Project.Models
                 Module temp = new Module();
                 temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
                 temp.EpicCount = Convert.ToInt32(dt.Rows[i]["EpicCount"]);
-                temp.TotalEstimation = (float)Convert.ToDouble(dt.Rows[i]["TotalEstimation"]);
                 moduleList.Add(temp);
             }
+
+            dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_ModuleEstimation]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    //if (isFSM == 1 || isFSM == 2)
+                    //{
+                    //    sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
+                    //}
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", location));
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Module temp = new Module();
+                temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
+                temp.TotalEstimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
+                temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
+                for (int j = 0; j < moduleList.Count(); j++)
+                {
+                    if (temp.ModuleId == moduleList[j].ModuleId)
+                    {
+                        if (isFSM == 1)
+                        {
+                            moduleList[j].TotalEstimation += temp.TotalEstimation * temp.FSMPercentage;
+                        }
+                        else if (isFSM == 2)
+                        {
+                            moduleList[j].TotalEstimation += temp.TotalEstimation * (1 - temp.FSMPercentage);
+                        }
+                        else
+                        {
+                            moduleList[j].TotalEstimation += temp.TotalEstimation;
+                        }
+                    }
+                }
+            }
+
+
+
+
             return moduleList;
         }
 
@@ -2583,5 +2689,6 @@ namespace Epic_Project.Models
 
             return longLogList;
         }
+        
     }
 }

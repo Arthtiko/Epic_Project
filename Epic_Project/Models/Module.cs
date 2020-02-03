@@ -16,6 +16,7 @@ namespace Epic_Project.Models
         public int EpicCount { get; set; }
         public float TotalEstimation { get; set; }
         public float WeightedOverallProgress { get; set; }
+        public float FSMPercentage { get; set; }
     }
 
     public class ModuleModel

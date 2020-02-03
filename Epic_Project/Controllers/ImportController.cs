@@ -21,6 +21,9 @@ namespace Epic_Project.Controllers
         private readonly IRepository _repository;
         private string UserId;
         int idx = 0;
+        
+        #region Constructor
+
         public ImportController(IRepository repository, IHttpContextAccessor httpContextAccessor)
         {
             _accessor = httpContextAccessor;
@@ -28,6 +31,10 @@ namespace Epic_Project.Controllers
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             epics = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
         }
+
+        #endregion
+
+        #region Views
 
         public IActionResult Index(int mode)
         {
@@ -37,8 +44,11 @@ namespace Epic_Project.Controllers
             };
             return View(model);
         }
-        
-        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
+
+        #endregion
+
+        #region Import
+
         public string ImportMeasurement(int epicId, int year, int month, int type, float req, float des, float dev, float test, float uat, float effort, int mode, int lineCount)
         {
             Measurement measurement = new Measurement();
@@ -139,11 +149,14 @@ namespace Epic_Project.Controllers
             }
         }
 
+        #endregion
+
+        #region Operations
+
         [HttpPost]
         public ActionResult Index_Save(string contentType, string base64, string fileName)
         {
             var fileContents = Convert.FromBase64String(base64);
-
             return File(fileContents, contentType, fileName);
         }
 
@@ -203,5 +216,6 @@ namespace Epic_Project.Controllers
             return m;
         }
 
+        #endregion
     }
 }

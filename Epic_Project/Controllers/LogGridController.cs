@@ -15,15 +15,26 @@ namespace Epic_Project.Controllers
     {
         private readonly IRepository _repository;
 
+        #region Constructor
+
         public LogGridController(IRepository repository)
         {
             _repository = repository;
         }
+
+        #endregion
+
+        #region Views
+
         public IActionResult Measurement()
         {
             return View();
         }
-        
+
+        #endregion
+
+        #region Reads
+
         public ActionResult Measurement_Read([DataSourceRequest] DataSourceRequest request, string epicId, int year, int month, string type, string user)
         {
             int id;
@@ -47,11 +58,14 @@ namespace Epic_Project.Controllers
             return Json(x.ToDataSourceResult(request));
         }
 
+        #endregion
+
+        #region Operations
+
         [HttpPost]
         public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
             var fileContents = Convert.FromBase64String(base64);
-
             return File(fileContents, contentType, fileName);
         }
 
@@ -102,12 +116,6 @@ namespace Epic_Project.Controllers
             return Json(selectList);
         }
 
-
-
-        public ActionResult EpicIdFilterList([DataSourceRequest] DataSourceRequest request)
-        {
-            List<EpicBaseLine> list = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
-            return Json(list.ToDataSourceResult(request));
-        }
+        #endregion
     }
 }

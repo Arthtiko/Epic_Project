@@ -15,23 +15,34 @@ namespace Epic_Project.Controllers
     {
         private readonly IRepository _repository;
 
+        #region Constructor
+
         public ModuleController(IRepository repository)
         {
             _repository = repository;
         }
 
-        [Authorize]
+        #endregion
+
+        #region Views
+
         public ActionResult Editing_InLine()
         {
             return View();
         }
 
-        [Authorize]
-        public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request, int year, int month)
+        #endregion
+
+        #region Reads
+
+        public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request, int year, int month, int fsm, string location)
         {
-            Date date = _repository.GetDates()[0];
-            return Json(_repository.GetModuleProgress(year, month).ToDataSourceResult(request));
+            return Json(_repository.GetModuleProgress(year, month, fsm, location == "All" ? null : location).ToDataSourceResult(request));
         }
+
+        #endregion
+
+        #region Creates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -41,9 +52,12 @@ namespace Epic_Project.Controllers
             {
                 Module m = _repository.InsertModule(module);
             }
-
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
         }
+
+        #endregion
+
+        #region Updates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -57,6 +71,10 @@ namespace Epic_Project.Controllers
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
+
+        #region Deletes
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, Module module)
@@ -67,6 +85,18 @@ namespace Epic_Project.Controllers
             }
 
             return Json(new[] { module }.ToDataSourceResult(request, ModelState));
+        }
+
+        #endregion
+
+        #region Operations
+
+        [HttpPost]
+        public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
+        {
+            var fileContents = Convert.FromBase64String(base64);
+
+            return File(fileContents, contentType, fileName);
         }
 
         public string IsVarianceShowed(int year, int month)
@@ -112,49 +142,34 @@ namespace Epic_Project.Controllers
         public JsonResult selectDates()
         {
             List<Date> DateList = new List<Date>();
-            int StartMonth;
-            int StartYear;
-            int NextMonth;
-            int NextYear;
             DateList = _repository.GetDates();
             List<string> selectList = new List<string>();
             for (int i = 0; i < DateList.Count(); i++)
             {
                 selectList.Add(DateList[i].Year.ToString() + "-" + DateList[i].Month.ToString());
             }
-            if (selectList != null || selectList.Count() > 0)
-            {
-                int m = DateList[0].Month;
-                int y = DateList[0].Year;
-                if (m >= 12)
-                {
-                    m = 1;
-                    y++;
-                }
-                else
-                {
-                    m++;
-                }
-                NextMonth = m;
-                NextYear = y;
-            }
-            else
-            {
-                int m = DateTime.Today.Month;
-                int y = DateTime.Today.Year;
-                if (m >= 12)
-                {
-                    m = 1;
-                    y++;
-                }
-                else
-                {
-                    m++;
-                }
-                NextMonth = m;
-                NextYear = y;
-            }
             return Json(selectList);
         }
+
+        public JsonResult selectFSM()
+        {
+            List<string> list = new List<string>();
+            list.Add("Overall");
+            list.Add("First Sellable Module");
+            list.Add("Not First Sellable Module");
+
+            return Json(list);
+        }
+
+        public JsonResult selectLocations()
+        {
+            List<string> locations = new List<string>()
+            {
+                "All", "Turkey", "Egypt"
+            };
+            return Json(locations);
+        }
+
+        #endregion
     }
 }

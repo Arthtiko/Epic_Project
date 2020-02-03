@@ -18,25 +18,38 @@ namespace Epic_Project.Controllers
         private IHttpContextAccessor _accessor;
         private readonly IRepository _repository;
         private string UserId;
+
+        #region Constructor
+
         public ProfileController(IRepository repository, IHttpContextAccessor httpContextAccessor)
         {
             _accessor = httpContextAccessor;
             _repository = repository;
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
-        [Authorize]
+
+        #endregion
+
+        #region Views
+
         public IActionResult Index()
         {
             return View();
         }
 
-        [Authorize]
+        #endregion
+
+        #region Reads
+
         public ActionResult Index_Read([DataSourceRequest] DataSourceRequest request)
         {
-            List<ProfileModel> model = getProfile();
-            return Json(model.ToDataSourceResult(request));
+            return Json(getProfile().ToDataSourceResult(request));
         }
-        [Authorize]
+
+        #endregion
+
+        #region Operations
+
         public List<ProfileModel> getProfile()
         {
             List<ProfileModel> model = new List<ProfileModel>();
@@ -123,12 +136,6 @@ namespace Epic_Project.Controllers
             return model;
         }
 
-        
-        public ActionResult GetBackup()
-        {
-            string command = "sqlcmd -S localhost -U SA -Q \"BACKUP DATABASE [EPICDB] TO DISK = N'/var/opt/mssql/data/EPICDB.bak' WITH NOFORMAT, NOINIT, NAME = 'epicdb-full', SKIP, NOREWIND, NOUNLOAD, STATS = 10\"";
-            _repository.GetBackup(command);
-            return RedirectToAction("Index");
-        }
+        #endregion
     }
 }

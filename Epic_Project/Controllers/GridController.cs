@@ -19,6 +19,8 @@ namespace EPICProject.Controllers
         private readonly IRepository _repository;
         private string UserId;
 
+        #region Constructor
+
         public GridController(IRepository repository, IHttpContextAccessor httpContextAccessor)
         {
             _accessor = httpContextAccessor;
@@ -26,24 +28,33 @@ namespace EPICProject.Controllers
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
 
-        [Authorize]
+        #endregion
+
+        #region Views
+
         public ActionResult Editing_InLine()
         {
             PopulateEpicTypes();
             PopulateModules();
-            PopulateMurabahas();
             PopulateFirstSellableModules();
             PopulateProjectLocations();
             PopulateTeams();
             return View();
         }
 
-        [Authorize]
+        #endregion
+
+        #region Reads
+
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
-            var x = _repository.GetEpicBaseLineAll(0).ToDataSourceResult(request);
-            return Json(x);
+            return Json(_repository.GetEpicBaseLineAll(0).ToDataSourceResult(request));
         }
+
+
+        #endregion
+
+        #region Creates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -57,7 +68,8 @@ namespace EPICProject.Controllers
                 {
                     _repository.InsertEpicBaseLine(epicBaseLine, "Test Admin Turkey", ipAddress);
                 }
-                else if (id == 2001) {
+                else if (id == 2001)
+                {
                     _repository.InsertEpicBaseLine(epicBaseLine, "Test Admin Egypt", ipAddress);
                 }
                 else
@@ -67,6 +79,10 @@ namespace EPICProject.Controllers
             }
             return Json(new[] { epicBaseLine }.ToDataSourceResult(request, ModelState));
         }
+
+        #endregion
+
+        #region Updates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -92,6 +108,10 @@ namespace EPICProject.Controllers
             return Json(new[] { epicBaseLine }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
+
+        #region Deletes
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, EpicBaseLine epicBaseLine, string name)
@@ -116,7 +136,10 @@ namespace EPICProject.Controllers
             return Json(new[] { epicBaseLine }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize]
+        #endregion
+
+        #region Operations
+
         private void PopulateEpicTypes()
         {
             List<EpicTypeViewModel> typeList = new List<EpicTypeViewModel>();
@@ -132,7 +155,6 @@ namespace EPICProject.Controllers
             ViewData["defaultType"] = typeList.First();
         }
 
-        [Authorize]
         private void PopulateModules()
         {
             IEnumerable<Module> moduleList = new List<Module>();
@@ -141,24 +163,6 @@ namespace EPICProject.Controllers
             ViewData["defaultModule"] = moduleList.First();
         }
 
-        [Authorize]
-        private void PopulateMurabahas()
-        {
-            List<MurabahaViewModel> murabahaList = new List<MurabahaViewModel>();
-            List<Parameter> parameterList;
-            parameterList = (List<Parameter>)_repository.GetParameter("IsMurabaha");
-            for (int i = 0; i < parameterList.Count(); i++)
-            {
-                var temp = new MurabahaViewModel();
-                temp.MurabahaName = parameterList[i].ParameterName;
-                temp.MurabahaValue = parameterList[i].ParameterValue;
-                murabahaList.Add(temp);
-            }
-            ViewData["murabahas"] = murabahaList;
-            ViewData["defaultMurabaha"] = murabahaList.First();
-        }
-
-        [Authorize]
         private void PopulateFirstSellableModules()
         {
             List<IsFirstSellableModuleViewModel> firstSellableModuleList = new List<IsFirstSellableModuleViewModel>();
@@ -175,7 +179,6 @@ namespace EPICProject.Controllers
             ViewData["defaultFirstSellableModule"] = firstSellableModuleList.First();
         }
 
-        [Authorize]
         private void PopulateProjectLocations()
         {
             List<ProjectLocationViewModel> projectLocationList = new List<ProjectLocationViewModel>();
@@ -192,44 +195,22 @@ namespace EPICProject.Controllers
             ViewData["defaultLocation"] = projectLocationList.First();
         }
 
-        [Authorize]
         private void PopulateTeams()
         {
             IEnumerable<Team> teamList = new List<Team>();
             teamList = _repository.GetTeamAll(0, null, 0, 0);
             ViewData["teams"] = teamList;
-            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "", ProjectManager = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = ""}, TeamLeader = new TeamLeaderViewModel() { TeamLeaderId = 0, TeamLeaderName = "" } };
+            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "", ProjectManager = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = "" }, TeamLeader = new TeamLeaderViewModel() { TeamLeaderId = 0, TeamLeaderName = "" } };
         }
 
-        [Authorize]
-        public JsonResult FilterMenu_Locations()
+        [HttpPost]
+        public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
-            List<string> locations = new List<string>()
-            {
-                "Turkey", "Egypt"
-            };
-            return Json(locations);
+            var fileContents = Convert.FromBase64String(base64);
+
+            return File(fileContents, contentType, fileName);
         }
 
-        [Authorize]
-        public JsonResult FilterMenu_IsFirstSellableModule()
-        {
-            List<string> locations = new List<string>()
-            {
-                "TRUE", "FALSE"
-            };
-            return Json(locations);
-        }
-
-        [Authorize]
-        public JsonResult FilterMenu_Type()
-        {
-            List<string> locations = new List<string>()
-            {
-                "Architecture", "Business", "Shared"
-            };
-            return Json(locations);
-        }
-
+        #endregion
     }
 }

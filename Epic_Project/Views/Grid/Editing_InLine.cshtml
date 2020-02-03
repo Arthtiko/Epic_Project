@@ -16,11 +16,13 @@
                 columns.Bound(e => e.TotalActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); }).Width(125); }
             })
+            .ToolBar(t => t.Excel())
             .Editable(editable => editable.Mode(GridEditMode.InLine))
             .Groupable()
             .Scrollable()
             .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
             .Filterable()
+            .Excel(excel => excel.FileName("EpicBaseLine.xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Grid")))
             .Resizable(resizable => resizable.Columns(true))
             .Reorderable(reorderable => reorderable.Columns(true))
             .HtmlAttributes(new { style = "background-color: Gainsboro" })
@@ -119,7 +121,7 @@
         //var headerHeight = $(window).headerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 185 - 10 - 15; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 185 - 10 - 70; // - headerHeight;       header is empty but this calculation makes grid small
         calculatedHeight += 75;         // create new record butonu eklenirse burayı commentle
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 

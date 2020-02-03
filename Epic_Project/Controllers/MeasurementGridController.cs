@@ -20,7 +20,6 @@ namespace EPICProject.Controllers
     {
         private IHttpContextAccessor _accessor;
         private readonly IRepository _repository;
-        private readonly ConnectionStrings _connectionStrings;
         private string UserId;
         private List<MeasurementDetailsViewModel> MeasurementDetailList = new List<MeasurementDetailsViewModel>();
         private List<Date> DateList = new List<Date>();
@@ -29,15 +28,20 @@ namespace EPICProject.Controllers
         private int StartYear;
         private int NextMonth;
         private int NextYear;
-        public MeasurementGridController(IRepository repository, IHttpContextAccessor httpContextAccessor, IOptions<ConnectionStrings> connectionStrings)
+
+        #region Constructor
+
+        public MeasurementGridController(IRepository repository, IHttpContextAccessor httpContextAccessor)
         {
             _accessor = httpContextAccessor;
             _repository = repository;
             UserId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            _connectionStrings = connectionStrings.Value;
         }
 
-        [Authorize]
+        #endregion
+
+        #region Views
+
         public ActionResult Editing_InLine(int epicId, int year, int month, string yearMonth, string type, string teamName)
         {
             Employee emp;
@@ -45,7 +49,7 @@ namespace EPICProject.Controllers
             int employeeId = _repository.GetEmployeeId(UserId);
             if (employeeId == 1001)
             {
-                emp = new Employee() { EmployeeId = 1001, EmployeeName = "Test Admin Turkey", EmployeeType = new EmployeeTypeViewModel() { TypeName = "Project Manager"}, EmployeeLocation = new ProjectLocationViewModel() { LocationName = "Turkey"} };
+                emp = new Employee() { EmployeeId = 1001, EmployeeName = "Test Admin Turkey", EmployeeType = new EmployeeTypeViewModel() { TypeName = "Project Manager" }, EmployeeLocation = new ProjectLocationViewModel() { LocationName = "Turkey" } };
                 location = emp.EmployeeLocation.LocationName;
             }
             else if (employeeId == 2001)
@@ -68,7 +72,7 @@ namespace EPICProject.Controllers
                 emp = _repository.GetEmployeeById(employeeId);
                 location = emp.EmployeeLocation.LocationName;
             }
-            
+
             DateList = _repository.GetDates();
             int maxYear = DateList[0].Year;
             int maxMonth = DateList[0].Month;
@@ -115,7 +119,6 @@ namespace EPICProject.Controllers
             return View(model);
         }
 
-        [Authorize]
         public IActionResult Editing_Inline_Details(int epicId, int year, int month, string yearMonth, string location, string type, string teamName)
         {
             DateList = _repository.GetDates();
@@ -157,9 +160,11 @@ namespace EPICProject.Controllers
             var model = new MeasurementSearchModel() { EpicId = epicId, Year = y, Month = m, YearMonth = yearMonth, NextMonth = NextMonth, NextYear = NextYear, Location = location, Type = type, TeamName = teamName };
             return View(model);
         }
-        
 
-        [Authorize]
+        #endregion
+
+        #region Reads
+
         public ActionResult EditingInLineDetails_Read([DataSourceRequest] DataSourceRequest request, int year, int month, string location, string isFSM, string team)
         {
             if (location == "All")
@@ -178,7 +183,6 @@ namespace EPICProject.Controllers
             return Json(x.ToDataSourceResult(request));
         }
 
-        [Authorize]
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month, string location, string type, string teamName)
         {
             Team team = null;
@@ -203,7 +207,11 @@ namespace EPICProject.Controllers
             }
             return Json(measurements.ToDataSourceResult(request));
         }
-        
+
+        #endregion
+
+        #region Creates
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Create([DataSourceRequest] DataSourceRequest request, Measurement measurement)
@@ -236,15 +244,18 @@ namespace EPICProject.Controllers
                 {
                     temp = _repository.InsertMeasurement(measurement, _repository.GetEmployeeById(id).EmployeeName, ipAddress);
                 }
-                
+
                 if (temp != null)
                 {
                     newMeasurement = _repository.GetMeasurementAll(measurement.EpicId, measurement.Year, measurement.Month, measurement.Type.TypeName).First();
                 }
             }
-
             return Json(new[] { newMeasurement }.ToDataSourceResult(request, ModelState));
         }
+
+        #endregion
+
+        #region Updates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager, Team Leader, Tester")]
         [HttpPost]
@@ -306,6 +317,10 @@ namespace EPICProject.Controllers
             return Json(new[] { newMeasurement }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
+
+        #region Deletes
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, Measurement measurement)
@@ -326,15 +341,19 @@ namespace EPICProject.Controllers
                 {
                     _repository.DeleteMeasurement(measurement.EpicId, measurement.Year, measurement.Month, _repository.GetParameterValue("Type", measurement.Type.TypeName), _repository.GetEmployeeById(id).EmployeeName, ipAddress);
                 }
-               
+
             }
 
             return Json(new[] { measurement }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
+
+        #region Operations
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         public IActionResult GenerateNextMonth(int year, int month, string location)
-       {
+        {
             Date date = new Date() { Year = year, Month = month };
             if (year == 0 || month == 0)
             {
@@ -369,9 +388,9 @@ namespace EPICProject.Controllers
                 Month = date.Month,
                 Effort = new EffortViewModel() { EffortId = 2, EffortName = "FALSE" },
                 Progress = new ProgressViewModel() { ProgressId = 1, ProgressName = "TRUE" },
-                Variance = new VarianceViewModel() { VarianceId = 2, VarianceName = "FALSE"}
+                Variance = new VarianceViewModel() { VarianceId = 2, VarianceName = "FALSE" }
             });
-            
+
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }
 
@@ -394,11 +413,10 @@ namespace EPICProject.Controllers
             }
             Date date = _repository.GetDates()[0];
             _repository.DeleteDateControl(date.Year, date.Month);
-            
+
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager, Team Leader")]
         [HttpPost]
         public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
         {
@@ -407,7 +425,6 @@ namespace EPICProject.Controllers
             return File(fileContents, contentType, fileName);
         }
 
-        [Authorize]
         private void PopulateTypes()
         {
             List<MeasurementTypeViewModel> typeList = new List<MeasurementTypeViewModel>();
@@ -423,16 +440,14 @@ namespace EPICProject.Controllers
             ViewData["defaultType"] = typeList.First();
         }
 
-        [Authorize]
         private void PopulateModules(int year, int month)
         {
             IEnumerable<Module> moduleList = new List<Module>();
-            moduleList = _repository.GetModuleProgress(year, month);
+            moduleList = _repository.GetModuleProgress(year, month, 0, null);
             ViewData["modules"] = moduleList;
-            ViewData["defaultModule"] = new Module() { ModuleId = 0, ModuleName = "", Progress = 0, Weight = 0};
+            ViewData["defaultModule"] = new Module() { ModuleId = 0, ModuleName = "", Progress = 0, Weight = 0 };
         }
 
-        [Authorize]
         private void PopulateTeams()
         {
             List<Team> teamList = new List<Team>();
@@ -444,10 +459,9 @@ namespace EPICProject.Controllers
                 teamList.Add(temp[i]);
             }
             ViewData["teams"] = teamList;
-            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = ""};
+            ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "" };
         }
 
-        [Authorize]
         private void PopulateDates()
         {
             DateList = _repository.GetDates();
@@ -504,7 +518,6 @@ namespace EPICProject.Controllers
             }
         }
 
-        [Authorize]
         public JsonResult selectDates()
         {
             DateList = _repository.GetDates();
@@ -547,7 +560,7 @@ namespace EPICProject.Controllers
             }
             return Json(selectList);
         }
-        [Authorize]
+
         public JsonResult selectTeams(string location)
         {
             TeamList = (List<Team>)_repository.GetTeamAll(0, null, 0, 0);
@@ -562,7 +575,7 @@ namespace EPICProject.Controllers
             }
             return Json(selectList);
         }
-        [Authorize]
+
         public JsonResult selectLocations()
         {
             List<string> locations = new List<string>()
@@ -571,7 +584,7 @@ namespace EPICProject.Controllers
             };
             return Json(locations);
         }
-        [Authorize]
+
         public JsonResult selectFSM()
         {
             List<string> locations = new List<string>()
@@ -580,5 +593,7 @@ namespace EPICProject.Controllers
             };
             return Json(locations);
         }
+
+        #endregion
     }
 }

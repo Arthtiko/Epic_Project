@@ -1,64 +1,51 @@
 ﻿@model ModuleModel
 
-<div class="row" style="position: relative;">
-    <div style="margin-left: 15px">
-        <div style="height: 40px; margin-left: 10px; margin-top: 10px;">
-            <div class="row" style="margin-top: -5px;">
-                <div style="margin-left: 4px">
-                    <text class="text-size">Year-Month: </text>
-                    <select class="k-select select-size" id="form-select-time"></select>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <a class="k-button button-size-month" id="showGrid">Show Data</a>
-    </div>
-</div>
-
 @(Html.Kendo().Grid<Module>()
-      .Name("grid")
-      .AutoBind(false)
-      .Columns(columns =>
-      {
-          columns.Bound(m => m.ModuleName).Width(540).HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.EpicCount).Width(120).ClientFooterTemplate("Total: #=sum#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.TotalEstimation).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.Weight).Width(160).Title("Total Weight").ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.ActualEffort).Title("Total Effort").Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.Variance).Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.WeightedOverallProgress).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)# %").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-          columns.Bound(m => m.Progress).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-      })
-      .Scrollable()
-      .Sortable()
-      .Groupable()
-      .Resizable(r => r.Columns(true))
-      .Events(e => e.DataBound("dataBound"))
-      .HtmlAttributes(new { style = "background-color: Gainsboro;" })
-      .DataSource(dataSource => dataSource
-          .Ajax()
-          .Events(events => { events.Error("error_handler"); })
-          .Model(model =>
+          .Name("grid")
+          .AutoBind(false)
+          .Columns(columns =>
           {
-              model.Id(m => m.ModuleId);
-              model.Field(m => m.ModuleId).Editable(false);
+              columns.Bound(m => m.ModuleName).Width(540).HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.EpicCount).Width(120).ClientFooterTemplate("Total: #=sum#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.TotalEstimation).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.Weight).Width(160).Title("Total Weight").ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.ActualEffort).Title("Total Effort").Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.Variance).Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.WeightedOverallProgress).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)# %").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.Progress).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
           })
-          .Aggregates(aggregates =>
-          {
-              aggregates.Add(m => m.EpicCount).Sum();
-              aggregates.Add(m => m.TotalEstimation).Sum();
-              aggregates.Add(m => m.Weight).Sum();
-              aggregates.Add(m => m.ActualEffort).Sum();
-              aggregates.Add(m => m.WeightedOverallProgress).Sum();
-              aggregates.Add(m => m.Variance).Sum();
-          })
-          .Read(read => read.Action("EditingInLine_Read", "Module").Data("getReadData"))
-      )
+          .ToolBar(t => t.ClientTemplateId("GridToolbarTemplate"))
+          .Scrollable()
+          .Sortable()
+          .Groupable()
+          .Resizable(r => r.Columns(true))
+          .Events(e => e.DataBound("dataBound"))
+          .Events(e => e.ExcelExport("excelExport"))
+          .Excel(excel => excel.FileName("asd.xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Module")))
+          .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+          .DataSource(dataSource => dataSource
+              .Ajax()
+              .Events(events => { events.Error("error_handler"); })
+              .Model(model =>
+              {
+                  model.Id(m => m.ModuleId);
+                  model.Field(m => m.ModuleId).Editable(false);
+              })
+              .Aggregates(aggregates =>
+              {
+                  aggregates.Add(m => m.EpicCount).Sum();
+                  aggregates.Add(m => m.TotalEstimation).Sum();
+                  aggregates.Add(m => m.Weight).Sum();
+                  aggregates.Add(m => m.ActualEffort).Sum();
+                  aggregates.Add(m => m.WeightedOverallProgress).Sum();
+                  aggregates.Add(m => m.Variance).Sum();
+              })
+              .Read(read => read.Action("EditingInLine_Read", "Module").Data("getReadData"))
+          )
 )
 <script type="text/javascript">
-    $("#showGrid").click(function () {
-        var yearMonth = document.getElementById("form-select-time").value;
+    function showData() {
+        var yearMonth = document.getElementById("yearMonths").value;
         var year = yearMonth.split("-")[0];
         var month = yearMonth.split("-")[1];
         $.ajax({
@@ -95,7 +82,7 @@
             }
         });
         $("#grid").data("kendoGrid").dataSource.read();
-    });
+    }
 
     function error_handler(e) {
         if (e.errors) {
@@ -111,13 +98,48 @@
         }
     }
 
+    function excelExport(e) {
+        var yearMonth = document.getElementById("yearMonths").value;
+        var fsm = document.getElementById("isFSM").value;
+        var filename = "Module " + yearMonth;
+
+        if (fsm == "Overall") {
+            filename = filename + "/Overall";
+        }
+        else {
+            if (fsm == "First Sellable Module") {
+                filename = filename + "/FSM";
+            }
+            else {
+                filename = filename + "/Not FSM";
+            }
+        }
+
+        filename = filename + ".xlsx";
+        e.workbook.fileName = filename;
+    }
+
     function getReadData() {
-        var yearMonth = document.getElementById("form-select-time").value;
+        var yearMonth = document.getElementById("yearMonths").value;
         var year = yearMonth.split("-")[0];
         var month = yearMonth.split("-")[1];
+        var fsmForm = document.getElementById("isFSM").value;
+        var location = document.getElementById("locations").value;
+        var fsm = 0;
+        if (fsmForm == "First Sellable Module") {
+            fsm = 1;
+        }
+        else if (fsmForm == "Not First Sellable Module") {
+            fsm = 2;
+        }
+        else if (fsmForm == "Overall") {
+            fsm = 0;
+        }
         return {
             year: year,
-            month: month
+            month: month,
+            fsm: fsm,
+            location: location
         };
     }
 
@@ -130,7 +152,7 @@
         var windowHeight = $(window).innerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 180 - 60; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 180 - 70; // - headerHeight;       header is empty but this calculation makes grid small
         calculatedHeight = calculatedHeight + 40;
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
@@ -164,11 +186,78 @@
         })
     })
 </script>
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Date: </text>
+        @(Html.Kendo().DropDownList()
+                           .Name("yearMonths")
+                           .DataSource(ds =>
+                           {
+                               ds.Read("selectDates", "Module");
+                           })
+                           .ToClientTemplate()
+        )
+        <text class="filter-gap">Location: </text>
+        @(Html.Kendo().DropDownList()
+                           .Name("locations")
+                           .DataSource(ds =>
+                           {
+                               ds.Read("selectLocations", "Module");
+                           })
+                           .ToClientTemplate()
+        )
+        <text class="filter-gap">Is FSM: </text>
+        @(Html.Kendo().DropDownList()
+                           .Name("isFSM")
+                           .DataSource(ds =>
+                           {
+                               ds.Read("selectFSM", "Module");
+                           })
+                           .HtmlAttributes(new { style = "width: 175px;" })
+                           .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+                           .Name("show-data")
+                           .Content("Show Data")
+                           .Events(e => e.Click("showData"))
+                           .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+                           .Name("excel")
+                           .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
+                           .Content("Export to Excel")
+                           .ToClientTemplate()
+        )
+    </div>
+</script>
+<script>
+    function exportExcel() {
+        window.location.href = "#";
+    }
+</script>
+
+
 <style>
     .k-grid tbody tr {
         height: 42px;
     }
+
     .button-size-month {
         margin-left: 24px;
+    }
+
+    .dateListContainer {
+        margin-left: 12px;
+        display: inline-block;
+    }
+
+    .filter-gap {
+        margin-left: 12px;
+    }
+
+    .toolbar {
+        float: right;
     }
 </style>

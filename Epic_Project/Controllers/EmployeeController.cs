@@ -15,12 +15,17 @@ namespace Epic_Project.Controllers
     {
         private readonly IRepository _repository;
 
+        #region Constructor
+
         public EmployeeController(IRepository repository)
         {
             _repository = repository;
         }
 
-        [Authorize]
+        #endregion
+
+        #region Views
+
         public ActionResult Editing_InLine()
         {
             PopulateEmployeeTypes();
@@ -28,11 +33,18 @@ namespace Epic_Project.Controllers
             return View();
         }
 
-        [Authorize]
+        #endregion
+
+        #region Reads
+
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
             return Json(_repository.GetEmployeeAll().ToDataSourceResult(request));
         }
+
+        #endregion
+
+        #region Creates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -42,9 +54,12 @@ namespace Epic_Project.Controllers
             {
                 _repository.InsertEmployee(employee);
             }
-
             return Json(new[] { employee }.ToDataSourceResult(request, ModelState));
         }
+
+        #endregion
+
+        #region Updates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -54,9 +69,12 @@ namespace Epic_Project.Controllers
             {
                 _repository.UpdateEmployee(employee);
             }
-
             return Json(new[] { employee }.ToDataSourceResult(request, ModelState));
         }
+
+        #endregion
+
+        #region Deletes
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -70,7 +88,10 @@ namespace Epic_Project.Controllers
             return Json(new[] { employee }.ToDataSourceResult(request, ModelState));
         }
 
-        [Authorize]
+        #endregion
+
+        #region Operations
+
         private void PopulateEmployeeTypes()
         {
             List<EmployeeTypeViewModel> typeList = new List<EmployeeTypeViewModel>();
@@ -88,7 +109,6 @@ namespace Epic_Project.Controllers
             ViewData["defaultEmployeeType"] = typeList.First();
         }
 
-        [Authorize]
         private void PopulateEmployeeLocations()
         {
             List<ProjectLocationViewModel> employeeLocationList = new List<ProjectLocationViewModel>();
@@ -106,5 +126,7 @@ namespace Epic_Project.Controllers
             ViewData["employeeLocations"] = employeeLocationList;
             ViewData["defaultEmployeeLocation"] = employeeLocationList.First();
         }
+
+        #endregion
     }
 }

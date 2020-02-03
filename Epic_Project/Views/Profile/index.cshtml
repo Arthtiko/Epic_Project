@@ -2,12 +2,6 @@
 @using Kendo.Mvc.UI
 
 <div>
-    @if (User.IsInRole("Admin"))
-    {
-    <form class="k-form" asp-controller="Profile" asp-action="GetBackup" method="post">
-         <button class="k-button" type="submit">BACKUP</button>
-    </form>
-    }
     <table>
         <tr>
             <td>

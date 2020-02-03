@@ -8,7 +8,7 @@
        columns.Bound(e => e.EmployeeLocation.LocationName).Title("Location").Width(180).EditorTemplateName("ClientEmployeeLocationEditor").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
        if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180); }
    })
-   .ToolBar(toolbar => toolbar.Create())
+   .ToolBar(toolbar => { toolbar.Create(); })
    .Editable(editable => editable.Mode(GridEditMode.InLine))
    .Groupable()
    .Scrollable()

@@ -14,13 +14,18 @@ namespace Epic_Project.Controllers
     public class LineChartPanelController : Controller
     {
         private readonly IRepository _repository;
-        
+
+        #region Constructor
+
         public LineChartPanelController(IRepository repository)
         {
             _repository = repository;
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
+        #endregion
+
+        #region Views
+
         public IActionResult Index()
         {
             PopulateDateControlTypes();
@@ -30,14 +35,19 @@ namespace Epic_Project.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin, Project Manager, Program Manager")]
+        #endregion
+
+        #region Reads
+
         public ActionResult DateControl_Read([DataSourceRequest] DataSourceRequest request)
         {
-            List<DateControl> model = (List<DateControl>)_repository.GetDateControl(null, null, null);
-            return Json(model.ToDataSourceResult(request));
+            return Json(_repository.GetDateControl(null, null, null).ToDataSourceResult(request));
         }
-        
-        [Authorize]
+
+        #endregion
+
+        #region Updates
+
         [HttpPost]
         public ActionResult DateControl_Update([DataSourceRequest] DataSourceRequest request, DateControl dateControl)
         {
@@ -48,8 +58,10 @@ namespace Epic_Project.Controllers
             return Json(new[] { dateControl }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
 
-        [Authorize]
+        #region Operations
+
         private void PopulateDateControlTypes()
         {
             List<DateControlTypeViewModel> typeList = new List<DateControlTypeViewModel>();
@@ -61,7 +73,7 @@ namespace Epic_Project.Controllers
             ViewData["dateControlTypes"] = typeList;
             ViewData["defaultDateControlType"] = typeList.First();
         }
-        [Authorize]
+
         private void PopulateEfforts()
         {
             List<EffortViewModel> effortList = new List<EffortViewModel>();
@@ -73,7 +85,7 @@ namespace Epic_Project.Controllers
             ViewData["efforts"] = effortList;
             ViewData["defaultEffort"] = effortList.First();
         }
-        [Authorize]
+
         private void PopulateProgresses()
         {
             List<ProgressViewModel> progressList = new List<ProgressViewModel>();
@@ -85,7 +97,7 @@ namespace Epic_Project.Controllers
             ViewData["progresses"] = progressList;
             ViewData["defaultProgress"] = progressList.First();
         }
-        [Authorize]
+
         private void PopulateVariances()
         {
             List<VarianceViewModel> varianceList = new List<VarianceViewModel>();
@@ -97,5 +109,7 @@ namespace Epic_Project.Controllers
             ViewData["variances"] = varianceList;
             ViewData["defaultVariance"] = varianceList.First();
         }
+
+        #endregion
     }
 }

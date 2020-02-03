@@ -15,25 +15,36 @@ namespace Epic_Project.Controllers
     {
         private readonly IRepository _repository;
 
+        #region Constructor
+
         public TeamController(IRepository repository)
         {
             _repository = repository;
         }
 
-        [Authorize]
+        #endregion
+
+        #region Views
+
         public ActionResult Editing_InLine()
         {
             PopulateTeamLeaders();
             PopulateProjectManagers();
             return View();
         }
-        
-        [Authorize]
+
+        #endregion
+
+        #region Reads
+
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
-            IEnumerable<Team> x = _repository.GetTeamAll(0, null, 0, 0);
-            return Json(x.ToDataSourceResult(request));
+            return Json(_repository.GetTeamAll(0, null, 0, 0).ToDataSourceResult(request));
         }
+
+        #endregion
+
+        #region Creates
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
@@ -47,6 +58,10 @@ namespace Epic_Project.Controllers
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
+
+        #region Updates
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Update([DataSourceRequest] DataSourceRequest request, Team team)
@@ -59,6 +74,10 @@ namespace Epic_Project.Controllers
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
         }
 
+        #endregion
+
+        #region Deletes
+
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
         [HttpPost]
         public ActionResult EditingInLine_Destroy([DataSourceRequest] DataSourceRequest request, Team team)
@@ -70,8 +89,11 @@ namespace Epic_Project.Controllers
 
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
         }
-        
-        [Authorize]
+
+        #endregion
+
+        #region Operations
+
         private void PopulateTeamLeaders()
         {
             List<TeamLeaderViewModel> employeeList = new List<TeamLeaderViewModel>();
@@ -88,7 +110,6 @@ namespace Epic_Project.Controllers
             ViewData["defaultTeamLeader"] = new TeamLeaderViewModel() { TeamLeaderId = 0, TeamLeaderName = "" };
         }
 
-        [Authorize]
         private void PopulateProjectManagers()
         {
             List<ProjectManagerViewModel> employeeList = new List<ProjectManagerViewModel>();
@@ -105,7 +126,6 @@ namespace Epic_Project.Controllers
             ViewData["defaultProjectManager"] = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = "" };
         }
 
-        [Authorize]
         [HttpPost]
         public ActionResult GetTurkeyProgress()
         {
@@ -122,5 +142,7 @@ namespace Epic_Project.Controllers
             };
             return Json(progressList);
         }
+
+        #endregion
     }
 }
