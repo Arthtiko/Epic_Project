@@ -247,7 +247,7 @@ namespace EPICProject.Controllers
 
                 if (temp != null)
                 {
-                    newMeasurement = _repository.GetMeasurementAll(measurement.EpicId, measurement.Year, measurement.Month, measurement.Type.TypeName).First();
+                    newMeasurement = _repository.GetMeasurementAll(measurement.EpicId, measurement.Year, measurement.Month, measurement.Type.TypeName, 0).First();
                 }
             }
             return Json(new[] { newMeasurement }.ToDataSourceResult(request, ModelState));
@@ -275,7 +275,7 @@ namespace EPICProject.Controllers
                 if (id == 1001)
                 {
                     newMeasurement = _repository.UpdateMeasurement(measurement, "Test Admin Turkey", ipAddress);
-                    List<Measurement> tempList = (List<Measurement>)_repository.GetMeasurementAll(newMeasurement.EpicId, newMeasurement.Month == 12 ? newMeasurement.Year + 1 : newMeasurement.Year, newMeasurement.Month == 12 ? 1 : newMeasurement.Month + 1, newMeasurement.Type.TypeName);
+                    List<Measurement> tempList = (List<Measurement>)_repository.GetMeasurementAll(newMeasurement.EpicId, newMeasurement.Month == 12 ? newMeasurement.Year + 1 : newMeasurement.Year, newMeasurement.Month == 12 ? 1 : newMeasurement.Month + 1, newMeasurement.Type.TypeName, 0);
                     if (tempList != null && tempList.Count() > 0)
                     {
                         Measurement temp = tempList[0];
@@ -286,7 +286,7 @@ namespace EPICProject.Controllers
                 else if (id == 2001)
                 {
                     newMeasurement = _repository.UpdateMeasurement(measurement, "Test Admin Egypt", ipAddress);
-                    List<Measurement> tempList = (List<Measurement>)_repository.GetMeasurementAll(newMeasurement.EpicId, newMeasurement.Month == 12 ? newMeasurement.Year + 1 : newMeasurement.Year, newMeasurement.Month == 12 ? 1 : newMeasurement.Month + 1, newMeasurement.Type.TypeName);
+                    List<Measurement> tempList = (List<Measurement>)_repository.GetMeasurementAll(newMeasurement.EpicId, newMeasurement.Month == 12 ? newMeasurement.Year + 1 : newMeasurement.Year, newMeasurement.Month == 12 ? 1 : newMeasurement.Month + 1, newMeasurement.Type.TypeName, 0);
                     if (tempList != null && tempList.Count() > 0)
                     {
                         Measurement temp = tempList[0];
@@ -297,7 +297,7 @@ namespace EPICProject.Controllers
                 else
                 {
                     newMeasurement = _repository.UpdateMeasurement(measurement, _repository.GetEmployeeById(id).EmployeeName, ipAddress);
-                    List<Measurement> tempList = (List<Measurement>)_repository.GetMeasurementAll(newMeasurement.EpicId, newMeasurement.Month == 12 ? newMeasurement.Year + 1 : newMeasurement.Year, newMeasurement.Month == 12 ? 1 : newMeasurement.Month + 1, newMeasurement.Type.TypeName);
+                    List<Measurement> tempList = (List<Measurement>)_repository.GetMeasurementAll(newMeasurement.EpicId, newMeasurement.Month == 12 ? newMeasurement.Year + 1 : newMeasurement.Year, newMeasurement.Month == 12 ? 1 : newMeasurement.Month + 1, newMeasurement.Type.TypeName, 0);
                     if (tempList != null && tempList.Count() > 0)
                     {
                         Measurement temp = tempList[0];

@@ -28,6 +28,7 @@ namespace Epic_Project.Models
         [UIHint("ClientTeam")]
         public Team Team { get; set; }
         public string IsFirstSellableModule { get; set; }
+        public float FSMPercentage { get; set; }
         [UIHint("ClientPercentText")]
         public float RequirementProgress { get; set; }
         [UIHint("ClientPercentText")]

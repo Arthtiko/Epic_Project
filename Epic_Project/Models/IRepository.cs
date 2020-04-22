@@ -13,6 +13,7 @@ namespace Epic_Project.Models
         void DeleteTeam(int id);
         Team InsertTeam(Team team);
         Team UpdateTeam(Team team);
+        IEnumerable<TeamProgressTrack> GetTeamProgressTrack(int year, int month, int isFSM);
         #endregion
 
         #region Module
@@ -21,6 +22,7 @@ namespace Epic_Project.Models
         void DeleteModule(int id);
         Module InsertModule(Module module);
         Module UpdateModule(Module module);
+        List<Module> GetModuleAggregates(int year, int month, int isFSM, string location);
         #endregion
 
         #region EpicBaseLine
@@ -32,7 +34,7 @@ namespace Epic_Project.Models
         #endregion
 
         #region Measurement
-        IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type);
+        IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type, int TeamId);
         void DeleteMeasurement(int epicId, int year, int month, int type, string userName, string ipAddress);
         Measurement InsertMeasurement(Measurement measurement, string userName, string ipAddress);
         Measurement UpdateMeasurement(Measurement measurement, string userName, string ipAddress);
@@ -66,6 +68,28 @@ namespace Epic_Project.Models
         void GenerateNewFinanceMonth();
         void DeleteLastFinanceMonth();
         IEnumerable<FinanceGraph> GetFinanceGraph(bool isTotal);
+        #endregion
+
+        #region Variance Analysis
+
+        IEnumerable<ProgressProducingVarianceAnalysis> GetProducingVarianceAnalysis(int teamId, int year, int month);
+        IEnumerable<NonProgressProducingVarianceAnalysis> GetNonProducingVarianceAnalysis(int teamId, int year, int month);
+        void InsertVarianceAnalysis(VarianceAnalysis var);
+        void DeleteVarianceAnalysis(int teamId, int year, int month);
+        void UpdateVarianceAnalysis(VarianceAnalysis var);
+        void InsertVarianceAnalysisDate(Date date);
+        void DeleteVarianceAnalysisDate(Date date);
+        List<Date> GetVarianceAnalysisDates();
+
+        #endregion
+
+        #region TimeSheet
+
+        IEnumerable<TimeSheet> GetTimeSheetAll(string name, string project, string task);
+        void InsertTimeSheetAll(TimeSheet timeSheet);
+        void DeleteTimeSheetAll(TimeSheet timeSheet);
+        void UpdateTimeSheet(TimeSheet timeSheet);
+
         #endregion
 
         #region Parameter

@@ -27,6 +27,7 @@ namespace Epic_Project.Models
         [UIHint("ClientProjectLocation")]
         public ProjectLocationViewModel ProjectLocation { get; set; }
         public float Estimation { get; set; }
+        public float FSMPercentage { get; set; }
         public float EpicWeight { get; set; }
         [UIHint("ClientTeam")]
         public Team Team { get; set; }
@@ -37,6 +38,8 @@ namespace Epic_Project.Models
         public float DistributedUnmappedEffort { get; set; }
         public float ActualEffort { get; set; }
         public float TotalActualEffort { get; set; }
+        public string Description { get; set; }
+        public string Dependency { get; set; }
     }
 
     public class EpicTypeViewModel

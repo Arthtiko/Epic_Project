@@ -375,6 +375,7 @@ namespace Epic_Project.Models
                 temp.ModuleName.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
                 temp.EpicType.TypeValue = Convert.ToInt32(dt.Rows[i]["EpicTypeId"]);
                 temp.EpicType.TypeName = Convert.ToString(dt.Rows[i]["EpicType"]);
+                temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
                 temp.ProjectLocation.LocationValue = Convert.ToInt32(dt.Rows[i]["ProjectLocationId"]);
                 temp.ProjectLocation.LocationName = Convert.ToString(dt.Rows[i]["ProjectLocation"]);
                 temp.Estimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
@@ -420,12 +421,14 @@ namespace Epic_Project.Models
                 temp.DistributedUnmappedEffort = (float)Convert.ToDouble(dt.Rows[i]["DistributedUnmappedEffort"]);
                 temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
                 temp.TotalActualEffort = (float)Convert.ToDouble(dt.Rows[i]["TotalActualEffort"]);
+                temp.Description = Convert.ToString(dt.Rows[i]["Description"]);
+                temp.Dependency = Convert.ToString(dt.Rows[i]["Dependency"]);
                 EpicBaseLineList.Add(temp);
             }
             return EpicBaseLineList;
         }
         
-        public IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type)
+        public IEnumerable<Measurement> GetMeasurementAll(int epicId, int year, int month, string type, int teamId)
         {
             MeasurementList = new List<Measurement>();
             DataTable dt = new DataTable();
@@ -452,6 +455,10 @@ namespace Epic_Project.Models
                     {
                         sqlCommand.Parameters.AddWithValue("@Type", GetParameterValue("Type", type));
                     }
+                    if (teamId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", teamId);
+                    }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -471,6 +478,7 @@ namespace Epic_Project.Models
                 temp.Type.TypeValue = Convert.ToInt32(dt.Rows[i]["TypeId"]);
                 temp.Type.TypeName = Convert.ToString(dt.Rows[i]["TypeName"]);
                 temp.EpicWeight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
                 if (Convert.IsDBNull(dt.Rows[i]["TeamId"]))
                 {
                     temp.Team.TeamId = 0;
@@ -928,10 +936,27 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", updatedEpicBaseLine.ProjectLocation.LocationName));
                     sqlCommand.Parameters.AddWithValue("@Estimation", updatedEpicBaseLine.Estimation);
                     sqlCommand.Parameters.AddWithValue("@TeamId", updatedEpicBaseLine.Team.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@FSMPercentage", Math.Round(updatedEpicBaseLine.FSMPercentage, 2));
                     sqlCommand.Parameters.AddWithValue("@IsMurabaha", GetParameterValue("IsMurabaha", updatedEpicBaseLine.IsMurabaha.MurabahaName));
                     sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", updatedEpicBaseLine.IsFirstSellableModule.FirstSellableModuleName));
                     sqlCommand.Parameters.AddWithValue("@DistributedUnmappedEffort", updatedEpicBaseLine.DistributedUnmappedEffort);
                     sqlCommand.Parameters.AddWithValue("@TotalActualEffort", updatedEpicBaseLine.TotalActualEffort);
+                    if (updatedEpicBaseLine.Description != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Description", updatedEpicBaseLine.Description);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Description", "");
+                    }
+                    if (updatedEpicBaseLine.Dependency != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Dependency", updatedEpicBaseLine.Dependency);
+                    }
+                    else
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Dependency", "");
+                    }
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
                     sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
                     sqlConnection.Open();
@@ -1486,6 +1511,7 @@ namespace Epic_Project.Models
             string cat4 = "\tServers";
             string cat5 = "\tTravel Expenses - Archtecht";
             string cat6 = "\tTravel Expenses - ITS";
+            string cat7 = "Migration Activity Ethix NG";
             FinanceGraph temp = new FinanceGraph();
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -1579,6 +1605,17 @@ namespace Epic_Project.Models
                         temp.Line6 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
                     }
                 }
+                if (tempCategory == cat7)
+                {
+                    if (isTotal)
+                    {
+                        temp.Line7 = (float)Convert.ToDouble(dt.Rows[i]["TotalActual"]);
+                    }
+                    else
+                    {
+                        temp.Line7 = (float)Convert.ToDouble(dt.Rows[i]["PeriodActual"]);
+                    }
+                }
                 temp.Category = Convert.ToString(dt.Rows[i]["Year"]) + " - " + Convert.ToString(dt.Rows[i]["Month"]);
             }
             return temp;
@@ -1630,11 +1667,11 @@ namespace Epic_Project.Models
                 FinanceGraph totals = GetFinanceTotalValues(dates[i].Year, dates[i].Month)[0];
                 if (isTotal)
                 {
-                    temp.Line7 = totals.Line1;
+                    temp.Line8 = totals.Line1;
                 }
                 else
                 {
-                    temp.Line7 = totals.Line2;
+                    temp.Line8 = totals.Line2;
                 }
                 financeList.Add(temp);
             }
@@ -1642,6 +1679,502 @@ namespace Epic_Project.Models
             return financeList;
         }
         #endregion
+
+        #region VarianceAnalysis
+
+        public IEnumerable<ProgressProducingVarianceAnalysis> GetProducingVarianceAnalysis(int teamId, int year, int month)
+        {
+            List<ProgressProducingVarianceAnalysis> varList = new List<ProgressProducingVarianceAnalysis>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_VarianceAnalysis]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (teamId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", teamId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                ProgressProducingVarianceAnalysis temp = new ProgressProducingVarianceAnalysis();
+                temp.Team = new Team()
+                {
+                    TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]),
+                    TeamName = Convert.ToString(dt.Rows[i]["TeamName"])
+                };
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.ResourceCount = Convert.ToInt32(dt.Rows[i]["ProgressProducingResourceCount"]);
+                temp.DayOff = Convert.ToInt32(dt.Rows[i]["ProgressProducingResourceDayOff"]);
+                temp.TargetProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetProgress"]);
+
+                temp.PlannedManday = temp.ResourceCount * 22 - temp.DayOff;
+                temp.PlannedConsumedMandayBudget = (temp.PlannedManday / GetTotalEstimation()) * 100;
+                temp.ThresholdIncrementProgress = (float)(temp.PlannedConsumedMandayBudget * 1.3);
+                int prevYear = temp.Month == 1 ? temp.Year - 1 : temp.Year;
+                int prevMonth = temp.Month == 1 ? 12 : temp.Month - 1;
+                List<Measurement> ms = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, "Actual", temp.Team.TeamId);
+                float prevMonthProgress = 0;
+                for (int j = 0; j < ms.Count(); j++)
+                {
+                    prevMonthProgress += ms[j].WeightedOverallProgress;
+                }
+                temp.PreviousMonthOverallProgress = prevMonthProgress;
+                temp.IncrementProgress = temp.TargetProgress - temp.PreviousMonthOverallProgress;
+                temp.Difference = temp.ThresholdIncrementProgress - temp.IncrementProgress;
+                temp.Variance = temp.PlannedConsumedMandayBudget - temp.IncrementProgress;
+                
+                varList.Add(temp);
+            }
+            return varList;
+        }
+
+        public IEnumerable<NonProgressProducingVarianceAnalysis> GetNonProducingVarianceAnalysis(int teamId, int year, int month)
+        {
+            List<NonProgressProducingVarianceAnalysis> varList = new List<NonProgressProducingVarianceAnalysis>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_VarianceAnalysis]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (teamId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", teamId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                NonProgressProducingVarianceAnalysis temp = new NonProgressProducingVarianceAnalysis();
+                temp.Team = new Team()
+                {
+                    TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]),
+                    TeamName = Convert.ToString(dt.Rows[i]["TeamName"])
+                };
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.NonProgressProducingResourceCount = Convert.ToInt32(dt.Rows[i]["NonProgressProducingResourceCount"]);
+                temp.ResourceCount = Convert.ToInt32(dt.Rows[i]["ProgressProducingResourceCount"]);
+                temp.TotalResourceCount = temp.ResourceCount + temp.NonProgressProducingResourceCount;
+
+                temp.DayOff = Convert.ToInt32(dt.Rows[i]["NonProgressProducingResourceDayOff"]);
+                temp.TargetProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetProgress"]);
+
+                temp.PlannedManday = temp.TotalResourceCount * 22 - temp.DayOff;
+                temp.PlannedConsumedMandayBudget = (temp.PlannedManday / GetTotalEstimation()) * 100;
+                temp.ThresholdIncrementProgress = (float)(temp.PlannedConsumedMandayBudget * 1.3);
+                int prevYear = temp.Month == 1 ? temp.Year - 1 : temp.Year;
+                int prevMonth = temp.Month == 1 ? 12 : temp.Month - 1;
+                List<Measurement> ms = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, "Actual", temp.Team.TeamId);
+                float prevMonthProgress = 0;
+                for (int j = 0; j < ms.Count(); j++)
+                {
+                    prevMonthProgress += ms[j].WeightedOverallProgress;
+                }
+                temp.PreviousMonthOverallProgress = prevMonthProgress;
+                temp.IncrementProgress = temp.TargetProgress - temp.PreviousMonthOverallProgress;
+                temp.Difference = temp.ThresholdIncrementProgress - temp.IncrementProgress;
+                temp.Variance = temp.PlannedConsumedMandayBudget - temp.IncrementProgress;
+
+                varList.Add(temp);
+            }
+            return varList;
+        }
+
+        public void InsertVarianceAnalysis(VarianceAnalysis var)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[ins_VarianceAnalysis]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@TeamId", var.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@Year", var.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", var.Month);
+                    sqlCommand.Parameters.AddWithValue("@ProgressProducingResourceCount", var.ProgressProducingResourceCount);
+                    sqlCommand.Parameters.AddWithValue("@NonProgressProducingResourceCount", var.NonProgressProducingResourceCount);
+                    sqlCommand.Parameters.AddWithValue("@ProgressProducingResourceDayOff", var.ProgressProducingResourceDayOff);
+                    sqlCommand.Parameters.AddWithValue("@NonProgressProducingResourceDayOff", var.NonProgressProducingResourceDayOff);
+                    sqlCommand.Parameters.AddWithValue("@TargetProgress", Math.Round(var.TargetProgress, 2));
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+        public void DeleteVarianceAnalysis(int teamId, int year, int month)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_VarianceAnalysis]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@TeamId", teamId);
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@Month",month);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+        public void UpdateVarianceAnalysis(VarianceAnalysis var)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_VarianceAnalysis]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@TeamId", var.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@Year", var.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", var.Month);
+                    sqlCommand.Parameters.AddWithValue("@ProgressProducingResourceCount", var.ProgressProducingResourceCount);
+                    sqlCommand.Parameters.AddWithValue("@NonProgressProducingResourceCount", var.NonProgressProducingResourceCount);
+                    sqlCommand.Parameters.AddWithValue("@ProgressProducingResourceDayOff", var.ProgressProducingResourceDayOff);
+                    sqlCommand.Parameters.AddWithValue("@NonProgressProducingResourceDayOff", var.NonProgressProducingResourceDayOff);
+                    sqlCommand.Parameters.AddWithValue("@TargetProgress", var.TargetProgress);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public void InsertVarianceAnalysisDate(Date date)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[ins_VarianceAnalysisDate]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", date.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", date.Month);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+        public void DeleteVarianceAnalysisDate(Date date)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_VarianceAnalysisDate]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", date.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", date.Month);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+        public List<Date> GetVarianceAnalysisDates()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_VarianceAnalysisDate]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Date temp = new Date();
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                DateList.Add(temp);
+            }
+            return DateList;
+        }
+        #endregion
+
+        #region TimeSheet
+
+        public IEnumerable<TimeSheet> GetTimeSheetAll(string name, string project, string task)
+        {
+            List<TimeSheet> timeSheets = new List<TimeSheet>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_TimeSheet]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (name != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Name", name);
+                    }
+                    if (project != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Project", project);
+                    }
+                    if (task != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Task", task);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                TimeSheet temp = new TimeSheet();
+                temp.Id = Convert.ToInt32(dt.Rows[i]["Id"]);
+                temp.Name = Convert.ToString(dt.Rows[i]["Name"]);
+                temp.Project = Convert.ToString(dt.Rows[i]["Project"]);
+                temp.Task = Convert.ToString(dt.Rows[i]["Task"]);
+                temp.Hour = (float)Convert.ToDouble(dt.Rows[i]["Hour"]);
+                temp.Date = Convert.ToDateTime(dt.Rows[i]["Date"]);
+                timeSheets.Add(temp);
+            }
+            return timeSheets;
+        }
+
+        public void InsertTimeSheetAll(TimeSheet timeSheet)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[ins_TimeSheet]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Name", timeSheet.Name);
+                    sqlCommand.Parameters.AddWithValue("@Project", timeSheet.Project);
+                    sqlCommand.Parameters.AddWithValue("@Task", timeSheet.Task);
+                    sqlCommand.Parameters.AddWithValue("@Hour", timeSheet.Hour);
+                    sqlCommand.Parameters.AddWithValue("@Date", timeSheet.Date);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public void UpdateTimeSheet(TimeSheet timeSheet)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_TimeSheet]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Id", timeSheet.Id);
+                    sqlCommand.Parameters.AddWithValue("@Name", timeSheet.Name);
+                    sqlCommand.Parameters.AddWithValue("@Project", timeSheet.Project);
+                    sqlCommand.Parameters.AddWithValue("@Task", timeSheet.Task);
+                    sqlCommand.Parameters.AddWithValue("@Hour", timeSheet.Hour);
+                    sqlCommand.Parameters.AddWithValue("@Date", timeSheet.Date);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public void DeleteTimeSheetAll(TimeSheet timeSheet)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_TimeSheet]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Id", timeSheet.Id);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+
+        #endregion
+
+        public IEnumerable<TeamProgressTrack> GetTeamProgressTrack(int year, int month, int isFSM)
+        {
+            List<Team> teams = new List<Team>();
+            List<MeasurementDetailsViewModel> measurementList = new List<MeasurementDetailsViewModel>();
+            int prevYear = month == 1 ? year - 1 : year;
+            int prevMonth = month == 1 ? 12 : month - 1;
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_MeasurementReport]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@Year", year);
+                    sqlCommand.Parameters.AddWithValue("@PrevYear", prevYear);
+                    sqlCommand.Parameters.AddWithValue("@Month", month);
+                    sqlCommand.Parameters.AddWithValue("@PrevMonth", prevMonth);
+                    if (isFSM != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", isFSM);
+                    }
+                    sqlCommand.Parameters.AddWithValue("@Location", GetParameterValue("ProjectLocation", "Turkey"));
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                MeasurementDetailsViewModel temp = new MeasurementDetailsViewModel();
+                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.Team.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
+
+                if (teams.Find(t => t.TeamName == temp.Team.TeamName) == null)
+                {
+                    teams.Add(new Team() { TeamName = temp.Team.TeamName});
+                }
+
+                if (Convert.IsDBNull(dt.Rows[i]["PreviousMonthRequirementProgress"]))
+                {
+                    temp.PrevMonthWeightedOverallProgress = 0;
+                }
+                else
+                {
+                    temp.PrevMonthWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthWeightedOverallProgress"]);
+                }
+                if (Convert.IsDBNull(dt.Rows[i]["ActualRequirementProgress"]))
+                {
+                    temp.ActualWeightedOverallProgress = 0;
+                }
+                else
+                {
+                    temp.ActualWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["ActualWeightedOverallProgress"]);
+                }
+                if (Convert.IsDBNull(dt.Rows[i]["ActualRequirementProgress"]))
+                {
+                    temp.TargetWeightedOverallProgress = 0;
+                }
+                else
+                {
+                    temp.TargetWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetWeightedOverallProgress"]);
+                }
+
+                measurementList.Add(temp);
+            }
+
+
+            List<TeamProgressTrack> track = new List<TeamProgressTrack>();
+            for (int i = 0; i < teams.Count(); i++)
+            {
+                track.Add(new TeamProgressTrack() { Team = teams[i].TeamName});
+            }
+
+            for (int i = 0; i < measurementList.Count(); i++)
+            {
+                for (int j = 0; j < track.Count(); j++)
+                {
+                    if (track[j].Team == measurementList[i].Team.TeamName)
+                    {
+                        track[j].PreviousMonthProgress += measurementList[i].PrevMonthWeightedOverallProgress;
+                        track[j].CurrentProgress += measurementList[i].ActualWeightedOverallProgress;
+                        track[j].TargetProgress += measurementList[i].TargetWeightedOverallProgress;
+                    }
+                }
+            }
+
+            TeamProgressTrack shared = new TeamProgressTrack();
+            TeamProgressTrack turkeyPool = new TeamProgressTrack();
+            for (int i = 0; i < track.Count(); i++)
+            {
+                track[i].RealizationRate = ((track[i].CurrentProgress - track[i].PreviousMonthProgress) / (track[i].TargetProgress - track[i].PreviousMonthProgress)) * 100;
+                if (track[i].Team == "Shared")
+                {
+                    shared = track[i];
+                }
+                if (track[i].Team == "Turkey Pool")
+                {
+                    turkeyPool = track[i];
+                }
+            }
+            track.Remove(shared);
+            track.Remove(turkeyPool);
+
+
+            List<TeamProgressTrack> SortedList = track.OrderByDescending(team => team.RealizationRate).ToList();
+
+            return SortedList;
+        }
 
         public List<MeasurementDetailsViewModel> FillMeasurementDetails(int year, int month, string location, string isFSM, string team)
         {
@@ -1689,6 +2222,7 @@ namespace Epic_Project.Models
                 temp.Location = Convert.ToString(dt.Rows[i]["ProjectLocation"]);
                 temp.EpicWeight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
                 temp.Estimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
+                temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
                 if (Convert.IsDBNull(dt.Rows[i]["TeamName"]))
                 {
                     temp.Team.TeamName = "";
@@ -1774,7 +2308,7 @@ namespace Epic_Project.Models
         {
             int prevYear = (month == 1 ? year - 1 : year);
             int prevMonth = (month == 1 ? 12 : month - 1);
-            List<Measurement> CurrentMeasurementList = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null);
+            List<Measurement> CurrentMeasurementList = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null, 0);
             List<Measurement> TempMeasurementList = new List<Measurement>();
             List<Measurement> NextMonthMeasurementList = CurrentMeasurementList;
             for (int i = 0; i < CurrentMeasurementList.Count(); i++)
@@ -1832,9 +2366,9 @@ namespace Epic_Project.Models
         public void DeleteLastMonth(int month, int year, string location, string userName, string ipAddress)
         {
             List<Date> dates = GetDates();
-            int prevYear = dates[0].Year;
+            int prevYear = dates[0].Year;//datecontrol silinecek
             int prevMonth = dates[0].Month;
-            List<Measurement> LastmonthMeasurement = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null);
+            List<Measurement> LastmonthMeasurement = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, null, 0);
             for (int i = 0; i < LastmonthMeasurement.Count(); i++)
             {
                 DeleteMeasurement(LastmonthMeasurement[i].EpicId, prevYear, prevMonth, LastmonthMeasurement[i].Type.TypeValue, userName, ipAddress);
@@ -1847,7 +2381,7 @@ namespace Epic_Project.Models
             List<Measurement> list = new List<Measurement>();
             List<int> IdListByLocation = GetEpicBaseLineIdByLocation(location);
             List<int> IdListByTeam = GetEpicBaseLineIdByTeam(teamName);
-            List<Measurement> measurements = (List<Measurement>)GetMeasurementAll(0, year, month, type);
+            List<Measurement> measurements = (List<Measurement>)GetMeasurementAll(0, year, month, type, 0);
             for (int i = 0; i < measurements.Count(); i++)
             {
                 int c1 = IdListByLocation.Find(id => id == measurements[i].EpicId);
@@ -1963,7 +2497,14 @@ namespace Epic_Project.Models
             float sum = 0;
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                sum = sum + (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                if (isFirstSellableModule == "TRUE")
+                {
+                    sum = sum + (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"])*((float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]) / 100);
+                }
+                else
+                {
+                    sum = sum + (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
+                }
             }
             return sum;
         }
@@ -1982,6 +2523,10 @@ namespace Epic_Project.Models
                     sqlCommand.CommandType = CommandType.StoredProcedure;
                     sqlCommand.Parameters.AddWithValue("@Year", year);
                     sqlCommand.Parameters.AddWithValue("@Month", month);
+                    if (location != null)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", location));
+                    }
                     if (isFSM == 1 || isFSM == 2)
                     {
                         sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
@@ -1998,6 +2543,11 @@ namespace Epic_Project.Models
                 Module temp = new Module();
                 temp.ModuleId = Convert.ToInt32(dt.Rows[i]["ModuleId"]);
                 temp.ModuleName = Convert.ToString(dt.Rows[i]["ModuleName"]);
+                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
+                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
+                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
+                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
+                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
                 temp.Progress = (float)Convert.ToDouble(dt.Rows[i]["EpicProgress"]);
                 temp.Weight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
                 temp.Variance = (float)Convert.ToDouble(dt.Rows[i]["Variance"]);
@@ -2014,7 +2564,14 @@ namespace Epic_Project.Models
                     if (modules[j].ModuleId == epics[i].ModuleId)
                     {
                         modules[j].WeightedOverallProgress = modules[j].WeightedOverallProgress + epics[i].WeightedOverallProgress;
-                        modules[j].Weight = modules[j].Weight + epics[i].Weight;
+                        if (isFSM == 1)
+                        {
+                            modules[j].Weight = modules[j].Weight + epics[i].Weight * (epics[i].FSMPercentage / 100);
+                        }
+                        else
+                        {
+                            modules[j].Weight = modules[j].Weight + epics[i].Weight;
+                        }
                         modules[j].Variance = modules[j].Variance + epics[i].Variance;
                         modules[j].ActualEffort = modules[j].ActualEffort + epics[i].ActualEffort;
                     }
@@ -2022,27 +2579,39 @@ namespace Epic_Project.Models
             }
             for (int i = 0; i < epics.Count(); i++)
             {
-                float prog = epics[i].Progress;
-                if (isFSM == 1)
-                {
-                    epics[i].Weight = epics[i].Weight * (epics[i].FSMPercentage / 100);
-                    if (epics[i].Progress >= epics[i].FSMPercentage)
-                    {
-                        prog = 100;
-                    }
-                    else
-                    {
-                        prog = (epics[i].Progress * 100)/epics[i].FSMPercentage;
-                    }
-                }
                 for (int j = 0; j < modules.Count(); j++)
                 {
                     if (modules[j].ModuleId == epics[i].ModuleId)
                     {
-                        modules[j].Progress = modules[j].Progress + prog * (epics[i].Weight / modules[j].Weight);
+                        if (isFSM == 1)
+                        {
+                            float progress = epics[i].Progress >= epics[i].FSMPercentage ? 100 : epics[i].Progress / epics[i].FSMPercentage * 100;
+                            float reqProgress = epics[i].RequirementProgress >= epics[i].FSMPercentage ? 100 : epics[i].RequirementProgress / epics[i].FSMPercentage * 100;
+                            float desProgress = epics[i].DesignProgress >= epics[i].FSMPercentage ? 100 : epics[i].DesignProgress / epics[i].FSMPercentage * 100;
+                            float devProgress = epics[i].DevelopmentProgress >= epics[i].FSMPercentage ? 100 : epics[i].DevelopmentProgress / epics[i].FSMPercentage * 100;
+                            float testProgress = epics[i].TestProgress >= epics[i].FSMPercentage ? 100 : epics[i].TestProgress / epics[i].FSMPercentage * 100;
+                            float uatProgress = epics[i].UatProgress >= epics[i].FSMPercentage ? 100 : epics[i].UatProgress / epics[i].FSMPercentage * 100;
+                            modules[j].Progress = modules[j].Progress + progress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                            modules[j].RequirementProgress = modules[j].RequirementProgress + reqProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                            modules[j].DesignProgress = modules[j].DesignProgress + desProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                            modules[j].DevelopmentProgress = modules[j].DevelopmentProgress + devProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                            modules[j].TestProgress = modules[j].TestProgress + testProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                            modules[j].UatProgress = modules[j].UatProgress + uatProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                        }
+                        else
+                        {
+                            modules[j].Progress = modules[j].Progress + epics[i].Progress * (epics[i].Weight / modules[j].Weight);
+                            modules[j].RequirementProgress = modules[j].RequirementProgress + epics[i].RequirementProgress * (epics[i].Weight / modules[j].Weight);
+                            modules[j].DesignProgress = modules[j].DesignProgress + epics[i].DesignProgress * (epics[i].Weight / modules[j].Weight);
+                            modules[j].DevelopmentProgress = modules[j].DevelopmentProgress + epics[i].DevelopmentProgress * (epics[i].Weight / modules[j].Weight);
+                            modules[j].TestProgress = modules[j].TestProgress + epics[i].TestProgress * (epics[i].Weight / modules[j].Weight);
+                            modules[j].UatProgress = modules[j].UatProgress + epics[i].UatProgress * (epics[i].Weight / modules[j].Weight);
+                        }
                     }
                 }
             }
+            
+            
             List<Module> SortedList = modules.OrderByDescending(mo => mo.Progress).ToList();
             for (int i = 0; i < SortedList.Count(); i++)
             {
@@ -2051,6 +2620,7 @@ namespace Epic_Project.Models
                     if (SortedList[i].ModuleId == moduleAggregates[j].ModuleId)
                     {
                         SortedList[i].EpicCount = moduleAggregates[j].EpicCount;
+                        SortedList[i].EpicString = moduleAggregates[j].EpicCount.ToString();
                         SortedList[i].TotalEstimation = moduleAggregates[j].TotalEstimation;
                     }
                 }
@@ -2067,6 +2637,26 @@ namespace Epic_Project.Models
             {
                 SortedList.Remove(ms[i]);
             }
+            if (isFSM == 1)
+            {
+                List<Module> list = GetModuleAggregates(year, month, 0, location);
+                int fsmCount = 0;
+                int totalCount = 0;
+                for (int i = 0; i < list.Count(); i++)
+                {
+                    for (int j = 0; j < SortedList.Count(); j++)
+                    {
+                        if (list[i].ModuleId == SortedList[j].ModuleId)
+                        {
+                            fsmCount += SortedList[j].EpicCount;
+                            totalCount += list[i].EpicCount;
+                            SortedList[j].EpicString = SortedList[j].EpicCount + " / " + list[i].EpicCount;
+                        }
+                    }
+                }
+                SortedList[0].EpicCountFooter = fsmCount + " / " + totalCount;
+            }
+            
             return SortedList;
         }
 
@@ -2581,7 +3171,7 @@ namespace Epic_Project.Models
                     }
                     if (temp != null)
                     {
-                        m = ((List<Measurement>)GetMeasurementAll(modelList[0].EpicId, temp.Year, temp.Month, "Target"))[0];
+                        m = ((List<Measurement>)GetMeasurementAll(modelList[0].EpicId, temp.Year, temp.Month, "Target", 0))[0];
                     }
                     MeasurementLog t = new MeasurementLog();
                     t.EpicId = modelList[0].EpicId;
@@ -2656,7 +3246,7 @@ namespace Epic_Project.Models
                     }
                     if (temp != null)
                     {
-                        m = ((List<Measurement>)GetMeasurementAll(modelList[0].EpicId, temp.Year, temp.Month, "Actual"))[0];
+                        m = ((List<Measurement>)GetMeasurementAll(modelList[0].EpicId, temp.Year, temp.Month, "Actual", 0))[0];
                     }
                     MeasurementLog t = new MeasurementLog();
                     t.EpicId = modelList[0].EpicId;
@@ -2689,6 +3279,27 @@ namespace Epic_Project.Models
 
             return longLogList;
         }
-        
+
+        public float GetTotalEstimation()
+        {
+            List<ProgressProducingVarianceAnalysis> varList = new List<ProgressProducingVarianceAnalysis>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_TotalEpicEstimation]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            float estimation = (float)Convert.ToDouble(dt.Rows[0]["TotalEstimation"]);
+            return estimation;
+        }
+
     }
 }

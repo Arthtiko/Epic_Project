@@ -17,7 +17,7 @@ using Newtonsoft.Json;
 
 namespace Epic_Project.Areas.Identity.Pages.Account
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin, Project Manager, Program Manager")]
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;

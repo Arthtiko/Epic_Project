@@ -1,0 +1,200 @@
+﻿@(Html.Kendo().Grid<TeamProgressTrack>()
+              .Name("grid")
+              .AutoBind(false)
+              .Columns(columns =>
+              {
+                  columns.Bound(t => t.Team).ClientFooterTemplate("Grand Total").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  columns.Bound(t => t.PreviousMonthProgress).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  columns.Bound(t => t.CurrentProgress).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  columns.Bound(t => t.TargetProgress).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  columns.Bound(t => t.RealizationRate).ClientFooterTemplate("#=footerRealizationRate()#").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              })
+              .ToolBar(t => t.ClientTemplateId("GridToolbarTemplate"))
+              .Scrollable()
+              .Sortable()
+              .Groupable()
+              .Resizable(r => r.Columns(true))
+              .Events(e => e.ExcelExport("excelExport"))
+              .Excel(excel => excel.Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Team")))
+              .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+              .DataSource(dataSource => dataSource
+                  .Ajax()
+                  .Events(events => { events.Error("error_handler"); })
+                  .Model(model =>
+                  {
+                      model.Id(m => m.Team);
+                  })
+                  .Aggregates(agg =>
+                  {
+                      agg.Add(t => t.PreviousMonthProgress).Sum();
+                      agg.Add(t => t.CurrentProgress).Sum();
+                      agg.Add(t => t.TargetProgress).Sum();
+                  })
+                  .Read(read => read.Action("TeamTracking_Read", "Team").Data("getReadData"))
+              )
+)
+<script type="text/javascript">
+
+    function footerRealizationRate() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+
+        var totalPrevMonthProgress = 0, totalCurrentProgress = 0, totalTargetProgress = 0;
+
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+
+            totalPrevMonthProgress = totalPrevMonthProgress + item.PreviousMonthProgress;
+            console.log(totalPrevMonthProgress);
+            totalCurrentProgress = totalCurrentProgress + item.CurrentProgress;
+            console.log(totalCurrentProgress);
+            totalTargetProgress = totalTargetProgress + item.TargetProgress;
+            console.log(totalTargetProgress);
+        }
+
+        var realizationRate = (((totalCurrentProgress - totalPrevMonthProgress) * 100) / (totalTargetProgress - totalPrevMonthProgress)).toFixed(2);
+
+        realizationRate = realizationRate + " %";
+        return realizationRate;
+    }
+
+    function showData() {
+        $("#grid").data("kendoGrid").dataSource.read();
+    }
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function excelExport(e) {
+        var yearMonth = document.getElementById("yearMonths").value;
+        //var fsm = document.getElementById("isFSM").value;
+        var filename = "Module " + yearMonth;
+
+        //if (fsm == "Overall") {
+        //    filename = filename + "/Overall";
+        //}
+        //else {
+        //    filename = filename + "/FSM";
+        //}
+
+        filename = filename + ".xlsx";
+        e.workbook.fileName = filename;
+    }
+
+    function getReadData() {
+        var yearMonth = document.getElementById("yearMonths").value;
+        var year = yearMonth.split("-")[0];
+        var month = yearMonth.split("-")[1];
+
+        //var fsmForm = document.getElementById("isFSM").value;
+        //
+        //var fsm = 0;
+        //if (fsmForm == "First Sellable Module") {
+        //    fsm = 1;
+        //}
+        return {
+            year: year,
+            month: month//,
+            //isFSM: fsm
+        };
+    }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid");
+
+        var minimumAcceptableGridHeight = 300;
+        var windowHeight = $(window).innerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 180 - 50; // - headerHeight;       header is empty but this calculation makes grid small
+        calculatedHeight = calculatedHeight + 40;
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+</script>
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Date: </text>
+        @(Html.Kendo().DropDownList()
+            .Name("yearMonths")
+            .DataSource(ds =>
+            {
+                ds.Read("selectDates", "Team");
+            })
+            .ToClientTemplate()
+        )
+        @*<text class="filter-gap">Is FSM: </text>
+        @(Html.Kendo().DropDownList()
+            .Name("isFSM")
+            .DataSource(ds =>
+            {
+                ds.Read("selectFSM", "Team");
+            })
+            .HtmlAttributes(new { style = "width: 175px;" })
+            .ToClientTemplate()
+        )*@
+        @(Html.Kendo().Button()
+            .Name("show-data")
+            .Content("Show Data")
+            .Events(e => e.Click("showData"))
+            .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+            .Name("excel")
+            .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
+            .Content("Export to Excel")
+            .ToClientTemplate()
+        )
+    </div>
+</script>
+<script>
+    function exportExcel() {
+        window.location.href = "#";
+    }
+</script>
+
+
+<style>
+    .k-grid tbody tr {
+        height: 42px;
+    }
+
+    .button-size-month {
+        margin-left: 24px;
+    }
+
+    .dateListContainer {
+        margin-left: 12px;
+        display: inline-block;
+    }
+
+    .filter-gap {
+        margin-left: 12px;
+    }
+
+    .toolbar {
+        float: right;
+    }
+</style>

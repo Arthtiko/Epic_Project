@@ -33,6 +33,11 @@ namespace Epic_Project.Controllers
             return View();
         }
 
+        public ActionResult TeamTracking()
+        {
+            return View();
+        }
+
         #endregion
 
         #region Reads
@@ -40,6 +45,11 @@ namespace Epic_Project.Controllers
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request)
         {
             return Json(_repository.GetTeamAll(0, null, 0, 0).ToDataSourceResult(request));
+        }
+
+        public ActionResult TeamTracking_Read([DataSourceRequest] DataSourceRequest request, int year, int month)
+        {
+           return Json(_repository.GetTeamProgressTrack(year, month, 0).ToDataSourceResult(request));
         }
 
         #endregion
@@ -94,6 +104,14 @@ namespace Epic_Project.Controllers
 
         #region Operations
 
+        [HttpPost]
+        public ActionResult Excel_Export_Save(string contentType, string base64, string fileName)
+        {
+            var fileContents = Convert.FromBase64String(base64);
+
+            return File(fileContents, contentType, fileName);
+        }
+
         private void PopulateTeamLeaders()
         {
             List<TeamLeaderViewModel> employeeList = new List<TeamLeaderViewModel>();
@@ -113,14 +131,17 @@ namespace Epic_Project.Controllers
         private void PopulateProjectManagers()
         {
             List<ProjectManagerViewModel> employeeList = new List<ProjectManagerViewModel>();
-            int typeId = _repository.GetParameterValue("EmployeeType", "Project Manager");
-            List<Employee> employees = (List<Employee>)_repository.GetEmployeeByType(typeId);
+            List<Employee> employees = (List<Employee>)_repository.GetEmployeeAll();
+
             for (int i = 0; i < employees.Count(); i++)
             {
-                ProjectManagerViewModel temp = new ProjectManagerViewModel();
-                temp.ProjectManagerId = employees[i].EmployeeId;
-                temp.ProjectManagerName = employees[i].EmployeeName;
-                employeeList.Add(temp);
+                if (employees[i].EmployeeType.TypeName == "Project Manager" || employees[i].EmployeeType.TypeName == "Program Manager")
+                {
+                    ProjectManagerViewModel temp = new ProjectManagerViewModel();
+                    temp.ProjectManagerId = employees[i].EmployeeId;
+                    temp.ProjectManagerName = employees[i].EmployeeName;
+                    employeeList.Add(temp);
+                }
             }
             ViewData["projectManagers"] = employeeList;
             ViewData["defaultProjectManager"] = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = "" };
@@ -141,6 +162,28 @@ namespace Epic_Project.Controllers
                 model
             };
             return Json(progressList);
+        }
+
+        public JsonResult selectDates()
+        {
+            List<Date> DateList = new List<Date>();
+            DateList = _repository.GetDates();
+            List<string> selectList = new List<string>();
+            for (int i = 0; i < DateList.Count(); i++)
+            {
+                selectList.Add(DateList[i].Year.ToString() + "-" + DateList[i].Month.ToString());
+            }
+            return Json(selectList);
+        }
+
+        public JsonResult selectFSM()
+        {
+            List<string> list = new List<string>();
+            list.Add("Overall");
+            list.Add("First Sellable Module");
+            //list.Add("Not First Sellable Module");
+
+            return Json(list);
         }
 
         #endregion

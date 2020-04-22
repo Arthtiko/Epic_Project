@@ -21,46 +21,48 @@
         columns.Bound(m => m.Estimation).ClientFooterTemplate("Total: #=sum#").Filterable(false).Format("{0:0.00}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
         columns.Bound(m => m.Team.TeamName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Team").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
         columns.Bound(m => m.IsFirstSellableModule).Filterable(ftb => ftb.Multi(true).Search(true)).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(175);
+        columns.Bound(m => m.FSMPercentage).Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(120);
         columns.Group(g => g.Title("Previous Month").HeaderHtmlAttributes(new { style = "text-align:center; background-color: #FFF2CC" }).Columns(c =>
         {
-            c.Bound(m => m.PrevMonthRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(110);
-            c.Bound(m => m.PrevMonthDesignProgress).Title("Design Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
-            c.Bound(m => m.PrevMonthDevelopmentProgress).Title("Development Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(110);
-            c.Bound(m => m.PrevMonthTestProgress).Title("Test Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
-            c.Bound(m => m.PrevMonthUatProgress).Title("Uat Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(90);
-            c.Bound(m => m.PrevMonthOverallEpicCompilation).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;'></div>").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Width(130).Filterable(false).Title("Overall Epic Completion").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" });
-            c.Bound(m => m.PrevMonthWeightedOverallProgress).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Weighted Overall Progress").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).Width(105);
+            c.Bound(m => m.PrevMonthRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("#=pmReq()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
+            c.Bound(m => m.PrevMonthDesignProgress).Title("Design Progress").ClientFooterTemplate("#=pmDes()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.PrevMonthDevelopmentProgress).Title("Development Progress").ClientFooterTemplate("#=pmDev()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
+            c.Bound(m => m.PrevMonthTestProgress).Title("Test Progress").ClientFooterTemplate("#=pmTest()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.PrevMonthUatProgress).Title("Uat Progress").ClientFooterTemplate("#=pmUat()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.PrevMonthOverallEpicCompilation).ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;'></div>").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Width(130).Filterable(false).Title("Overall Epic Completion").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+            c.Bound(m => m.PrevMonthWeightedOverallProgress).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Weighted Overall Progress").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(105);
         }));
         columns.Group(g => g.Title("Current Actual").HeaderHtmlAttributes(new { style = "text-align:center; background-color: #f8cbad" }).Columns(c =>
         {
-            c.Bound(m => m.ActualRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(110);
-            c.Bound(m => m.ActualDesignProgress).Title("Design Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
-            c.Bound(m => m.ActualDevelopmentProgress).Title("Development Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(110);
-            c.Bound(m => m.ActualTestProgress).Title("Test Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
-            c.Bound(m => m.ActualUatProgress).Title("Uat Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(90);
-            c.Bound(m => m.ActualOverallEpicCompilation).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress2' data-role='progressbar' style='width: 100%;  background-color: White;'></div>").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Title("Overall Epic Completion").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(130);
-            c.Bound(m => m.ActualWeightedOverallProgress).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Weighted Overall Progress").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).Width(105);
+            c.Bound(m => m.ActualRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("#=cReq()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
+            c.Bound(m => m.ActualDesignProgress).Title("Design Progress").ClientFooterTemplate("#=cDes()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.ActualDevelopmentProgress).Title("Development Progress").ClientFooterTemplate("#=cDev()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
+            c.Bound(m => m.ActualTestProgress).Title("Test Progress").ClientFooterTemplate("#=cTest()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.ActualUatProgress).Title("Uat Progress").ClientFooterTemplate("#=cUat()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.ActualOverallEpicCompilation).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress2' data-role='progressbar' style='width: 100%;  background-color: White;'></div>").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Title("Overall Epic Completion").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(130);
+            c.Bound(m => m.ActualWeightedOverallProgress).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Weighted Overall Progress").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PeachPuff;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #f8cbad;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(105);
         }));
         columns.Group(g => g.Title("Current Target").HeaderHtmlAttributes(new { style = "text-align:center; background-color: PowderBlue" }).Columns(c =>
         {
-            c.Bound(m => m.TargetRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(110);
-            c.Bound(m => m.TargetDesignProgress).Title("Design Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
-            c.Bound(m => m.TargetDevelopmentProgress).Title("Development Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(110);
-            c.Bound(m => m.TargetTestProgress).Title("Test Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
-            c.Bound(m => m.TargetUatProgress).Title("Uat Progress").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(90);
-            c.Bound(m => m.TargetOverallEpicCompilation).ClientTemplate("<div class='progress3' data-role='progressbar' style='width: 100%; background-color: White;'></div>").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Title("Overall Epic Completion").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(130);
-            c.Bound(m => m.TargetWeightedOverallProgress).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Weighted Overall Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).Width(105);
+            c.Bound(m => m.TargetRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("#=tReq()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
+            c.Bound(m => m.TargetDesignProgress).Title("Design Progress").ClientFooterTemplate("#=tDes()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.TargetDevelopmentProgress).Title("Development Progress").ClientFooterTemplate("#=tDev()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
+            c.Bound(m => m.TargetTestProgress).Title("Test Progress").ClientFooterTemplate("#=tTest()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.TargetUatProgress).Title("Uat Progress").ClientFooterTemplate("#=tUat()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(90);
+            c.Bound(m => m.TargetOverallEpicCompilation).ClientTemplate("<div class='progress3' data-role='progressbar' style='width: 100%; background-color: White;'></div>").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Title("Overall Epic Completion").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(130);
+            c.Bound(m => m.TargetWeightedOverallProgress).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Weighted Overall Progress").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: PaleTurquoise;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: PowderBlue;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(105);
         }));
-        columns.Bound(m => m.PreviousMonthCumulativeActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Previous Month Cumulative Actual Effort").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
-        columns.Bound(m => m.ActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
+        columns.Bound(m => m.PreviousMonthCumulativeActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Title("Previous Month Cumulative Actual Effort").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(135);
+        columns.Bound(m => m.ActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(105);
         columns.Bound(m => m.Variance).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
-        //columns.Bound(m => m.Deviation).Format("{0:0.00}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(105);
+        columns.Bound(m => m.Description).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(270);
+        columns.Bound(m => m.Dependency).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(270);
     })
     .ToolBar(toolbar => toolbar.ClientTemplateId("GridToolbarTemplate"))
     .Groupable()
     .Scrollable()
     .Sortable()
-    .Filterable()
+    .Filterable(fil => fil.Extra(false).Operators(op => op.ForString(str => str.Clear().Contains("Contains"))))
     .Events(e => e.DataBound("dataBound"))
     .Events(e => e.ExcelExport("excelExport"))
     .Resizable(resizable => resizable.Columns(true))
@@ -193,7 +195,7 @@
         });
 
         var columns = e.sender.columns;
-        var columnIndex = 31;
+        var columnIndex = 32;
         
         var rows = e.sender.tbody.children();
         for (var j = 0; j < rows.length; j++) {
@@ -328,10 +330,10 @@
                 success: function (result) {
                     console.log(result)
                     if (result == "true") {
-                        $("#grid").data("kendoGrid").showColumn(16);
+                        $("#grid").data("kendoGrid").showColumn(17);
                     }
                     else {
-                        $("#grid").data("kendoGrid").hideColumn(16);
+                        $("#grid").data("kendoGrid").hideColumn(17);
                     }
                 },
                 error: function (error) {
@@ -384,3 +386,299 @@
             background-color: #61df00;
         }
     </style>
+
+
+<script type="text/javascript">
+    function pmReq() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.PrevMonthRequirementProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function pmDes() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.PrevMonthDesignProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function pmDev() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.PrevMonthDevelopmentProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function pmTest() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.PrevMonthTestProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function pmUat() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.PrevMonthUatProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function pmProgress() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.PrevMonthOverallEpicCompilation;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+</script>
+<script type="text/javascript">
+    function cReq() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.ActualRequirementProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function cDes() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.ActualDesignProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function cDev() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.ActualDevelopmentProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function cTest() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.ActualTestProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function cUat() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.ActualUatProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function cProgress() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.ActualOverallEpicCompilation;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+</script>
+<script type="text/javascript">
+    function tReq() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.TargetRequirementProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function tDes() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.TargetDesignProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function tDev() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.TargetDevelopmentProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function tTest() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.TargetTestProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function tUat() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.TargetUatProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function tProgress() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.EpicWeight;
+            total = total + item.EpicWeight * item.TargetOverallEpicCompilation;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+</script>

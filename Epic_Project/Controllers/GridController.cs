@@ -51,7 +51,6 @@ namespace EPICProject.Controllers
             return Json(_repository.GetEpicBaseLineAll(0).ToDataSourceResult(request));
         }
 
-
         #endregion
 
         #region Creates
@@ -98,7 +97,7 @@ namespace EPICProject.Controllers
                 }
                 else if (id == 2001)
                 {
-                    _repository.InsertEpicBaseLine(epicBaseLine, "Test Admin Egypt", ipAddress);
+                    _repository.UpdateEpicBaseLine(epicBaseLine, "Test Admin Egypt", ipAddress);
                 }
                 else
                 {

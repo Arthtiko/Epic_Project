@@ -169,7 +169,7 @@ namespace Epic_Project.Controllers
                 return null;
             }
 
-            List<Measurement> list = (List<Measurement>)_repository.GetMeasurementAll(measurement.EpicId, measurement.Year, measurement.Month, measurement.Type.TypeName);
+            List<Measurement> list = (List<Measurement>)_repository.GetMeasurementAll(measurement.EpicId, measurement.Year, measurement.Month, measurement.Type.TypeName, 0);
             if (list != null && list.Count() > 0)
             {
                 result = list[0];
@@ -181,7 +181,7 @@ namespace Epic_Project.Controllers
 
             int prevYear = measurement.Month == 1 ? measurement.Year - 1 : measurement.Year;
             int prevMonth = measurement.Month == 1 ? 12 : measurement.Month - 1;
-            Measurement prevMonthMeasurement = ((List<Measurement>)_repository.GetMeasurementAll(measurement.EpicId, prevYear, prevMonth, measurement.Type.TypeName))[0];
+            Measurement prevMonthMeasurement = ((List<Measurement>)_repository.GetMeasurementAll(measurement.EpicId, prevYear, prevMonth, measurement.Type.TypeName, 0))[0];
             measurement.PreviousMonthCumulativeActualEffort = prevMonthMeasurement.PreviousMonthCumulativeActualEffort + prevMonthMeasurement.ActualEffort;
 
             if (mode == 1)
@@ -211,7 +211,6 @@ namespace Epic_Project.Controllers
             m.DevelopmentProgress = m.DevelopmentProgress < 0 ? 0 : m.DevelopmentProgress > 100 ? 100 : m.DevelopmentProgress;
             m.TestProgress = m.TestProgress < 0 ? 0 : m.TestProgress > 100 ? 100 : m.TestProgress;
             m.UatProgress = m.UatProgress < 0 ? 0 : m.UatProgress > 100 ? 100 : m.UatProgress;
-            m.ActualEffort = m.ActualEffort < 0 ? 0 : m.ActualEffort > 100 ? 100 : m.ActualEffort;
 
             return m;
         }

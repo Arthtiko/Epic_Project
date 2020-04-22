@@ -280,8 +280,8 @@ namespace Epic_Project.Controllers
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            //model.Total = _repository.GetEpicWeight("Turkey", "TRUE");
-            model.Total = TurkeyFSMTotal;
+            model.Total = _repository.GetEpicWeight("Turkey", "TRUE");
+            //model.Total = TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
@@ -321,9 +321,9 @@ namespace Epic_Project.Controllers
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            //model.Total = _repository.GetEpicWeight(null, "TRUE");
-            model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
-            model.Total = model.Total + TurkeyFSMTotal;
+            model.Total = _repository.GetEpicWeight(null, "TRUE");
+            //model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
+            //model.Total = model.Total + TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
@@ -588,6 +588,11 @@ namespace Epic_Project.Controllers
         #endregion
 
         #region Operations
+
+        public void MakeFSMWeight(string location)
+        {
+            List<EpicBaseLine> epics = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
+        }
 
         public JsonResult selectDates()
         {

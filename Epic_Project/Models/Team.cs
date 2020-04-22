@@ -33,4 +33,13 @@ namespace Epic_Project.Models
         public int ProjectManagerId { get; set; }
         public string ProjectManagerName { get; set; }
     }
+
+    public class TeamProgressTrack
+    {
+        public string Team { get; set; }
+        public float PreviousMonthProgress { get; set; }
+        public float CurrentProgress { get; set; }
+        public float TargetProgress { get; set; }
+        public float RealizationRate { get; set; }
+    }
 }

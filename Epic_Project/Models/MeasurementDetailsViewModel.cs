@@ -26,6 +26,7 @@ namespace Epic_Project.Models
         public float Estimation { get; set; }
         public Team Team { get; set; }
         public string IsFirstSellableModule { get; set; }
+        public float FSMPercentage { get; set; }
         public float PrevMonthRequirementProgress { get; set; }
         public float PrevMonthDesignProgress { get; set; }
         public float PrevMonthDevelopmentProgress { get; set; }
@@ -51,5 +52,7 @@ namespace Epic_Project.Models
         public float ActualEffort { get; set; }
         public float Variance { get; set; }
         public float Deviation { get; set; }
+        public string Description { get; set; }
+        public string Dependency { get; set; }
     }
 }

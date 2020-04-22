@@ -99,6 +99,21 @@ namespace Epic_Project.Controllers
             return File(fileContents, contentType, fileName);
         }
 
+        public string GetEpicCount(string location)
+        {
+            if (location == "All")
+            {
+                location = null;
+            }
+            List<Module> list = _repository.GetModuleAggregates(0, 0, 0, location);
+            int totalCount = 0;
+            for (int i = 0; i < list.Count(); i++)
+            {
+                totalCount += list[i].EpicCount;
+            }
+            return totalCount.ToString();
+        }
+
         public string IsVarianceShowed(int year, int month)
         {
             List<DateControl> dateControlList = (List<DateControl>)_repository.GetDateControl(year, month, null);
@@ -156,7 +171,7 @@ namespace Epic_Project.Controllers
             List<string> list = new List<string>();
             list.Add("Overall");
             list.Add("First Sellable Module");
-            list.Add("Not First Sellable Module");
+            //list.Add("Not First Sellable Module");
 
             return Json(list);
         }

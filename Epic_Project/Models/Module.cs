@@ -14,14 +14,21 @@ namespace Epic_Project.Models
         public float Weight { get; set; }
         public float Variance { get; set; }
         public int EpicCount { get; set; }
+        public float RequirementProgress { get; set; }
+        public float DesignProgress { get; set; }
+        public float DevelopmentProgress { get; set; }
+        public float TestProgress { get; set; }
+        public float UatProgress { get; set; }
         public float TotalEstimation { get; set; }
         public float WeightedOverallProgress { get; set; }
         public float FSMPercentage { get; set; }
+        public string EpicString { get; set; }
+        public string EpicCountFooter { get; set; }
     }
 
     public class ModuleModel
     {
-        public float TotalWeightedOverallProgress { get; set; }
+        public float TotalEpicCount { get; set; }
     }
     
 }

@@ -19,6 +19,7 @@
                    columns.Bound(m => m.EpicWeight).Title("Weight").Filterable(false).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.0000}").Width(90).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                    columns.Bound(m => m.Team.TeamName).Filterable(x => x.Cell(y => y.Template("template").ShowOperators(false).Operator("contains")).Multi(true).Search(true)).Title("Team").EditorTemplateName("ClientTeamEditor").Width(100).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                    columns.Bound(m => m.IsFirstSellableModule).Filterable(x => x.Cell(y => y.Template("template").ShowOperators(false).Operator("contains")).Multi(true).Search(true)).Title("First Sellable Module").Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                   columns.Bound(m => m.FSMPercentage).Filterable(false).Format("{0:0.00 \\'%'}").Width(120).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                    columns.Bound(m => m.RequirementProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                    columns.Bound(m => m.DesignProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                    columns.Bound(m => m.DevelopmentProgress).Filterable(false).EditorTemplateName("ClientPercentTextEditor").ClientFooterTemplate("Avg: #= kendo.format('{0:p}', average/100)#").Format("{0:0.00 \\'%'}").Width(130).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
@@ -273,10 +274,20 @@
         window.location.href = "~/Log/MeasurementLog";
     }
     function newMonth() {
-        window.location.href = "GenerateNextMonth";
+        var result = confirm("Do you want to create new month?");
+        if (result) {
+            window.location.href = "GenerateNextMonth";
+        } else {
+            return false;
+        }
     }
     function deleteMonth() {
-        window.location.href = "DeleteLastMonth";
+        var result = confirm("Do you want to delete last month?");
+        if (result) {
+            window.location.href = "DeleteLastMonth";
+        } else {
+            return false;
+        }
     }
 </script>
 }

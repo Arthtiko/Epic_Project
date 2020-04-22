@@ -10,10 +10,13 @@
                 columns.Bound(e => e.Estimation).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Width(105).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.EpicWeight).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Title("Weight").Width(105).Format("{0:0.0000}").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.Team.TeamName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Team").EditorTemplateName("ClientTeamEditor").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                columns.Bound(e => e.IsFirstSellableModule.FirstSellableModuleName).Width(200).Filterable(fil => fil.UI("firstSellableModuleFilter")).Title("Is First Sellable Module").EditorTemplateName("ClientFirstSellableModuleEditor").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.IsFirstSellableModule.FirstSellableModuleName).Width(200).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Is First Sellable Module").EditorTemplateName("ClientFirstSellableModuleEditor").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.FSMPercentage).Filterable(false).Width(120).Format("{0:0.00 \\'%'}").Title("FSM Percentage").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.DistributedUnmappedEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.ActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(120).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.TotalActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.Description).Filterable(ftb => ftb.Search(true)).Width(270).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.Dependency).Filterable(ftb => ftb.Search(true)).Width(270).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); }).Width(125); }
             })
             .ToolBar(t => t.Excel())
@@ -21,7 +24,7 @@
             .Groupable()
             .Scrollable()
             .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
-            .Filterable()
+            .Filterable(fil => fil.Extra(false).Operators(op => op.ForString(str => str.Clear().Contains("Contains"))))
             .Excel(excel => excel.FileName("EpicBaseLine.xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Grid")))
             .Resizable(resizable => resizable.Columns(true))
             .Reorderable(reorderable => reorderable.Columns(true))
@@ -44,6 +47,7 @@
                     if (!(User.IsInRole("Admin") || User.IsInRole("Project Manager") || User.IsInRole("Program Manager")))
                     {
                         model.Field(e => e.EPICName).Editable(false);
+                        model.Field(e => e.FSMPercentage).Editable(false);
                     }
                     model.Field(e => e.ModuleName.ModuleName).Editable(false);
                     model.Field(e => e.EpicType.TypeName).Editable(false);
@@ -78,36 +82,6 @@
             });
             alert(message);
         }
-    }
-
-    function locationFilter(element) {
-        element.kendoDropDownList({
-            dataSource: {
-                transport: {
-                    read: "@Url.Action("FilterMenu_Locations")"
-                }
-            },
-            optionLabel: "Select Location"
-        });
-    }
-    function firstSellableModuleFilter(element) {
-        element.kendoDropDownList({
-            dataSource: {
-                transport: {
-                    read: "@Url.Action("FilterMenu_IsFirstSellableModule")"
-                }
-            }
-        });
-    }
-    function typeFilter(element) {
-        element.kendoDropDownList({
-            dataSource: {
-                transport: {
-                    read: "@Url.Action("FilterMenu_Type")"
-                }
-            },
-            optionLabel: "Select Type"
-        });
     }
 
     function resizeGrid() {

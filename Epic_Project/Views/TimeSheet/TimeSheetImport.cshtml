@@ -1,0 +1,212 @@
+﻿<a class="k-button button-size-month" onclick="importOnClick()">Import</a>
+
+@(Html.Kendo().Spreadsheet()
+        .Name("spreadsheet")
+        .HtmlAttributes(new { style = "width:100%; height:910px;" })
+        .Toolbar(t => t.Data(false).Home(false).Insert(false))
+        .Excel(excel => excel
+            .ProxyURL(Url.Action("Index_Save", "TimeSheet"))
+        )
+        .Pdf(pdf => pdf
+            .ProxyURL(Url.Action("Index_Save", "Spreadsheet"))
+        )
+        .Sheets(sheets =>
+        {
+            sheets.Add()
+            .Name("Time Sheet Import")
+            .MergedCells("A1:D1")
+            .Columns(columns =>
+            {
+                columns.Add().Width(200);
+                columns.Add().Width(210);
+                columns.Add().Width(750);
+                columns.Add().Width(100);
+            })
+            .Rows(rows =>
+            {
+                rows.Add().Height(130).Cells(cells =>
+                {
+                    cells.Add()
+                        .Value("Time Sheet Import\n(Date Format: MONTH/DAY/YEAR)")
+                        .FontSize(32)
+                        .Background("rgb(96,181,255)")
+                        .TextAlign(SpreadsheetTextAlign.Center).VerticalAlign(SpreadsheetVerticalAlign.Center)
+                        .Color("white");
+                    cells.Add(); cells.Add(); cells.Add(); cells.Add(); cells.Add();
+                });
+                rows.Add().Height(25).Cells(cells =>
+                {
+                    cells.Add()
+                        .Background("rgb(167,214,255)");
+                    cells.Add()
+                        .Background("rgb(167,214,255)");
+                    cells.Add()
+                        .Background("rgb(167,214,255)");
+                    cells.Add()
+                       .Value("Dates")
+                       .Background("rgb(167,214,255)")
+                       .Color("rgb(0,62,117)")
+                       .TextAlign(SpreadsheetTextAlign.Center);
+                });
+                rows.Add().Height(25).Cells(cells =>
+                {
+                    cells.Add()
+                        .Value("Name")
+                        .Background("rgb(167,214,255)")
+                        .Color("rgb(0,62,117)")
+                        .TextAlign(SpreadsheetTextAlign.Center);
+                    cells.Add()
+                        .Value("Project")
+                        .Background("rgb(167,214,255)")
+                        .Color("rgb(0,62,117)")
+                        .TextAlign(SpreadsheetTextAlign.Center);
+                    cells.Add()
+                        .Value("Task")
+                        .Background("rgb(167,214,255)")
+                        .Color("rgb(0,62,117)")
+                        .TextAlign(SpreadsheetTextAlign.Center);
+                    cells.Add();
+                });
+            });
+        })
+)
+@(Html.Kendo().Dialog()
+        .Name("dialog")
+        .Title("Import Report")
+        .Visible(false)
+        .MaxHeight(750)
+        .Modal(true)
+    )
+
+<script>
+    function importOnClick() {
+        spreadsheet = $("#spreadsheet").data("kendoSpreadsheet");
+        var sheet = spreadsheet.sheetByIndex(0);
+        var activeSheet = spreadsheet.activeSheet();
+        var data = sheet.toJSON();
+        var obj;
+        var indexes = [];
+        var failedHours = [];
+        var failedDates = [];
+        var issues = [];
+        var failedDataCount = 0;
+
+        var name = 0; var project = 0; var task = 0; var hour = 0; var date = 0; var dateString = "";
+
+        var totalRowsCount = data.rows.length;
+
+        var dates = data.rows[2].cells;
+        for (let i = 3; i < totalRowsCount; i++) {
+            obj = data.rows[i].cells;
+            if (obj[0].value != null && obj[0].value != undefined) {
+                name = obj[0].value;
+                project = obj[1].value;
+                task = obj[2].value;
+                for (let j = 3; j < obj.length; j++) {
+                    if (obj[j].value != undefined) {
+                        hour = obj[j].value;
+                        date = ExcelDateToJSDate(dates[j].value);
+                        $.ajax({
+                            contentType: 'application/json',
+                            data: {
+                                "name": name,
+                                "project": project,
+                                "task": task,
+                                "hour": hour,
+                                "date": date.getUTCFullYear() + "/" + (date.getUTCMonth() + 1) + "/" + date.getUTCDate()
+                            },
+                            type: "GET",
+                            async: false,
+                            dataType: "text",
+                            url: "/TimeSheet/ImportTimeSheet",
+                            success: function (result) {
+                                if (result != "Success") {
+                                    indexes[failedDataCount] = i;
+                                    failedHours[failedDataCount] = hour;
+                                    failedDates[failedDataCount] = date;
+                                    issues[failedDataCount] = result;
+                                    failedDataCount++;
+                                }
+                            },
+                            error: function (error) {
+                                //console.log("error");
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        var content = "";
+
+
+        if (failedDataCount > 0) {
+            content = content + "<table id='issues'";
+            $("#dialog").data("kendoDialog").title("Failed Requests");
+            content = content + "<tr><th>Name</th><th>Project</th><th>Task</th><th>Hour</th><th>Date</th><th>Issue</th></tr>";
+            for (let i = 0; i < failedDataCount; i++) {
+                obj = data.rows[indexes[i]].cells;
+                content = content + "<tr>" +
+                    "<td>" + obj[0].value + "</td>" +
+                    "<td>" + obj[1].value + "</td>" +
+                    "<td>" + obj[2].value + "</td>" +
+                    "<td>" + obj[3].value + "</td>" +
+                    "<td>" + ExcelDateToJSDate(obj[4].value) + "</td>" +
+                    "<td>" + issues[i] + "</td>" +
+                    "</tr>";
+            }
+            content = content + "</table>";
+        }
+        else {
+            $("#dialog").data("kendoDialog").title("Import Report");
+            content = "<pre>All import requests sent successfully.</pre>";
+        }
+
+        changeContent(content);
+        showDialog();
+    }
+
+    function ExcelDateToJSDate(serial) {
+        var utc_days = Math.floor(serial - 25569);
+        var utc_value = utc_days * 86400;
+        var date_info = new Date(utc_value * 1000);
+
+        var fractional_day = serial - Math.floor(serial) + 0.0000001;
+
+        var total_seconds = Math.floor(86400 * fractional_day);
+
+        var seconds = total_seconds % 60;
+
+        total_seconds -= seconds;
+
+        var hours = Math.floor(total_seconds / (60 * 60));
+        var minutes = Math.floor(total_seconds / 60) % 60;
+
+        return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate(), hours, minutes, seconds);
+    }
+
+    function changeContent(data) {
+        $("#dialog").data("kendoDialog").content("<div>" + data + "</div>");
+    }
+
+    function showDialog() {
+        $('#dialog').data("kendoDialog").open();
+    }
+</script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #dddddd;
+    }
+</style>

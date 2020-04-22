@@ -5,13 +5,18 @@
           .AutoBind(false)
           .Columns(columns =>
           {
-              columns.Bound(m => m.ModuleName).Width(540).HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-              columns.Bound(m => m.EpicCount).Width(120).ClientFooterTemplate("Total: #=sum#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-              columns.Bound(m => m.TotalEstimation).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-              columns.Bound(m => m.Weight).Width(160).Title("Total Weight").ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-              columns.Bound(m => m.ActualEffort).Title("Total Effort").Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-              columns.Bound(m => m.Variance).Width(150).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
-              columns.Bound(m => m.WeightedOverallProgress).Width(180).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)# %").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.ModuleName).Width(420).HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.EpicString).Width(105).Title("Epic Count").ClientFooterTemplate("#=totalEpicCount()#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.TotalEstimation).Width(135).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.Weight).Width(105).Title("Total Weight").ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.ActualEffort).Title("Total Effort").Width(105).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.Variance).Width(90).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.WeightedOverallProgress).Width(135).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)# %").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.RequirementProgress).Width(105).Format("{0:0.00 \\'%'}").ClientFooterTemplate("#=footerReq()#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.DesignProgress).Width(105).Format("{0:0.00 \\'%'}").ClientFooterTemplate("#=footerDes()#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.DevelopmentProgress).Width(115).Format("{0:0.00 \\'%'}").ClientFooterTemplate("#=footerDev()#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.TestProgress).Width(105).Format("{0:0.00 \\'%'}").ClientFooterTemplate("#=footerTest()#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+              columns.Bound(m => m.UatProgress).Width(105).Format("{0:0.00 \\'%'}").ClientFooterTemplate("#=footerUat()#").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
               columns.Bound(m => m.Progress).Format("{0:0.00 \\'%'}").ClientTemplate("<div class='progress1' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
           })
           .ToolBar(t => t.ClientTemplateId("GridToolbarTemplate"))
@@ -33,17 +38,148 @@
               })
               .Aggregates(aggregates =>
               {
-                  aggregates.Add(m => m.EpicCount).Sum();
                   aggregates.Add(m => m.TotalEstimation).Sum();
                   aggregates.Add(m => m.Weight).Sum();
                   aggregates.Add(m => m.ActualEffort).Sum();
                   aggregates.Add(m => m.WeightedOverallProgress).Sum();
                   aggregates.Add(m => m.Variance).Sum();
+                  aggregates.Add(m => m.RequirementProgress).Average();
+                  aggregates.Add(m => m.DesignProgress).Average();
+                  aggregates.Add(m => m.DevelopmentProgress).Average();
+                  aggregates.Add(m => m.TestProgress).Average();
+                  aggregates.Add(m => m.UatProgress).Average();
               })
               .Read(read => read.Action("EditingInLine_Read", "Module").Data("getReadData"))
           )
 )
 <script type="text/javascript">
+    function totalEpicCount() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0;
+
+        if (document.getElementById("isFSM").value != "First Sellable Module") {
+            for (var i = 0; i < data.dataSource._data.length; i++) {
+                item = data.dataSource._data[i];
+                console.log(data.dataSource);
+                total = total + parseInt(item.EpicString);
+            }
+            total = "Total: " + total;
+        }
+        else {
+            var countFSM = 0;
+            var countTotal;
+            for (var i = 0; i < data.dataSource._data.length; i++) {
+                item = data.dataSource._data[i];
+                countFSM = countFSM + parseInt(item.EpicString.split(" / ")[0]);
+            }
+
+            var location = document.getElementById("locations").value;
+            $.ajax({
+                contentType: 'application/json',
+                data: {
+                    "location": location
+                },
+                type: "GET",
+                async: false,
+                dataType: "text",
+                url: "/Module/GetEpicCount",
+                success: function (result) {
+                    countTotal = result;
+                }
+            });
+
+            total = countFSM + " / " + countTotal;
+        }
+        return total;
+    }
+
+    function footerReq() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+        
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.Weight;
+            total = total + item.Weight * item.RequirementProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function footerDes() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.Weight;
+            total = total + item.Weight * item.DesignProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function footerDev() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.Weight;
+            total = total + item.Weight * item.DevelopmentProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function footerTest() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.Weight;
+            total = total + item.Weight * item.TestProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+    function footerUat() {
+        var data = $("#grid").data("kendoGrid");
+        var item, total = 0, weight = 0;
+
+        for (var i = 0; i < data.dataSource._data.length; i++) {
+            item = data.dataSource._data[i];
+            weight = weight + item.Weight;
+            total = total + item.Weight * item.UatProgress;
+        }
+        var progress = (total / weight).toFixed(2);
+        if (progress > 100) {
+            var num = 100;
+            progress = num.toFixed(2);
+        }
+        total = "Avg: " + progress + " %";
+        return total;
+    }
+
+
     function showData() {
         var yearMonth = document.getElementById("yearMonths").value;
         var year = yearMonth.split("-")[0];
