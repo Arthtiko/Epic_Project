@@ -20,8 +20,8 @@
         columns.Bound(m => m.EpicWeight).Title("Weight").ClientFooterTemplate("Total: #=sum#").Filterable(false).Format("{0:0.000000}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
         columns.Bound(m => m.Estimation).ClientFooterTemplate("Total: #=sum#").Filterable(false).Format("{0:0.00}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
         columns.Bound(m => m.Team.TeamName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Team").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(135);
-        columns.Bound(m => m.IsFirstSellableModule).Filterable(ftb => ftb.Multi(true).Search(true)).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(175);
-        columns.Bound(m => m.FSMPercentage).Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(120);
+        columns.Bound(m => m.IsFirstSellableModule).Title("Delivery").Filterable(ftb => ftb.Multi(true).Search(true)).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(175);
+        columns.Bound(m => m.FSMPercentage).Title("FSM(Ph-4) Percentage").Filterable(false).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).Width(120);
         columns.Group(g => g.Title("Previous Month").HeaderHtmlAttributes(new { style = "text-align:center; background-color: #FFF2CC" }).Columns(c =>
         {
             c.Bound(m => m.PrevMonthRequirementProgress).Title("Requirement Progress").ClientFooterTemplate("#=pmReq()#").Format("{0:0.00 \\'%'}").Filterable(false).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background: Cornsilk;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; background-color: #FFF2CC;" }).FooterHtmlAttributes(new { style = "text-align:center;" }).Width(110);
@@ -250,7 +250,7 @@
                })
                .ToClientTemplate()
             )
-            <text class="filter-gap">Is FSM: </text>
+            <text class="filter-gap">Delivery: </text>
             @(Html.Kendo().DropDownList()
                .Name("isFSM")
                .DataSource(ds =>

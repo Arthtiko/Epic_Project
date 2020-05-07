@@ -589,7 +589,7 @@ namespace EPICProject.Controllers
         {
             List<string> locations = new List<string>()
             {
-                "All", "TRUE", "FALSE"
+                "All", "Phase-4", "Phase-5", "Phase-6"
             };
             return Json(locations);
         }

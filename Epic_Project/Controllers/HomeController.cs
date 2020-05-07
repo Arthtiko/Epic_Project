@@ -276,11 +276,11 @@ namespace Epic_Project.Controllers
         {
             Date date = new Date() { Year = year, Month = month };
             Date lastDate = _repository.GetDates()[0];
-            ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Turkey", "TRUE");
+            ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Turkey", "Phase-4");
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            model.Total = _repository.GetEpicWeight("Turkey", "TRUE");
+            model.Total = _repository.GetEpicWeight("Turkey", "Phase-4");
             //model.Total = TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
 
@@ -297,11 +297,11 @@ namespace Epic_Project.Controllers
         {
             Date date = new Date() { Year = year, Month = month };
             Date lastDate = _repository.GetDates()[0];
-            ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Egypt", "TRUE");
+            ProgressModel model = _repository.GetProgress(date.Year, date.Month, "Egypt", "Phase-4");
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
+            model.Total = _repository.GetEpicWeight("Egypt", "Phase-4");
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
@@ -317,11 +317,11 @@ namespace Epic_Project.Controllers
         {
             Date date = new Date() { Year = year, Month = month };
             Date lastDate = _repository.GetDates()[0];
-            ProgressModel model = _repository.GetProgress(date.Year, date.Month, null, "TRUE");
+            ProgressModel model = _repository.GetProgress(date.Year, date.Month, null, "Phase-4");
             model.Completed = (float)Math.Round(model.Completed, afterComma);
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
-            model.Total = _repository.GetEpicWeight(null, "TRUE");
+            model.Total = _repository.GetEpicWeight(null, "Phase-4");
             //model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
             //model.Total = model.Total + TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
@@ -364,7 +364,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetTurkeyFirstSellableLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Turkey", "TRUE", "Turkey FSM Progress");
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Turkey", "Phase-4", "Turkey FSM Progress");
             return Json(model);
         }
 
@@ -372,7 +372,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetEgyptFirstSellableLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Egypt", "TRUE", "Egypt FSM Progress");
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress("Egypt", "Phase-4", "Egypt FSM Progress");
             return Json(model);
         }
 
@@ -380,7 +380,7 @@ namespace Epic_Project.Controllers
         [HttpPost]
         public ActionResult GetTotalFirstSellableLineChart()
         {
-            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress(null, "TRUE", "Total FSM Progress");
+            IEnumerable<LineChartModel> model = _repository.GetLineChartProgress(null, "Phase-4", "Total FSM Progress");
             return Json(model);
         }
         #endregion
@@ -427,7 +427,7 @@ namespace Epic_Project.Controllers
                 Year = year,
                 Month = month
             };
-            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress("Turkey", "TRUE", date);
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress("Turkey", "Phase-4", date);
             model[0].TargetFinishDate = "12/12/2019";
             model[1].TargetFinishDate = "24/02/2020";
             model[2].TargetFinishDate = "02/04/2020";
@@ -443,7 +443,7 @@ namespace Epic_Project.Controllers
                 Year = year,
                 Month = month
             };
-            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Turkey", "TRUE", date);
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Turkey", "Phase-4", date);
             model[0].TargetFinishDate = "12/12/2019";
             model[1].TargetFinishDate = "24/02/2020";
             model[2].TargetFinishDate = "02/04/2020";
@@ -493,7 +493,7 @@ namespace Epic_Project.Controllers
                 Year = year,
                 Month = month
             };
-            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress("Egypt", "TRUE", date);
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress("Egypt", "Phase-4", date);
             model[0].TargetFinishDate = "29/12/2019";
             model[1].TargetFinishDate = "11/03/2020";
             model[2].TargetFinishDate = "31/03/2020";
@@ -509,7 +509,7 @@ namespace Epic_Project.Controllers
                 Year = year,
                 Month = month
             };
-            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Egypt", "TRUE", date);
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew("Egypt", "Phase-4", date);
             model[0].TargetFinishDate = "29/12/2019";
             model[1].TargetFinishDate = "11/03/2020";
             model[2].TargetFinishDate = "31/03/2020";
@@ -559,7 +559,7 @@ namespace Epic_Project.Controllers
                 Year = year,
                 Month = month
             };
-            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress(null, "TRUE", date);
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgress(null, "Phase-4", date);
             model[0].TargetFinishDate = "29/12/2019";
             model[1].TargetFinishDate = "11/03/2020";
             model[2].TargetFinishDate = "02/04/2020";
@@ -575,7 +575,7 @@ namespace Epic_Project.Controllers
                 Year = year,
                 Month = month
             };
-            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew(null, "TRUE", date);
+            List<HighLevelProgress> model = (List<HighLevelProgress>)_repository.GetHighLevelProgressNew(null, "Phase-4", date);
             model[0].TargetFinishDate = "29/12/2019";
             model[1].TargetFinishDate = "11/03/2020";
             model[2].TargetFinishDate = "02/04/2020";
@@ -588,11 +588,6 @@ namespace Epic_Project.Controllers
         #endregion
 
         #region Operations
-
-        public void MakeFSMWeight(string location)
-        {
-            List<EpicBaseLine> epics = (List<EpicBaseLine>)_repository.GetEpicBaseLineAll(0);
-        }
 
         public JsonResult selectDates()
         {

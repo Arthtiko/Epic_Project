@@ -2527,7 +2527,7 @@ namespace Epic_Project.Models
                     {
                         sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", location));
                     }
-                    if (isFSM == 1 || isFSM == 2)
+                    if (isFSM != 0)
                     {
                         sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
                     }

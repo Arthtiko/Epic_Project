@@ -170,8 +170,7 @@ namespace Epic_Project.Controllers
         {
             List<string> list = new List<string>();
             list.Add("Overall");
-            list.Add("First Sellable Module");
-            //list.Add("Not First Sellable Module");
+            list.Add("First Sellable Module (Phase-4)");
 
             return Json(list);
         }
