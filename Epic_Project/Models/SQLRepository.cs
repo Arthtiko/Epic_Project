@@ -1951,8 +1951,13 @@ namespace Epic_Project.Models
 
         #region TimeSheet
 
-        public IEnumerable<TimeSheet> GetTimeSheetAll(string name, string project, string task)
+        public IEnumerable<TimeSheet> GetTimeSheetAll(string name, string project, string task, int year, int month)
         {
+            int nextYear = month == 12 ? year + 1 : year;
+            int nextMonth = month == 12 ? 1 : month + 1;
+            DateTime date = new DateTime(year, month, 1);
+            DateTime nextDate = new DateTime(nextYear, nextMonth, 1);
+
             List<TimeSheet> timeSheets = new List<TimeSheet>();
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -1972,6 +1977,11 @@ namespace Epic_Project.Models
                     if (task != null)
                     {
                         sqlCommand.Parameters.AddWithValue("@Task", task);
+                    }
+                    if (year != 0 && month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FirstDate", date);
+                        sqlCommand.Parameters.AddWithValue("@LastDate", nextDate);
                     }
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
@@ -2060,6 +2070,29 @@ namespace Epic_Project.Models
             }
         }
 
+        public IEnumerable<string> GetTimeSheetName()
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_TimeSheetName]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            List<string> names = new List<string>();
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                names.Add(Convert.ToString(dt.Rows[i]["Name"]));
+            }
+            return names;
+        }
 
         #endregion
 
@@ -2327,6 +2360,31 @@ namespace Epic_Project.Models
                     PreviousMonthCumulativeActualEffort = CurrentMeasurementList[i].PreviousMonthCumulativeActualEffort + CurrentMeasurementList[i].ActualEffort,
                     ActualEffort = 0
                 };
+                if (CurrentMeasurementList[i].Type.TypeValue == 1 && i < CurrentMeasurementList.Count() - 1)
+                {
+                    Measurement currentM = CurrentMeasurementList[i];
+                    Measurement currentActual = CurrentMeasurementList[i+1];
+                    if (currentM.RequirementProgress < currentActual.RequirementProgress)
+                    {
+                        temp.RequirementProgress = currentActual.RequirementProgress;
+                    }
+                    if (currentM.DesignProgress < currentActual.DesignProgress)
+                    {
+                        temp.DesignProgress = currentActual.DesignProgress;
+                    }
+                    if (currentM.DevelopmentProgress < currentActual.DevelopmentProgress)
+                    {
+                        temp.DevelopmentProgress = currentActual.DevelopmentProgress;
+                    }
+                    if (currentM.TestProgress < currentActual.TestProgress)
+                    {
+                        temp.TestProgress = currentActual.TestProgress;
+                    }
+                    if (currentM.UatProgress < currentActual.UatProgress)
+                    {
+                        temp.UatProgress = currentActual.UatProgress;
+                    }
+                }
                 TempMeasurementList.Add(temp);
             }
             for (int i = 0; i < TempMeasurementList.Count(); i++)
@@ -2497,7 +2555,7 @@ namespace Epic_Project.Models
             float sum = 0;
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                if (isFirstSellableModule == "TRUE")
+                if (isFirstSellableModule == "Phase-4")
                 {
                     sum = sum + (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"])*((float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]) / 100);
                 }

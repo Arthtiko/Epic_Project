@@ -34,13 +34,19 @@ namespace Epic_Project.Controllers
             return View();
         }
 
+        public IActionResult Delete()
+        {
+            return View();
+        }
+
         #endregion
 
         #region Reads
 
-        public ActionResult TimeSheetTable_Read([DataSourceRequest] DataSourceRequest request, string name, string project, string task)
+        public ActionResult TimeSheetTable_Read([DataSourceRequest] DataSourceRequest request, int year, int month, string name, string project, string task)
         {
-            return Json(_repository.GetTimeSheetAll(name, project, task).ToDataSourceResult(request));
+            if (name == "All") { name = null; }
+            return Json(_repository.GetTimeSheetAll(name, project, task, year, month).ToDataSourceResult(request));
         }
 
         #endregion
@@ -139,6 +145,23 @@ namespace Epic_Project.Controllers
         {
             var fileContents = Convert.FromBase64String(base64);
             return File(fileContents, contentType, fileName);
+        }
+
+        public JsonResult selectNames()
+        {
+            List<string> names = (List<string>)_repository.GetTimeSheetName();
+            List<string> selectList = new List<string>();
+            selectList.Add("All");
+            for (int i = 0; i < names.Count(); i++)
+            {
+                selectList.Add(names[i]);
+            }
+            return Json(selectList);
+        }
+
+        public void DeleteTimeSheetData(string timesheet)
+        {
+            _repository.DeleteTimeSheetAll(new TimeSheet() { Id = Convert.ToInt32(timesheet) });
         }
 
         #endregion

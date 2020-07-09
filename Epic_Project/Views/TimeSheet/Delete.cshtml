@@ -1,0 +1,173 @@
+﻿@(Html.Kendo().Grid<TimeSheet>()
+        .Name("grid")
+        .AutoBind(false)
+        .Columns(columns =>
+        {
+            columns.Select().Width(50);
+            columns.Bound(t => t.Name).Filterable(ftb => ftb.Multi(true).Search(true)).ClientFooterTemplate("Grand Total:").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+            columns.Bound(t => t.Project).Filterable(ftb => ftb.Multi(true).Search(true)).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+            columns.Bound(t => t.Task).Filterable(ftb => ftb.Multi(true).Search(true)).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+            columns.Bound(t => t.Hour).Filterable(false).ClientFooterTemplate("#=kendo.format('{0:0.00}', sum)#").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+            columns.Bound(t => t.Date).Filterable(ftb => ftb.Multi(true).Search(true)).ClientTemplate("#=kendo.toString(kendo.parseDate(Date), 'dd / MM / yyyy')#").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
+        })
+        .ToolBar(toolbar =>
+                       {
+                           toolbar.ClientTemplateId("GridToolbarTemplate");
+                       })
+        .Editable(editable => editable.Mode(GridEditMode.InLine))
+        .Groupable()
+        .Scrollable()
+        .Sortable(sort => sort.SortMode(GridSortMode.SingleColumn))
+        .Filterable()
+        .Excel(excel => excel.FileName("TimeSheet.xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "TimeSheet")))
+    .Events(ev => ev.Change("onChange"))
+        .Resizable(resizable => resizable.Columns(true))
+        .Reorderable(reorderable => reorderable.Columns(true))
+        .HtmlAttributes(new { style = "background-color: Gainsboro" })
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .Aggregates(aggregates =>
+            {
+                aggregates.Add(t => t.Hour).Sum();
+            })
+            .Model(model => model.Id(t => t.Id))
+            .Events(events => events.Error("error_handler"))
+            .Read(read => read.Action("TimeSheetTable_Read", "TimeSheet").Data("getTimeSheetData"))
+        )
+)
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid");
+
+        var minimumAcceptableGridHeight = 300;
+
+        var windowHeight = $(window).innerHeight();
+        //var headerHeight = $(window).headerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 185; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+</script>
+<style>
+    .k-grid-toolbar a {
+        float: right;
+    }
+
+    .dateListContainer {
+        margin-left: 24px;
+        display: inline-block;
+    }
+
+    .toolbar {
+        float: right;
+    }
+</style>
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Year-Month: </text>
+        @(Html.Kendo().DropDownList()
+                                                              .Name("yearMonths")
+                                                              .DataSource(ds =>
+                                                              {
+                                                                  ds.Read("selectDates", "MeasurementGrid");
+                                                              })
+                                                              .ToClientTemplate()
+        )
+        @(Html.Kendo().DropDownList()
+                                                              .Name("names")
+                                                              .DataSource(ds =>
+                                                              {
+                                                                  ds.Read("selectNames", "TimeSheet");
+                                                              })
+                                                              .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+                                                              .Name("show-data")
+                                                              .Content("Show Data")
+                                                              .Events(e => e.Click("showData"))
+                                                              .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+            .Name("delete-all")
+            .Content("Delete Selected Data")
+            .Events(e => e.Click("deleteSelectedData"))
+            .ToClientTemplate()
+        )
+    </div>
+</script>
+<script>
+    var selectedItems = [];
+    function onChange(arg) {
+        selectedItems = this.selectedKeyNames();
+    }
+    function deleteSelectedData() {
+            var result = confirm("Do you want to delete all of " + selectedItems.length + " data?");
+        if (result) {
+            for (let i = 0; i < selectedItems.length; i++) {
+                $.ajax({
+                    contentType: 'application/json',
+                    data: {
+                        "timesheet": selectedItems[i]
+                    },
+                    type: "GET",
+                    async: false,
+                    url: "/TimeSheet/DeleteTimeSheetData",
+                    success: function (result) {
+                    },
+                    error: function (error) {
+                        //console.log("error");
+                    }
+                });
+            }
+        } else {
+            return false;
+        }
+        showData();
+    }
+    function showData() {
+        $("#grid").data("kendoGrid").dataSource.read();
+    }
+    function getTimeSheetData() {
+        var yearMonth = document.getElementById("yearMonths").value;
+        var name = document.getElementById("names").value;
+
+        var year = yearMonth.split("-")[0];
+        var month = yearMonth.split("-")[1];
+
+        return {
+            year: year,
+            month: month,
+            name: name,
+            project: null,
+            task: null
+        }
+    }
+</script>

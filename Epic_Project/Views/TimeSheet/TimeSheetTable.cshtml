@@ -1,5 +1,6 @@
 ﻿@(Html.Kendo().Grid<TimeSheet>()
     .Name("grid")
+    .AutoBind(false)
     .Columns(columns =>
     {
         columns.Bound(t => t.Name).Filterable(ftb => ftb.Multi(true).Search(true)).ClientFooterTemplate("Grand Total:").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
@@ -9,7 +10,10 @@
         columns.Bound(t => t.Date).Filterable(ftb => ftb.Multi(true).Search(true)).ClientTemplate("#=kendo.toString(kendo.parseDate(Date), 'dd / MM / yyyy')#").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal; padding: .786em .6em .786em 1.286em;" });
         columns.Command(command => { command.Edit(); command.Destroy(); }).Width(180);
     })
-    .ToolBar(t => t.Excel())
+    .ToolBar(toolbar =>
+                   {
+                       toolbar.ClientTemplateId("GridToolbarTemplate");
+                   })
     .Editable(editable => editable.Mode(GridEditMode.InLine))
     .Groupable()
     .Scrollable()
@@ -27,7 +31,7 @@
         })
         .Model(model => model.Id(t => t.Id))
         .Events(events => events.Error("error_handler"))
-        .Read(read => read.Action("TimeSheetTable_Read", "TimeSheet"))
+        .Read(read => read.Action("TimeSheetTable_Read", "TimeSheet").Data("getTimeSheetData"))
         .Destroy(destroy => destroy.Action("TimeSheetTable_Destroy", "TimeSheet"))
         .Update(update => update.Action("TimeSheetTable_Update", "TimeSheet"))
     )
@@ -75,4 +79,71 @@
     .k-grid-toolbar a {
         float: right;
     }
+    .dateListContainer {
+        margin-left: 24px;
+        display: inline-block;
+    }
+
+    .toolbar {
+        float: right;
+    }
 </style>
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Year-Month: </text>
+        @(Html.Kendo().DropDownList()
+                                      .Name("yearMonths")
+                                      .DataSource(ds =>
+                                      {
+                                          ds.Read("selectDates", "MeasurementGrid");
+                                      })
+                                      .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+                                      .Name("show-data")
+                                      .Content("Show Data")
+                                      .Events(e => e.Click("showData"))
+                                      .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+                              .Name("excel")
+                              .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
+                              .Content("Export to Excel")
+                              .ToClientTemplate()
+        )
+        @if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin"))
+        {
+            @(Html.Kendo().Button()
+                                  .Name("delete")
+                                  .Content("Delete Page")
+                                  .Events(e => e.Click("openDeletePage"))
+                                  .ToClientTemplate()
+            )
+        }
+    </div>
+</script>
+<script>
+
+    function showData() {
+        $("#grid").data("kendoGrid").dataSource.read();
+    }
+    function getTimeSheetData() {
+        var yearMonth = document.getElementById("yearMonths").value;
+
+        var year = yearMonth.split("-")[0];
+        var month = yearMonth.split("-")[1];
+
+        return {
+            year: year,
+            month: month,
+            name: null,
+            project: null,
+            task: null
+        }
+    }
+    function openDeletePage() {
+        window.location.href = "/TimeSheet/Delete";
+    }
+</script>

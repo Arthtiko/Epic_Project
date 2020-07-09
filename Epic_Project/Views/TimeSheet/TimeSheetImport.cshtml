@@ -103,7 +103,7 @@
                 project = obj[1].value;
                 task = obj[2].value;
                 for (let j = 3; j < obj.length; j++) {
-                    if (obj[j].value != undefined) {
+                    if (obj[j].value != undefined && obj[j].value != null && obj[j].value != 0) {
                         hour = obj[j].value;
                         date = ExcelDateToJSDate(dates[j].value);
                         $.ajax({

@@ -85,10 +85,11 @@ namespace Epic_Project.Models
 
         #region TimeSheet
 
-        IEnumerable<TimeSheet> GetTimeSheetAll(string name, string project, string task);
+        IEnumerable<TimeSheet> GetTimeSheetAll(string name, string project, string task, int year, int month);
         void InsertTimeSheetAll(TimeSheet timeSheet);
         void DeleteTimeSheetAll(TimeSheet timeSheet);
         void UpdateTimeSheet(TimeSheet timeSheet);
+        IEnumerable<string> GetTimeSheetName();
 
         #endregion
 
