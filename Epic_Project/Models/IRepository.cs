@@ -92,6 +92,16 @@ namespace Epic_Project.Models
 
         #endregion
 
+        #region Feature
+
+        IEnumerable<Feature> GetFeatureAll(int featureId, int featureIsFSM, int epicId, int year, int month, int type, int teamId);
+        IEnumerable<FeatureReport> GetFeatureReport(int featureId, int featureIsFSM, int epicId, int year, int month, int type);
+        void DeleteFeature(Feature feature);
+        void InsertFeature(Feature feature);
+        void UpdateFeature(Feature feature);
+
+            #endregion
+
         #region Parameter
         int GetParameterValue(string columnName, string parameterName);
         IEnumerable<Parameter> GetParameter(string name);
