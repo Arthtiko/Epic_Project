@@ -411,7 +411,7 @@ namespace EPICProject.Controllers
                 {
                     measurement = temp[0];
                 }
-                if (measurement != null)
+                if (measurement != null && measurement.EditMode.Name == "EditMode")
                 {
                     measurement.RequirementProgress = 0;
                     measurement.DesignProgress = 0;

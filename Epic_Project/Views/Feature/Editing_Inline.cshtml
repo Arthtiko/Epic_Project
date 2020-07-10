@@ -29,6 +29,7 @@
                       .Groupable()
                                        .Events(e => e.BeforeEdit("beforeEdit"))
                       .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
+                               .HtmlAttributes(new { style = "background-color: Gainsboro;" })
                       //.Filterable(ftb => ftb.Mode(GridFilterMode.Row))
                       .Excel(excel => excel.FileName("Features.xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Feature")))
                       .Events(e => e.DataBound("dataBoundFeature"))
@@ -82,7 +83,7 @@
         //var headerHeight = $(window).headerHeight();
         var contentArea = grid.find(".k-grid-content");
 
-        var calculatedHeight = windowHeight - 300; // - headerHeight;       header is empty but this calculation makes grid small
+        var calculatedHeight = windowHeight - 150; // - headerHeight;       header is empty but this calculation makes grid small
         var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
 
         contentArea.height(finalHeight);

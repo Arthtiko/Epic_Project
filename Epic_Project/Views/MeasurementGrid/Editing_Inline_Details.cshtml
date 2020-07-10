@@ -65,7 +65,7 @@
     .Filterable(fil => fil.Extra(false).Operators(op => op.ForString(str => str.Clear().Contains("Contains"))))
     .Events(e => e.DataBound("dataBound"))
     .Events(e => e.ExcelExport("excelExport"))
-    .ClientDetailTemplateId("featureReport-template")
+    //.ClientDetailTemplateId("featureReport-template")
     .Resizable(resizable => resizable.Columns(true))
     .Reorderable(reorderable => reorderable.Columns(true))
     .HtmlAttributes(new { style = "background-color: Gainsboro;" })

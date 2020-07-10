@@ -81,7 +81,7 @@ namespace Epic_Project.Controllers
                 {
                     measurement = temp[0];
                 }
-                if (measurement != null)
+                if (measurement != null && measurement.EditMode.Name == "Feature")
                 {
                     measurement.RequirementProgress = 0;
                     measurement.DesignProgress = 0;
