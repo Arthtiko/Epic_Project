@@ -1,0 +1,189 @@
+﻿@model MeasurementSearchModel
+
+@(Html.Kendo().Grid<Feature>()
+                      .Name("grid_feature")
+                      //.AutoBind(false)
+                      .Columns(columns =>
+                      {
+                          columns.Bound(o => o.FeatureName).Width(210).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.FeatureEstimation).Width(90).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.EpicId).Width(75).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.FSM.FSMName).Title("Delivery").Width(90)/*.EditorTemplateName("ClientFeatureFSMEditor")*/.HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.Team.TeamName).Title("Team").Width(90)/*.EditorTemplateName("ClientFeatureTeamEditor")*/.HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.Year).Width(75).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.Month).Width(75).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.RequirementProgress).Width(135).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.DesignProgress).Width(135).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.DevelopmentProgress).Width(135).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.TestProgress).Width(135).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Bound(o => o.UatProgress).Width(135).Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          //columns.Bound(o => o.OverallEpicCompletion).Title("Overall Feature Completion").Width(135).ClientTemplate("<div class='progressFeature' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          //columns.Bound(o => o.PreviousMonthCumulativeActualEffort).Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          //columns.Bound(o => o.ActualEffort).Width(105).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                          columns.Command(command => { command.Edit(); command.Destroy(); }).Width(210);
+                      })
+                      .ToolBar(t => { t.Create().Text("New Feature"); t.Excel(); })
+                      //.ToolBar(t => { t.ClientTemplateId("GridToolbarTemplate"); })
+                      .Editable(editable => editable.Mode(GridEditMode.InLine).CreateAt(GridInsertRowPosition.Bottom))
+                      .Scrollable()
+                      .Groupable()
+                                       .Events(e => e.BeforeEdit("beforeEdit"))
+                      .Sortable(sort => sort.SortMode(GridSortMode.MultipleColumn))
+                               .HtmlAttributes(new { style = "background-color: Gainsboro;" })
+                      //.Filterable(ftb => ftb.Mode(GridFilterMode.Row))
+                      .Excel(excel => excel.FileName("Features.xlsx").Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Feature")))
+                      .Events(e => e.DataBound("dataBoundFeature"))
+                      .DataSource(dataSource => dataSource
+                          .Ajax()
+                          .Read(read => read.Action("Feature_Read", "Feature").Data("getFeatureReadData"))
+                          .Create(create => create.Action("Feature_Create", "Feature"))
+                          //.Update(update => update.Action("Feature_Update", "Feature"))
+                          .Destroy(update => update.Action("Feature_Destroy", "Feature"))
+                          .Model(model =>
+                          {
+                              model.Id(m => m.FeatureId);
+                              model.Field(m => m.FSM.FSMName).Editable(false);
+                              model.Field(m => m.Team.TeamName).Editable(false);
+                              model.Field(m => m.FSM).Editable(false);
+                              model.Field(m => m.Team).Editable(false);
+                              model.Field(m => m.Team).DefaultValue(new FeatureTeamModel() { TeamId = 0, TeamName = "" });
+                              model.Field(m => m.FSM).DefaultValue(new FeatureFSMModel() { FSMValue = 0, FSMName = "" });
+                          })
+                          )
+)
+
+<script type="text/javascript">
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+
+    function onRequestEnd() {
+        var grid = $("#grid_feature").data("kendoGrid");
+        grid.refresh();
+    }
+
+    function resizeGrid() {
+        //Define Elements Needed
+        var header = $("#header-content");
+        var grid = $("#grid_feature");
+
+        var minimumAcceptableGridHeight = 300;
+
+        var windowHeight = $(window).innerHeight();
+        //var headerHeight = $(window).headerHeight();
+        var contentArea = grid.find(".k-grid-content");
+
+        var calculatedHeight = windowHeight - 150; // - headerHeight;       header is empty but this calculation makes grid small
+        var finalHeight = (calculatedHeight < minimumAcceptableGridHeight ? minimumAcceptableGridHeight : calculatedHeight);
+
+        contentArea.height(finalHeight);
+    }
+    $(window).resize(function () {
+        resizeGrid();
+    });
+    $(window).ready(function () {
+        resizeGrid();
+    });
+
+    function beforeEdit(e) {
+    }
+
+    function dataBoundFeature() {
+        var grid = this;
+        grid.tbody.find("tr[role='row']").each(function () {
+            var model = grid.dataItem(this);
+            var val = model.RequirementProgress * 0.02 + model.DesignProgress * 0.23 + model.DevelopmentProgress * 0.42 + model.TestProgress * 0.19 + model.UatProgress * 0.14
+            $(this).find(".progressFeature").kendoProgressBar({
+                type: "percent",
+                value: val
+            });
+        });
+    }
+
+    $("#showGrid").click(function () {
+        $("#grid_feature").data("kendoGrid").dataSource.read();
+    });
+
+    function getFeatureReadData() {
+        //var yearMonth = document.getElementById("yearMonths").value;
+        //var year = yearMonth.split("-")[0];
+        //var month = yearMonth.split("-")[1];
+
+        return {
+            epicId: 0,
+            year: 0,
+            month: 0
+        };
+    }
+
+</script>
+
+<script id="GridToolbarTemplate" type="text/x-kendo-template">
+    <div class="dateListContainer">
+        <text>Year-Month: </text>
+        @(Html.Kendo().DropDownList()
+                                                      .Name("yearMonths")
+                                                      .Value(Model.YearMonth)
+                                                      .Events(e => e.Change("datesOnChange"))
+                                                      .DataSource(ds =>
+                                                      {
+                                                          ds.Read("selectDates", "MeasurementGrid");
+                                                      })
+                                                      .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+                                                      .Name("show-data")
+                                                      .Content("Show Data")
+                                                      .Events(e => e.Click("showData"))
+                                                      .ToClientTemplate()
+        )
+    </div>
+    <div class="toolbar">
+        @(Html.Kendo().Button()
+                                                      .Name("create")
+                                                      .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-add" })
+                                                      .Content("New Feature")
+                                                      .ToClientTemplate()
+        )
+        @(Html.Kendo().Button()
+                                                      .Name("excel")
+                                                      .HtmlAttributes(new { @class = "k-button k-button-icontext k-grid-excel" })
+                                                      .Content("Export to Excel")
+                                                      .ToClientTemplate()
+        )
+    </div>
+</script>
+
+<script type="text/javascript">
+    function datesOnChange(e) {
+        window.location.href = "Editing_Inline?YearMonth=" + this.value();
+    }
+    function showData() {
+        $("#grid").data("kendoGrid").dataSource.read();
+    }
+    function exportExcel() {
+        window.location.href = "#";
+    }
+</script>
+
+<style>
+
+    .dateListContainer {
+        margin-left: 24px;
+        display: inline-block;
+    }
+
+    .toolbar {
+        float: right;
+    }
+</style>

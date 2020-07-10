@@ -13,6 +13,7 @@ namespace Epic_Project.Models
             Type = new MeasurementTypeViewModel();
             Module = new Module();
             Team = new Team();
+            EditMode = new EditModeModel();
         }
         [Required]
         public int EpicId { get; set; }
@@ -44,6 +45,8 @@ namespace Epic_Project.Models
         public float PreviousMonthCumulativeActualEffort { get; set; }
         [UIHint("ClientNumericTextBox")]
         public float ActualEffort { get; set; }
+        [UIHint("ClientEditMode")]
+        public EditModeModel EditMode { get; set; }
     }
 
     public class MeasurementSearchModel
@@ -121,5 +124,11 @@ namespace Epic_Project.Models
     public class ImportSearchModel
     {
         public int Mode { get; set; }
+    }
+
+    public class EditModeModel
+    {
+        public int Value { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace Epic_Project.Models
             IsFirstSellableModule = new IsFirstSellableModuleViewModel();
             ProjectLocation = new ProjectLocationViewModel();
             Team = new Team();
+            EditMode = new EditModeModel();
         }
         [Required]
         [UIHint("NoSpinners")]
@@ -40,6 +41,8 @@ namespace Epic_Project.Models
         public float TotalActualEffort { get; set; }
         public string Description { get; set; }
         public string Dependency { get; set; }
+        [UIHint("ClientEditMode")]
+        public EditModeModel EditMode { get; set; }
     }
 
     public class EpicTypeViewModel

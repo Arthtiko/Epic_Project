@@ -71,6 +71,7 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@TotalActualEffort", epicBaseLine.TotalActualEffort);
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
                     sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
+                    sqlCommand.Parameters.AddWithValue("@EditMode", epicBaseLine.EditMode.Name);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -423,6 +424,9 @@ namespace Epic_Project.Models
                 temp.TotalActualEffort = (float)Convert.ToDouble(dt.Rows[i]["TotalActualEffort"]);
                 temp.Description = Convert.ToString(dt.Rows[i]["Description"]);
                 temp.Dependency = Convert.ToString(dt.Rows[i]["Dependency"]);
+                string mode = Convert.ToString(dt.Rows[i]["EditMode"]);
+                temp.EditMode.Value = mode == "Epic" ? 1 : mode == "Feature" ? 2 : 0;
+                temp.EditMode.Name = mode == "Epic" || mode == "Feature" ? mode : "";
                 EpicBaseLineList.Add(temp);
             }
             return EpicBaseLineList;
@@ -519,6 +523,8 @@ namespace Epic_Project.Models
                 temp.WeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["WeightedOverallProgress"]);
                 temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
                 temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                string m = Convert.ToString(dt.Rows[i]["EditMode"]);
+                temp.EditMode = new EditModeModel() { Value = m == "Epic" ? 1 : m == "Feature" ? 2 : 0, Name = m == "Epic" || m == "Feature" ? m : "" }; 
                 MeasurementList.Add(temp);
             }
             return MeasurementList;
@@ -959,6 +965,7 @@ namespace Epic_Project.Models
                     }
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
                     sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
+                    sqlCommand.Parameters.AddWithValue("@EditMode", updatedEpicBaseLine.EditMode.Name);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
                     {
@@ -2096,6 +2103,276 @@ namespace Epic_Project.Models
 
         #endregion
 
+        #region Feature
+
+        public IEnumerable<Feature> GetFeatureAll(int featureId, int featureIsFSM, int epicId, int year, int month, int type, int teamId)
+        {
+            List<Feature> FeatureList = new List<Feature>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_Feature]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (featureId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FeatureId", featureId);
+                    }
+                    if (featureIsFSM != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FeatureIsFSM", featureIsFSM);
+                    }
+                    if (epicId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    if (type != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", type);
+                    }
+                    if (teamId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", teamId);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                Feature temp = new Feature();
+                temp.FeatureId = Convert.ToInt32(dt.Rows[i]["FeatureId"]);
+                temp.FeatureName = Convert.ToString(dt.Rows[i]["FeatureName"]);
+                temp.FeatureEstimation = Convert.ToInt32(dt.Rows[i]["FeatureEstimation"]);
+                temp.FSM.FSMValue = Convert.ToInt32(dt.Rows[i]["FeatureIsFSMValue"]);
+                temp.FSM.FSMName = Convert.ToString(dt.Rows[i]["FeatureIsFSMName"]);
+                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.TypeValue = Convert.ToInt32(dt.Rows[i]["TypeValue"]);
+                temp.TypeName = Convert.ToString(dt.Rows[i]["TypeName"]);
+                temp.RequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
+                temp.DesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
+                temp.DevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
+                temp.TestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
+                temp.UatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
+                temp.OverallEpicCompletion = (float)Convert.ToDouble(dt.Rows[i]["OverallEpicCompletion"]);
+                temp.PreviousMonthCumulativeActualEffort = (float)Convert.ToDouble(dt.Rows[i]["PreviousMonthCumulativeActualEffort"]);
+                temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
+                temp.UserName = Convert.ToString(dt.Rows[i]["UserName"]);
+                temp.UserIp = Convert.ToString(dt.Rows[i]["UserIp"]);
+                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]) || Convert.IsDBNull(dt.Rows[i]["TeamName"]))
+                {
+                    temp.Team = new FeatureTeamModel() { TeamId = 0, TeamName = ""};
+                }
+                else
+                {
+                    temp.Team.TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]);
+                    temp.Team.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
+                }
+                FeatureList.Add(temp);
+            }
+            return FeatureList;
+        }
+
+        public IEnumerable<FeatureReport> GetFeatureReport(int featureId, int featureIsFSM, int epicId, int year, int month, int type)
+        {
+            int prevYear = month == 1 ? year - 1 : year;
+            int prevMonth = month == 1 ? 12 : month - 1;
+            List<FeatureReport> FeatureList = new List<FeatureReport>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_FeatureReport]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (featureId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FeatureId", featureId);
+                    }
+                    if (featureIsFSM != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FeatureIsFSM", featureIsFSM);
+                    }
+                    if (epicId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@EpicId", epicId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                        sqlCommand.Parameters.AddWithValue("@PrevYear", prevYear);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                        sqlCommand.Parameters.AddWithValue("@PrevMonth", prevMonth);
+                    }
+                    if (type != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Type", type);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                FeatureReport temp = new FeatureReport();
+                temp.FeatureId = Convert.ToInt32(dt.Rows[i]["FeatureId"]);
+                temp.FeatureName = Convert.ToString(dt.Rows[i]["FeatureName"]);
+                temp.FeatureEstimation = Convert.ToInt32(dt.Rows[i]["FeatureEstimation"]);
+                temp.FSM = Convert.ToString(dt.Rows[i]["FeatureIsFSMName"]);
+                temp.EpicId = Convert.ToInt32(dt.Rows[i]["EpicId"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.TypeValue = Convert.ToInt32(dt.Rows[i]["TypeValue"]);
+                temp.TypeName = Convert.ToString(dt.Rows[i]["TypeName"]);
+                temp.CurrentRequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["RequirementProgress"]);
+                temp.CurrentDesignProgress = (float)Convert.ToDouble(dt.Rows[i]["DesignProgress"]);
+                temp.CurrentDevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["DevelopmentProgress"]);
+                temp.CurrentTestProgress = (float)Convert.ToDouble(dt.Rows[i]["TestProgress"]);
+                temp.CurrentUatProgress = (float)Convert.ToDouble(dt.Rows[i]["UatProgress"]);
+                temp.CurrentOverallEpicCompletion = (float)Convert.ToDouble(dt.Rows[i]["OverallEpicCompletion"]) / 100;
+                temp.PrevMonthRequirementProgress = (float)Convert.ToDouble(dt.Rows[i]["PrevMonthRequirementProgress"]);
+                temp.PrevMonthDesignProgress = (float)Convert.ToDouble(dt.Rows[i]["PrevMonthDesignProgress"]);
+                temp.PrevMonthDevelopmentProgress = (float)Convert.ToDouble(dt.Rows[i]["PrevMonthDevelopmentProgress"]);
+                temp.PrevMonthTestProgress = (float)Convert.ToDouble(dt.Rows[i]["PrevMonthTestProgress"]);
+                temp.PrevMonthUatProgress = (float)Convert.ToDouble(dt.Rows[i]["PrevMonthUatProgress"]);
+                temp.PrevMonthOverallEpicCompletion = (float)Convert.ToDouble(dt.Rows[i]["PrevMonthOverallEpicCompletion"])/100;
+                if (Convert.IsDBNull(dt.Rows[i]["TeamId"]) || Convert.IsDBNull(dt.Rows[i]["TeamName"]))
+                {
+                    temp.Team = "";
+                }
+                else
+                {
+                    temp.Team = Convert.ToString(dt.Rows[i]["TeamName"]);
+                }
+                FeatureList.Add(temp);
+            }
+            return FeatureList;
+        }
+
+        public void DeleteFeature(Feature feature)
+        {
+            if (feature != null && feature.FeatureId != 0)
+            {
+                DataTable dt = new DataTable();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    string procName = "[del_Feature]";
+                    using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                    {
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
+                        sqlCommand.Parameters.AddWithValue("@FeatureId", feature.FeatureId);
+                        sqlConnection.Open();
+                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                        {
+                            sqlDataAdapter.Fill(dt);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void InsertFeature(Feature feature)
+        {
+            Measurement measurement = null;
+            List<Measurement> ms = (List<Measurement>)GetMeasurementAll(feature.EpicId, feature.Year, feature.Month, feature.TypeName, feature.Team.TeamId);
+            if (ms != null && ms.Count > 0)
+            {
+                measurement = ms[0];
+            }
+            if (measurement != null)
+            {
+                DataTable dt = new DataTable();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+                {
+                    string procName = "[ins_Feature]";
+                    using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                    {
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
+                        sqlCommand.Parameters.AddWithValue("@FeatureName", feature.FeatureName);
+                        sqlCommand.Parameters.AddWithValue("@FeatureEstimation", feature.FeatureEstimation);
+                        sqlCommand.Parameters.AddWithValue("@FeatureIsFSM", GetParameterValue("IsFirstSellableModule", measurement.IsFirstSellableModule));
+                        sqlCommand.Parameters.AddWithValue("@EpicId", feature.EpicId);
+                        sqlCommand.Parameters.AddWithValue("@Year", feature.Year);
+                        sqlCommand.Parameters.AddWithValue("@Month", feature.Month);
+                        sqlCommand.Parameters.AddWithValue("@Type", 2);
+                        sqlCommand.Parameters.AddWithValue("@RequirementProgress", feature.RequirementProgress);
+                        sqlCommand.Parameters.AddWithValue("@DesignProgress", feature.DesignProgress);
+                        sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", feature.DevelopmentProgress);
+                        sqlCommand.Parameters.AddWithValue("@TestProgress", feature.TestProgress);
+                        sqlCommand.Parameters.AddWithValue("@UatProgress", feature.UatProgress);
+                        sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", feature.PreviousMonthCumulativeActualEffort);
+                        sqlCommand.Parameters.AddWithValue("@ActualEffort", feature.ActualEffort);
+                        sqlCommand.Parameters.AddWithValue("@UserName", feature.UserName);
+                        sqlCommand.Parameters.AddWithValue("@UserIp", feature.UserIp);
+                        sqlCommand.Parameters.AddWithValue("@TeamId", measurement.Team.TeamId);
+                        sqlConnection.Open();
+                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                        {
+                            sqlDataAdapter.Fill(dt);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void UpdateFeature(Feature feature, string userName, string userIp)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_Feature]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@FeatureId", feature.FeatureId);
+                    sqlCommand.Parameters.AddWithValue("@FeatureName", feature.FeatureName);
+                    sqlCommand.Parameters.AddWithValue("@FeatureEstimation", feature.FeatureEstimation);
+                    sqlCommand.Parameters.AddWithValue("@FeatureIsFSM", feature.FSM.FSMValue);
+                    sqlCommand.Parameters.AddWithValue("@EpicId", feature.EpicId);
+                    sqlCommand.Parameters.AddWithValue("@Year", feature.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", feature.Month);
+                    sqlCommand.Parameters.AddWithValue("@Type", feature.TypeValue);
+                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", feature.RequirementProgress);
+                    sqlCommand.Parameters.AddWithValue("@DesignProgress", feature.DesignProgress);
+                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", feature.DevelopmentProgress);
+                    sqlCommand.Parameters.AddWithValue("@TestProgress", feature.TestProgress);
+                    sqlCommand.Parameters.AddWithValue("@UatProgress", feature.UatProgress);
+                    sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", feature.PreviousMonthCumulativeActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@ActualEffort", feature.ActualEffort);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", userIp);
+                    sqlCommand.Parameters.AddWithValue("@TeamId", feature.Team.TeamId);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
         public IEnumerable<TeamProgressTrack> GetTeamProgressTrack(int year, int month, int isFSM)
         {
             List<Team> teams = new List<Team>();
@@ -2162,6 +2439,8 @@ namespace Epic_Project.Models
                 {
                     temp.TargetWeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["TargetWeightedOverallProgress"]);
                 }
+
+                temp.EditMode = Convert.ToString(dt.Rows[i]["EditMode"]);
 
                 measurementList.Add(temp);
             }
@@ -2774,10 +3053,10 @@ namespace Epic_Project.Models
                     {
                         sqlCommand.Parameters.AddWithValue("@Month", month);
                     }
-                    //if (isFSM == 1 || isFSM == 2)
-                    //{
-                    //    sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
-                    //}
+                    if (isFSM == 4 || isFSM == 5 || isFSM == 6)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
+                    }
                     if (location != null)
                     {
                         sqlCommand.Parameters.AddWithValue("@ProjectLocation", GetParameterValue("ProjectLocation", location));

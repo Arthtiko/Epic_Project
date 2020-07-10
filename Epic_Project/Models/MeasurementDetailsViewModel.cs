@@ -54,5 +54,6 @@ namespace Epic_Project.Models
         public float Deviation { get; set; }
         public string Description { get; set; }
         public string Dependency { get; set; }
+        public string EditMode { get; set; }
     }
 }

@@ -99,6 +99,8 @@ namespace EPICProject.Controllers
             PopulateTeams();
             PopulateTypes();
             PopulateDates();
+            PopulateFirstSellableModules();
+            PopulateEditModes();
             if (yearMonth == null)
             {
                 m = month <= 0 || month > 12 ? StartMonth : month;
@@ -349,6 +351,96 @@ namespace EPICProject.Controllers
 
         #endregion
 
+        #region Feature
+
+        public ActionResult Feature_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month)
+        {
+            List<Feature> features = new List<Feature>();
+            features = (List<Feature>)_repository.GetFeatureAll(0, 0, epicId, year, month, 2, 0);
+            return Json(features.ToDataSourceResult(request));
+        }
+        public ActionResult FeatureReport_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month)
+        {
+            List<FeatureReport> features = new List<FeatureReport>();
+            features = (List<FeatureReport>)_repository.GetFeatureReport(0, 0, epicId, year, month, 2);
+            return Json(features.ToDataSourceResult(request));
+        }
+
+        [HttpPost]
+        public ActionResult Feature_Create([DataSourceRequest] DataSourceRequest request, Feature feature)
+        {
+            if (feature != null && ModelState.IsValid)
+            {
+                _repository.InsertFeature(feature);
+                CalculateFeature(feature);
+            }
+            return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
+        }
+
+        [HttpPost]
+        public ActionResult Feature_Update([DataSourceRequest] DataSourceRequest request, Feature feature)
+        {
+            string ipAddress = _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            if (feature != null && ModelState.IsValid)
+            {
+                _repository.UpdateFeature(feature, "", ipAddress);
+                CalculateFeature(feature);
+            }
+            return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
+        }
+
+        [HttpPost]
+        public ActionResult Feature_Destroy([DataSourceRequest] DataSourceRequest request, Feature feature)
+        {
+            if (feature != null && ModelState.IsValid)
+            {
+                _repository.DeleteFeature(feature);
+            }
+            return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
+        }
+
+        public void CalculateFeature(Feature feature)
+        {
+            List<Feature> features = (List<Feature>)_repository.GetFeatureAll(0, 0, feature.EpicId, feature.Year, feature.Month, 2, 0);
+
+            if (features != null && features.Count() > 0)
+            {
+                List<Measurement> temp = (List<Measurement>)_repository.GetMeasurementAll(feature.EpicId, feature.Year, feature.Month, "Actual", 0);
+                Measurement measurement = null;
+                if (temp != null && temp.Count() > 0)
+                {
+                    measurement = temp[0];
+                }
+                if (measurement != null && measurement.EditMode.Name == "EditMode")
+                {
+                    measurement.RequirementProgress = 0;
+                    measurement.DesignProgress = 0;
+                    measurement.DevelopmentProgress = 0;
+                    measurement.TestProgress = 0;
+                    measurement.UatProgress = 0;
+
+                    float totalEstimation = 0;
+                    for (int i = 0; i < features.Count(); i++)
+                    {
+                        totalEstimation += features[i].FeatureEstimation;
+                    }
+                    for (int i = 0; i < features.Count(); i++)
+                    {
+                        measurement.RequirementProgress += features[i].RequirementProgress * (features[i].FeatureEstimation / totalEstimation);
+                        measurement.DesignProgress += features[i].DesignProgress * (features[i].FeatureEstimation / totalEstimation);
+                        measurement.DevelopmentProgress += features[i].DevelopmentProgress * (features[i].FeatureEstimation / totalEstimation);
+                        measurement.TestProgress += features[i].TestProgress * (features[i].FeatureEstimation / totalEstimation);
+                        measurement.UatProgress += features[i].UatProgress * (features[i].FeatureEstimation / totalEstimation);
+                    }
+                    _repository.UpdateMeasurement(measurement, "", "");
+                }
+            }
+
+
+        }
+
+        #endregion
+
         #region Operations
 
         [Authorize(Roles = "Admin, Project Manager, Program Manager")]
@@ -451,14 +543,18 @@ namespace EPICProject.Controllers
         private void PopulateTeams()
         {
             List<Team> teamList = new List<Team>();
+            List<FeatureTeamModel> featureTeams = new List<FeatureTeamModel>();
             List<Team> temp = new List<Team>();
             temp = (List<Team>)_repository.GetTeamAll(0, null, 0, 0);
             teamList.Add(new Team { TeamId = 0, TeamName = "", TeamLeader = new TeamLeaderViewModel(), ProjectManager = new ProjectManagerViewModel() });
             for (int i = 0; i < temp.Count(); i++)
             {
                 teamList.Add(temp[i]);
+                featureTeams.Add(new FeatureTeamModel() { TeamId = temp[i].TeamId, TeamName = temp[i].TeamName });
             }
             ViewData["teams"] = teamList;
+            ViewData["featureTeams"] = featureTeams;
+            ViewData["defaultFeatureTeam"] = new FeatureTeamModel() { TeamId = 0, TeamName = "" };
             ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "" };
         }
 
@@ -490,6 +586,31 @@ namespace EPICProject.Controllers
                 }
             }
             ViewData["dates"] = options;
+        }
+
+        private void PopulateFirstSellableModules()
+        {
+            List<FeatureFSMModel> FSMList = new List<FeatureFSMModel>();
+            List<Parameter> parameterList;
+            parameterList = (List<Parameter>)_repository.GetParameter("IsFirstSellableModule");
+            for (int i = 0; i < parameterList.Count(); i++)
+            {
+                var temp = new FeatureFSMModel();
+                temp.FSMName = parameterList[i].ParameterName;
+                temp.FSMValue = parameterList[i].ParameterValue;
+                FSMList.Add(temp);
+            }
+            ViewData["FSMs"] = FSMList;
+            ViewData["defaultFSM"] = FSMList.First();
+        }
+
+        private void PopulateEditModes()
+        {
+            List<EditModeModel> editModeList = new List<EditModeModel>();
+            editModeList.Add(new EditModeModel() { Value = 1, Name = "Epic" });
+            editModeList.Add(new EditModeModel() { Value = 2, Name = "Feature" });
+            ViewData["editModes"] = editModeList;
+            ViewData["defaultEditMode"] = editModeList.First();
         }
 
         public string IsVarianceShowed(int year, int month)
