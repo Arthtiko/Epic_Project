@@ -2622,7 +2622,7 @@ namespace Epic_Project.Models
                     if (modules[j].ModuleId == epics[i].ModuleId)
                     {
                         modules[j].WeightedOverallProgress = modules[j].WeightedOverallProgress + epics[i].WeightedOverallProgress;
-                        if (isFSM == 1)
+                        if (isFSM == 4)
                         {
                             modules[j].Weight = modules[j].Weight + epics[i].Weight * (epics[i].FSMPercentage / 100);
                         }
@@ -2641,7 +2641,7 @@ namespace Epic_Project.Models
                 {
                     if (modules[j].ModuleId == epics[i].ModuleId)
                     {
-                        if (isFSM == 1)
+                        if (isFSM == 4)
                         {
                             float progress = epics[i].Progress >= epics[i].FSMPercentage ? 100 : epics[i].Progress / epics[i].FSMPercentage * 100;
                             float reqProgress = epics[i].RequirementProgress >= epics[i].FSMPercentage ? 100 : epics[i].RequirementProgress / epics[i].FSMPercentage * 100;
@@ -2695,7 +2695,7 @@ namespace Epic_Project.Models
             {
                 SortedList.Remove(ms[i]);
             }
-            if (isFSM == 1)
+            if (isFSM == 4)
             {
                 List<Module> list = GetModuleAggregates(year, month, 0, location);
                 int fsmCount = 0;
@@ -2736,7 +2736,7 @@ namespace Epic_Project.Models
                     {
                         sqlCommand.Parameters.AddWithValue("@Month", month);
                     }
-                    if (isFSM == 1 || isFSM == 2)
+                    if (isFSM != 0)
                     {
                         sqlCommand.Parameters.AddWithValue("@FirstSellableModule", isFSM);
                     }
@@ -2799,14 +2799,14 @@ namespace Epic_Project.Models
                 {
                     if (temp.ModuleId == moduleList[j].ModuleId)
                     {
-                        if (isFSM == 1)
+                        if (isFSM == 4)
                         {
                             moduleList[j].TotalEstimation += temp.TotalEstimation * temp.FSMPercentage;
                         }
-                        else if (isFSM == 2)
-                        {
-                            moduleList[j].TotalEstimation += temp.TotalEstimation * (1 - temp.FSMPercentage);
-                        }
+                        //else if (isFSM == 2)
+                        //{
+                        //    moduleList[j].TotalEstimation += temp.TotalEstimation * (1 - temp.FSMPercentage);
+                        //}
                         else
                         {
                             moduleList[j].TotalEstimation += temp.TotalEstimation;
