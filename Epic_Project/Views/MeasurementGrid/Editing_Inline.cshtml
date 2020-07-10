@@ -256,8 +256,8 @@
             var dataItem = grid.dataItem(this);
             if (dataItem.EditMode.Name == "Feature") {
                 featureEpicId = dataItem.EpicId;
-                $("#grid_feature").data("kendoGrid").dataSource.read();
                 $('#dialog').data("kendoDialog").open();
+                $("#grid_feature").data("kendoGrid").dataSource.read();
             }
         });
         grid.tbody.find("tr[role='row']").each(function () {

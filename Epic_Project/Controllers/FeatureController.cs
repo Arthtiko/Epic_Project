@@ -53,7 +53,7 @@ namespace Epic_Project.Controllers
         {
             if (feature != null && ModelState.IsValid)
             {
-                _repository.UpdateFeature(feature);
+                _repository.UpdateFeature(feature, "", "");
                 CalculateFeature(feature);
             }
             return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
@@ -102,7 +102,7 @@ namespace Epic_Project.Controllers
                         measurement.TestProgress += features[i].TestProgress * (features[i].FeatureEstimation / totalEstimation);
                         measurement.UatProgress += features[i].UatProgress * (features[i].FeatureEstimation / totalEstimation);
                     }
-                    _repository.UpdateMeasurement(measurement, null, null);
+                    _repository.UpdateMeasurement(measurement, "", "");
                 }
             }
         }
@@ -116,5 +116,6 @@ namespace Epic_Project.Controllers
 
             return File(fileContents, contentType, fileName);
         }
+
     }
 }

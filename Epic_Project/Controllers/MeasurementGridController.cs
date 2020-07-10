@@ -380,9 +380,10 @@ namespace EPICProject.Controllers
         [HttpPost]
         public ActionResult Feature_Update([DataSourceRequest] DataSourceRequest request, Feature feature)
         {
+            string ipAddress = _accessor.HttpContext.Connection.RemoteIpAddress.ToString();
             if (feature != null && ModelState.IsValid)
             {
-                _repository.UpdateFeature(feature);
+                _repository.UpdateFeature(feature, "", ipAddress);
                 CalculateFeature(feature);
             }
             return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
@@ -431,7 +432,7 @@ namespace EPICProject.Controllers
                         measurement.TestProgress += features[i].TestProgress * (features[i].FeatureEstimation / totalEstimation);
                         measurement.UatProgress += features[i].UatProgress * (features[i].FeatureEstimation / totalEstimation);
                     }
-                    _repository.UpdateMeasurement(measurement, null, null);
+                    _repository.UpdateMeasurement(measurement, "", "");
                 }
             }
 

@@ -2260,40 +2260,49 @@ namespace Epic_Project.Models
 
         public void InsertFeature(Feature feature)
         {
-            DataTable dt = new DataTable();
-            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            Measurement measurement = null;
+            List<Measurement> ms = (List<Measurement>)GetMeasurementAll(feature.EpicId, feature.Year, feature.Month, feature.TypeName, feature.Team.TeamId);
+            if (ms != null && ms.Count > 0)
             {
-                string procName = "[ins_Feature]";
-                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                measurement = ms[0];
+            }
+            if (measurement != null)
+            {
+                DataTable dt = new DataTable();
+                using (SqlConnection sqlConnection = new SqlConnection(connectionString))
                 {
-                    sqlCommand.CommandType = CommandType.StoredProcedure;
-                    sqlCommand.Parameters.AddWithValue("@FeatureName", feature.FeatureName);
-                    sqlCommand.Parameters.AddWithValue("@FeatureEstimation", feature.FeatureEstimation);
-                    sqlCommand.Parameters.AddWithValue("@FeatureIsFSM", feature.FSM.FSMValue);
-                    sqlCommand.Parameters.AddWithValue("@EpicId", feature.EpicId);
-                    sqlCommand.Parameters.AddWithValue("@Year", feature.Year);
-                    sqlCommand.Parameters.AddWithValue("@Month", feature.Month);
-                    sqlCommand.Parameters.AddWithValue("@Type", feature.TypeValue);
-                    sqlCommand.Parameters.AddWithValue("@RequirementProgress", feature.RequirementProgress);
-                    sqlCommand.Parameters.AddWithValue("@DesignProgress", feature.DesignProgress);
-                    sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", feature.DevelopmentProgress);
-                    sqlCommand.Parameters.AddWithValue("@TestProgress", feature.TestProgress);
-                    sqlCommand.Parameters.AddWithValue("@UatProgress", feature.UatProgress);
-                    sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", feature.PreviousMonthCumulativeActualEffort);
-                    sqlCommand.Parameters.AddWithValue("@ActualEffort", feature.ActualEffort);
-                    sqlCommand.Parameters.AddWithValue("@UserName", feature.UserName);
-                    sqlCommand.Parameters.AddWithValue("@UserIp", feature.UserIp);
-                    sqlCommand.Parameters.AddWithValue("@TeamId", feature.Team.TeamId);
-                    sqlConnection.Open();
-                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    string procName = "[ins_Feature]";
+                    using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
                     {
-                        sqlDataAdapter.Fill(dt);
+                        sqlCommand.CommandType = CommandType.StoredProcedure;
+                        sqlCommand.Parameters.AddWithValue("@FeatureName", feature.FeatureName);
+                        sqlCommand.Parameters.AddWithValue("@FeatureEstimation", feature.FeatureEstimation);
+                        sqlCommand.Parameters.AddWithValue("@FeatureIsFSM", GetParameterValue("IsFirstSellableModule", measurement.IsFirstSellableModule));
+                        sqlCommand.Parameters.AddWithValue("@EpicId", feature.EpicId);
+                        sqlCommand.Parameters.AddWithValue("@Year", feature.Year);
+                        sqlCommand.Parameters.AddWithValue("@Month", feature.Month);
+                        sqlCommand.Parameters.AddWithValue("@Type", 2);
+                        sqlCommand.Parameters.AddWithValue("@RequirementProgress", feature.RequirementProgress);
+                        sqlCommand.Parameters.AddWithValue("@DesignProgress", feature.DesignProgress);
+                        sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", feature.DevelopmentProgress);
+                        sqlCommand.Parameters.AddWithValue("@TestProgress", feature.TestProgress);
+                        sqlCommand.Parameters.AddWithValue("@UatProgress", feature.UatProgress);
+                        sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", feature.PreviousMonthCumulativeActualEffort);
+                        sqlCommand.Parameters.AddWithValue("@ActualEffort", feature.ActualEffort);
+                        sqlCommand.Parameters.AddWithValue("@UserName", feature.UserName);
+                        sqlCommand.Parameters.AddWithValue("@UserIp", feature.UserIp);
+                        sqlCommand.Parameters.AddWithValue("@TeamId", measurement.Team.TeamId);
+                        sqlConnection.Open();
+                        using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                        {
+                            sqlDataAdapter.Fill(dt);
+                        }
                     }
                 }
             }
         }
 
-        public void UpdateFeature(Feature feature)
+        public void UpdateFeature(Feature feature, string userName, string userIp)
         {
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
@@ -2317,8 +2326,8 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@UatProgress", feature.UatProgress);
                     sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", feature.PreviousMonthCumulativeActualEffort);
                     sqlCommand.Parameters.AddWithValue("@ActualEffort", feature.ActualEffort);
-                    sqlCommand.Parameters.AddWithValue("@UserName", feature.UserName);
-                    sqlCommand.Parameters.AddWithValue("@UserIp", feature.UserIp);
+                    sqlCommand.Parameters.AddWithValue("@UserName", userName);
+                    sqlCommand.Parameters.AddWithValue("@UserIp", userIp);
                     sqlCommand.Parameters.AddWithValue("@TeamId", feature.Team.TeamId);
                     sqlConnection.Open();
                     using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))

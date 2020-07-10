@@ -98,7 +98,7 @@ namespace Epic_Project.Models
         IEnumerable<FeatureReport> GetFeatureReport(int featureId, int featureIsFSM, int epicId, int year, int month, int type);
         void DeleteFeature(Feature feature);
         void InsertFeature(Feature feature);
-        void UpdateFeature(Feature feature);
+        void UpdateFeature(Feature feature, string userName, string userIp);
 
             #endregion
 

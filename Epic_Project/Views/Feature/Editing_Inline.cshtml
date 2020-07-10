@@ -20,7 +20,7 @@
                           //columns.Bound(o => o.OverallEpicCompletion).Title("Overall Feature Completion").Width(135).ClientTemplate("<div class='progressFeature' data-role='progressbar' style='width: 100%; background-color: White;' ></div>").HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                           //columns.Bound(o => o.PreviousMonthCumulativeActualEffort).Width(135).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                           //columns.Bound(o => o.ActualEffort).Width(105).HtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
-                          columns.Command(command => { /*command.Edit();*/ command.Destroy(); }).Width(210);
+                          columns.Command(command => { command.Edit(); command.Destroy(); }).Width(210);
                       })
                       .ToolBar(t => { t.Create().Text("New Feature"); t.Excel(); })
                       //.ToolBar(t => { t.ClientTemplateId("GridToolbarTemplate"); })
@@ -43,8 +43,10 @@
                               model.Id(m => m.FeatureId);
                               model.Field(m => m.FSM.FSMName).Editable(false);
                               model.Field(m => m.Team.TeamName).Editable(false);
-                              model.Field(m => m.Team).DefaultValue(ViewData["defaultFeatureTeam"] as Epic_Project.Models.FeatureTeamModel);
-                              model.Field(m => m.FSM).DefaultValue(ViewData["defaultFSM"] as Epic_Project.Models.FeatureFSMModel);
+                              model.Field(m => m.FSM).Editable(false);
+                              model.Field(m => m.Team).Editable(false);
+                              model.Field(m => m.Team).DefaultValue(new FeatureTeamModel() { TeamId = 0, TeamName = "" });
+                              model.Field(m => m.FSM).DefaultValue(new FeatureFSMModel() { FSMValue = 0, FSMName = "" });
                           })
                           )
 )
@@ -65,14 +67,14 @@
     }
 
     function onRequestEnd() {
-        var grid = $("#grid").data("kendoGrid");
+        var grid = $("#grid_feature").data("kendoGrid");
         grid.refresh();
     }
 
     function resizeGrid() {
         //Define Elements Needed
         var header = $("#header-content");
-        var grid = $("#grid");
+        var grid = $("#grid_feature");
 
         var minimumAcceptableGridHeight = 300;
 
@@ -108,7 +110,7 @@
     }
 
     $("#showGrid").click(function () {
-        $("#grid").data("kendoGrid").dataSource.read();
+        $("#grid_feature").data("kendoGrid").dataSource.read();
     });
 
     function getFeatureReadData() {
