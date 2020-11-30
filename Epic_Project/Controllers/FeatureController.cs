@@ -65,6 +65,7 @@ namespace Epic_Project.Controllers
             if (feature != null && ModelState.IsValid)
             {
                 _repository.DeleteFeature(feature);
+                CalculateFeature(feature);
             }
             return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
         }
