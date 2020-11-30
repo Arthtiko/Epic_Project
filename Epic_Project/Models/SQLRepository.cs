@@ -377,6 +377,8 @@ namespace Epic_Project.Models
                 temp.EpicType.TypeValue = Convert.ToInt32(dt.Rows[i]["EpicTypeId"]);
                 temp.EpicType.TypeName = Convert.ToString(dt.Rows[i]["EpicType"]);
                 temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
+                temp.Phase5Percentage = (float)Convert.ToDouble(dt.Rows[i]["Phase5Percentage"]);
+                temp.Phase6Percentage = (float)Convert.ToDouble(dt.Rows[i]["Phase6Percentage"]);
                 temp.ProjectLocation.LocationValue = Convert.ToInt32(dt.Rows[i]["ProjectLocationId"]);
                 temp.ProjectLocation.LocationName = Convert.ToString(dt.Rows[i]["ProjectLocation"]);
                 temp.Estimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
@@ -943,6 +945,8 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@Estimation", updatedEpicBaseLine.Estimation);
                     sqlCommand.Parameters.AddWithValue("@TeamId", updatedEpicBaseLine.Team.TeamId);
                     sqlCommand.Parameters.AddWithValue("@FSMPercentage", Math.Round(updatedEpicBaseLine.FSMPercentage, 2));
+                    sqlCommand.Parameters.AddWithValue("@Phase5Percentage", Math.Round(updatedEpicBaseLine.Phase5Percentage, 2));
+                    sqlCommand.Parameters.AddWithValue("@Phase6Percentage", Math.Round(updatedEpicBaseLine.Phase6Percentage, 2));
                     sqlCommand.Parameters.AddWithValue("@IsMurabaha", GetParameterValue("IsMurabaha", updatedEpicBaseLine.IsMurabaha.MurabahaName));
                     sqlCommand.Parameters.AddWithValue("@IsFirstSellableModule", GetParameterValue("IsFirstSellableModule", updatedEpicBaseLine.IsFirstSellableModule.FirstSellableModuleName));
                     sqlCommand.Parameters.AddWithValue("@DistributedUnmappedEffort", updatedEpicBaseLine.DistributedUnmappedEffort);
@@ -979,6 +983,12 @@ namespace Epic_Project.Models
 
         public Measurement UpdateMeasurement(Measurement updatedMeasurement, string userName, string ipAddress)
         {
+            //List<Measurement> measurements = (List<Measurement>)GetMeasurementAll(0, updatedMeasurement.Month == 1 ? updatedMeasurement.Year - 1 : updatedMeasurement.Year, updatedMeasurement.Month == 1 ? 12 : updatedMeasurement.Month - 1, null, 0);
+            //Measurement measurement = null;
+            //if (measurements != null && measurements.Count() > 0)
+            //{
+            //    measurement = measurements[0];
+            //}
             DataTable dt = new DataTable();
             using (SqlConnection sqlConnection = new SqlConnection(connectionString))
             {
@@ -995,7 +1005,14 @@ namespace Epic_Project.Models
                     sqlCommand.Parameters.AddWithValue("@DevelopmentProgress", Math.Round(updatedMeasurement.DevelopmentProgress / 100, 4));
                     sqlCommand.Parameters.AddWithValue("@TestProgress", Math.Round(updatedMeasurement.TestProgress / 100, 4));
                     sqlCommand.Parameters.AddWithValue("@UatProgress", Math.Round(updatedMeasurement.UatProgress / 100, 4));
-                    sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", updatedMeasurement.PreviousMonthCumulativeActualEffort);
+                    //if (measurement != null)
+                    //{
+                    //    sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", measurement.PreviousMonthCumulativeActualEffort + measurement.ActualEffort);
+                    //}
+                    //else
+                    //{
+                        sqlCommand.Parameters.AddWithValue("@PreviousMonthCumulativeActualEffort", updatedMeasurement.PreviousMonthCumulativeActualEffort);
+                    //}
                     sqlCommand.Parameters.AddWithValue("@ActualEffort", updatedMeasurement.ActualEffort);
                     sqlCommand.Parameters.AddWithValue("@UserName", userName);
                     sqlCommand.Parameters.AddWithValue("@UserIp", ipAddress);
@@ -1734,7 +1751,7 @@ namespace Epic_Project.Models
 
                 temp.PlannedManday = temp.ResourceCount * 22 - temp.DayOff;
                 temp.PlannedConsumedMandayBudget = (temp.PlannedManday / GetTotalEstimation()) * 100;
-                temp.ThresholdIncrementProgress = (float)(temp.PlannedConsumedMandayBudget * 1.3);
+                temp.ThresholdIncrementProgress = (float)(temp.PlannedConsumedMandayBudget * 1.5);
                 int prevYear = temp.Month == 1 ? temp.Year - 1 : temp.Year;
                 int prevMonth = temp.Month == 1 ? 12 : temp.Month - 1;
                 List<Measurement> ms = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, "Actual", temp.Team.TeamId);
@@ -1801,7 +1818,7 @@ namespace Epic_Project.Models
 
                 temp.PlannedManday = temp.TotalResourceCount * 22 - temp.DayOff;
                 temp.PlannedConsumedMandayBudget = (temp.PlannedManday / GetTotalEstimation()) * 100;
-                temp.ThresholdIncrementProgress = (float)(temp.PlannedConsumedMandayBudget * 1.3);
+                temp.ThresholdIncrementProgress = (float)(temp.PlannedConsumedMandayBudget * 1.5);
                 int prevYear = temp.Month == 1 ? temp.Year - 1 : temp.Year;
                 int prevMonth = temp.Month == 1 ? 12 : temp.Month - 1;
                 List<Measurement> ms = (List<Measurement>)GetMeasurementAll(0, prevYear, prevMonth, "Actual", temp.Team.TeamId);
@@ -2373,6 +2390,123 @@ namespace Epic_Project.Models
 
         #endregion
 
+        #region Team Tracking
+
+        public IEnumerable<TeamTracking> GetTeamTracking(int teamId, int year, int month)
+        {
+            List<TeamTracking> trackings = new List<TeamTracking>();
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[sel_TeamTracking]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (teamId != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@TeamId", teamId);
+                    }
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+            for (int i = 0; i < dt.Rows.Count; i++)
+            {
+                TeamTracking temp = new TeamTracking();
+                temp.TeamId = Convert.ToInt32(dt.Rows[i]["TeamId"]);
+                temp.TeamName = Convert.ToString(dt.Rows[i]["TeamName"]);
+                temp.Year = Convert.ToInt32(dt.Rows[i]["Year"]);
+                temp.Month = Convert.ToInt32(dt.Rows[i]["Month"]);
+                temp.CurrentCapacity = (float)Convert.ToDouble(dt.Rows[i]["CurrentCapacity"]);
+                trackings.Add(temp);
+            }
+            return trackings;
+        }
+
+        public void InsertTeamTracking(TeamTracking tracking)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[ins_TeamTracking]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@TeamId", tracking.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@Year", tracking.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", tracking.Month);
+                    sqlCommand.Parameters.AddWithValue("@CurrentCapacity", tracking.CurrentCapacity);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public void UpdateTeamTracking(TeamTracking tracking)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[upd_TeamTracking]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    sqlCommand.Parameters.AddWithValue("@TeamId", tracking.TeamId);
+                    sqlCommand.Parameters.AddWithValue("@Year", tracking.Year);
+                    sqlCommand.Parameters.AddWithValue("@Month", tracking.Month);
+                    sqlCommand.Parameters.AddWithValue("@CurrentCapacity", tracking.CurrentCapacity);
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        public void DeleteTeamTracking(int year, int month)
+        {
+            DataTable dt = new DataTable();
+            using (SqlConnection sqlConnection = new SqlConnection(connectionString))
+            {
+                string procName = "[del_TeamTracking]";
+                using (SqlCommand sqlCommand = new SqlCommand(procName, sqlConnection))
+                {
+                    sqlCommand.CommandType = CommandType.StoredProcedure;
+                    if (year != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Year", year);
+                    }
+                    if (month != 0)
+                    {
+                        sqlCommand.Parameters.AddWithValue("@Month", month);
+                    }
+                    sqlConnection.Open();
+                    using (SqlDataAdapter sqlDataAdapter = new SqlDataAdapter(sqlCommand))
+                    {
+                        sqlDataAdapter.Fill(dt);
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+
         public IEnumerable<TeamProgressTrack> GetTeamProgressTrack(int year, int month, int isFSM)
         {
             List<Team> teams = new List<Team>();
@@ -2465,11 +2599,32 @@ namespace Epic_Project.Models
                 }
             }
 
+            List<TeamTracking> trackings = (List<TeamTracking>)GetTeamTracking(0, year, month);
+            for (int i = 0; i < trackings.Count(); i++)
+            {
+                for (int j = 0; j < track.Count(); j++)
+                {
+                    if (track[j].Team == trackings[i].TeamName)
+                    {
+                        track[j].CurrentCapacity = trackings[i].CurrentCapacity;
+                        track[j].ExpectedTarget = track[j].PreviousMonthProgress + (float)(trackings[i].CurrentCapacity * 100 * 1.5) / GetTotalEstimation();
+                    }
+                }
+            }
+
             TeamProgressTrack shared = new TeamProgressTrack();
             TeamProgressTrack turkeyPool = new TeamProgressTrack();
             for (int i = 0; i < track.Count(); i++)
             {
-                track[i].RealizationRate = ((track[i].CurrentProgress - track[i].PreviousMonthProgress) / (track[i].TargetProgress - track[i].PreviousMonthProgress)) * 100;
+                if (track[i].ExpectedTarget - track[i].PreviousMonthProgress != 0)
+                {
+                    track[i].RealizationRate = ((track[i].CurrentProgress - track[i].PreviousMonthProgress) / (track[i].ExpectedTarget - track[i].PreviousMonthProgress)) * 100;
+                }
+                else
+                {
+                    track[i].RealizationRate = 0;
+                }
+                
                 if (track[i].Team == "Shared")
                 {
                     shared = track[i];
@@ -2535,6 +2690,8 @@ namespace Epic_Project.Models
                 temp.EpicWeight = (float)Convert.ToDouble(dt.Rows[i]["EpicWeight"]);
                 temp.Estimation = (float)Convert.ToDouble(dt.Rows[i]["Estimation"]);
                 temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
+                temp.Phase5Percentage = (float)Convert.ToDouble(dt.Rows[i]["Phase5Percentage"]);
+                temp.Phase6Percentage = (float)Convert.ToDouble(dt.Rows[i]["Phase6Percentage"]);
                 if (Convert.IsDBNull(dt.Rows[i]["TeamName"]))
                 {
                     temp.Team.TeamName = "";
@@ -2891,6 +3048,8 @@ namespace Epic_Project.Models
                 temp.ActualEffort = (float)Convert.ToDouble(dt.Rows[i]["ActualEffort"]);
                 temp.WeightedOverallProgress = (float)Convert.ToDouble(dt.Rows[i]["OverallCompilation"]);
                 temp.FSMPercentage = (float)Convert.ToDouble(dt.Rows[i]["FSMPercentage"]);
+                temp.Phase5Percentage = (float)Convert.ToDouble(dt.Rows[i]["Phase5Percentage"]);
+                temp.Phase6Percentage = (float)Convert.ToDouble(dt.Rows[i]["Phase6Percentage"]);
                 epics.Add(temp); 
             }
             
@@ -2904,6 +3063,14 @@ namespace Epic_Project.Models
                         if (isFSM == 4)
                         {
                             modules[j].Weight = modules[j].Weight + epics[i].Weight * (epics[i].FSMPercentage / 100);
+                        }
+                        else if (isFSM == 5)
+                        {
+                            modules[j].Weight = modules[j].Weight + epics[i].Weight * (epics[i].Phase5Percentage / 100);
+                        }
+                        else if (isFSM == 6)
+                        {
+                            modules[j].Weight = modules[j].Weight + epics[i].Weight * (epics[i].Phase6Percentage / 100);
                         }
                         else
                         {
@@ -2934,6 +3101,43 @@ namespace Epic_Project.Models
                             modules[j].DevelopmentProgress = modules[j].DevelopmentProgress + devProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
                             modules[j].TestProgress = modules[j].TestProgress + testProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
                             modules[j].UatProgress = modules[j].UatProgress + uatProgress * (epics[i].Weight * epics[i].FSMPercentage / 100) / modules[j].Weight;
+                        }
+                        else if (isFSM == 5)
+                        {
+                            float totalPh5Percentage = epics[i].FSMPercentage + epics[i].Phase5Percentage;
+
+                            float progress = epics[i].Progress >= totalPh5Percentage ? 100 : epics[i].Progress <= epics[i].FSMPercentage ? 0 : (epics[i].Progress - epics[i].FSMPercentage) / epics[i].Phase5Percentage * 100;
+                            float reqProgress = epics[i].RequirementProgress >= totalPh5Percentage ? 100 : epics[i].RequirementProgress <= epics[i].FSMPercentage ? 0 : (epics[i].RequirementProgress - epics[i].FSMPercentage) / epics[i].Phase5Percentage * 100;
+                            float desProgress = epics[i].DesignProgress >= totalPh5Percentage ? 100 : epics[i].DesignProgress <= epics[i].FSMPercentage ? 0 : (epics[i].DesignProgress - epics[i].FSMPercentage) / epics[i].Phase5Percentage * 100;
+                            float devProgress = epics[i].DevelopmentProgress >= totalPh5Percentage ? 100 : epics[i].DevelopmentProgress <= epics[i].FSMPercentage ? 0 : (epics[i].DevelopmentProgress - epics[i].FSMPercentage) / epics[i].Phase5Percentage * 100;
+                            float testProgress = epics[i].TestProgress >= totalPh5Percentage ? 100 : epics[i].TestProgress <= epics[i].FSMPercentage ? 0 : (epics[i].TestProgress - epics[i].FSMPercentage) / epics[i].Phase5Percentage * 100;
+                            float uatProgress = epics[i].UatProgress >= totalPh5Percentage ? 100 : epics[i].UatProgress <= epics[i].FSMPercentage ? 0 : (epics[i].UatProgress - epics[i].FSMPercentage) / epics[i].Phase5Percentage * 100;
+
+                            modules[j].Progress = modules[j].Progress + progress * (epics[i].Weight * epics[i].Phase5Percentage / 100) / modules[j].Weight;
+                            modules[j].RequirementProgress = modules[j].RequirementProgress + reqProgress * (epics[i].Weight * epics[i].Phase5Percentage / 100) / modules[j].Weight;
+                            modules[j].DesignProgress = modules[j].DesignProgress + desProgress * (epics[i].Weight * epics[i].Phase5Percentage / 100) / modules[j].Weight;
+                            modules[j].DevelopmentProgress = modules[j].DevelopmentProgress + devProgress * (epics[i].Weight * epics[i].Phase5Percentage / 100) / modules[j].Weight;
+                            modules[j].TestProgress = modules[j].TestProgress + testProgress * (epics[i].Weight * epics[i].Phase5Percentage / 100) / modules[j].Weight;
+                            modules[j].UatProgress = modules[j].UatProgress + uatProgress * (epics[i].Weight * epics[i].Phase5Percentage / 100) / modules[j].Weight;
+                        }
+                        else if (isFSM == 6)
+                        {
+                            float totalPh5Percentage = epics[i].FSMPercentage + epics[i].Phase5Percentage;
+                            float totalPh6Percentage = epics[i].FSMPercentage + epics[i].Phase5Percentage + epics[i].Phase6Percentage;
+
+                            float progress = epics[i].Progress >= totalPh6Percentage ? 100 : epics[i].Progress <= totalPh5Percentage ? 0 : (epics[i].Progress - totalPh5Percentage) / epics[i].Phase6Percentage * 100;
+                            float reqProgress = epics[i].RequirementProgress >= totalPh6Percentage ? 100 : epics[i].RequirementProgress <= totalPh5Percentage ? 0 : (epics[i].RequirementProgress - totalPh5Percentage) / epics[i].Phase6Percentage * 100;
+                            float desProgress = epics[i].DesignProgress >= totalPh6Percentage ? 100 : epics[i].DesignProgress <= totalPh5Percentage ? 0 : (epics[i].DesignProgress - totalPh5Percentage) / epics[i].Phase6Percentage * 100;
+                            float devProgress = epics[i].DevelopmentProgress >= totalPh6Percentage ? 100 : epics[i].DevelopmentProgress <= totalPh5Percentage ? 0 : (epics[i].DevelopmentProgress - totalPh5Percentage) / epics[i].Phase6Percentage * 100;
+                            float testProgress = epics[i].TestProgress >= totalPh6Percentage ? 100 : epics[i].TestProgress <= totalPh5Percentage ? 0 : (epics[i].TestProgress - totalPh5Percentage) / epics[i].Phase6Percentage * 100;
+                            float uatProgress = epics[i].UatProgress >= totalPh6Percentage ? 100 : epics[i].UatProgress <= totalPh5Percentage ? 0 : (epics[i].UatProgress - totalPh5Percentage) / epics[i].Phase6Percentage * 100;
+
+                            modules[j].Progress = modules[j].Progress + progress * (epics[i].Weight * epics[i].Phase6Percentage / 100) / modules[j].Weight;
+                            modules[j].RequirementProgress = modules[j].RequirementProgress + reqProgress * (epics[i].Weight * epics[i].Phase6Percentage / 100) / modules[j].Weight;
+                            modules[j].DesignProgress = modules[j].DesignProgress + desProgress * (epics[i].Weight * epics[i].Phase6Percentage / 100) / modules[j].Weight;
+                            modules[j].DevelopmentProgress = modules[j].DevelopmentProgress + devProgress * (epics[i].Weight * epics[i].Phase6Percentage / 100) / modules[j].Weight;
+                            modules[j].TestProgress = modules[j].TestProgress + testProgress * (epics[i].Weight * epics[i].Phase6Percentage / 100) / modules[j].Weight;
+                            modules[j].UatProgress = modules[j].UatProgress + uatProgress * (epics[i].Weight * epics[i].Phase6Percentage / 100) / modules[j].Weight;
                         }
                         else
                         {
@@ -3638,5 +3842,70 @@ namespace Epic_Project.Models
             return estimation;
         }
 
+        public void GenerateNewMonthTeamTracking(int year, int month)
+        {
+            int prevYear = month == 1 ? year - 1 : year;
+            int prevMonth = month == 1 ? 12 : month - 1;
+
+            List<TeamTracking> teamTrackings = (List<TeamTracking>)GetTeamTracking(0, prevYear, prevMonth);
+
+            for (int i = 0; i < teamTrackings.Count; i++)
+            {
+                TeamTracking prevTracking = teamTrackings[i];
+                TeamTracking temp = new TeamTracking() {
+                    TeamId = prevTracking.TeamId,
+                    Year = year,
+                    Month = month,
+                    CurrentCapacity = 0,
+                    TeamName = prevTracking.TeamName
+                };
+
+                InsertTeamTracking(temp);
+            }
+        }
+
+        public void GenerateNewMonthSubEpic(int year, int month)
+        {
+            int prevYear = month == 1 ? year - 1 : year;
+            int prevMonth = month == 1 ? 12 : month - 1;
+
+            List<Feature> features = (List<Feature>)GetFeatureAll(0, 0, 0, prevYear, prevMonth, 0, 0);
+
+            for (int i = 0; i < features.Count; i++)
+            {
+                Feature temp = features[i];
+                temp.Year = year;
+                temp.Month = month;
+
+                InsertFeature(temp);
+            }
+        }
+
+        public void DeleteLasMonthFeature(int year, int month)
+        {
+            List<Feature> features = (List<Feature>)GetFeatureAll(0, 0, 0, year, month, 0, 0);
+
+            for (int i = 0; i < features.Count; i++)
+            {
+                DeleteFeature(features[i]);
+            }
+        }
+
+        public void GenerateInitialTeamTrackingData(int teamId)
+        {
+            List<Date> dates = GetDates();
+            for (int i = 0; i < dates.Count; i++)
+            {
+                TeamTracking temp = new TeamTracking()
+                {
+                    TeamId = teamId,
+                    TeamName = "",
+                    Year = dates[i].Year,
+                    Month = dates[i].Month,
+                    CurrentCapacity = 0
+                };
+                InsertTeamTracking(temp);
+            }
+        }
     }
 }

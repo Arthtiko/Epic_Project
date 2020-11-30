@@ -108,6 +108,7 @@ namespace Epic_Project.Controllers
                     if (epic.ProjectLocation.LocationName == "Turkey")
                     {
                         _repository.UpdateMeasurement(measurement, "Turkey Test Admin", ipAddress);
+                        UpdateEfforts();
                         return "Success";
                     }
                     else
@@ -121,6 +122,7 @@ namespace Epic_Project.Controllers
                     if (epic.ProjectLocation.LocationName == "Egypt")
                     {
                         _repository.UpdateMeasurement(measurement, "Egypt Test Admin", ipAddress);
+                        UpdateEfforts();
                         return "Success";
                     }
                     else
@@ -135,6 +137,7 @@ namespace Epic_Project.Controllers
                     if (emp.EmployeeLocation.LocationName == epic.ProjectLocation.LocationName)
                     {
                         _repository.UpdateMeasurement(measurement, emp.EmployeeName, ipAddress);
+                        UpdateEfforts();
                         return "Success";
                     }
                     else
@@ -213,6 +216,22 @@ namespace Epic_Project.Controllers
             m.UatProgress = m.UatProgress < 0 ? 0 : m.UatProgress > 100 ? 100 : m.UatProgress;
 
             return m;
+        }
+
+        public void UpdateEfforts()
+        {
+            List<Date> dates = _repository.GetDates();
+            if (dates != null && dates.Count > 1)
+            {
+                List<Measurement> prevMonthMeasurements = (List<Measurement>)_repository.GetMeasurementAll(0, dates[1].Year, dates[1].Month, "Actual", 0);
+                List<Measurement> lastMonthMeasurements = (List<Measurement>)_repository.GetMeasurementAll(0, dates[0].Year, dates[0].Month, "Actual", 0);
+                for (int i = 0; i < lastMonthMeasurements.Count; i++)
+                {
+                    Measurement temp = lastMonthMeasurements[i];
+                    temp.PreviousMonthCumulativeActualEffort = prevMonthMeasurements[i].ActualEffort + prevMonthMeasurements[i].PreviousMonthCumulativeActualEffort;
+                    _repository.UpdateMeasurement(temp, "Update after import", "Update after import");
+                }
+            }
         }
 
         #endregion

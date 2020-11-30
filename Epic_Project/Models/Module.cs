@@ -22,6 +22,8 @@ namespace Epic_Project.Models
         public float TotalEstimation { get; set; }
         public float WeightedOverallProgress { get; set; }
         public float FSMPercentage { get; set; }
+        public float Phase5Percentage { get; set; }
+        public float Phase6Percentage { get; set; }
         public string EpicString { get; set; }
         public string EpicCountFooter { get; set; }
     }

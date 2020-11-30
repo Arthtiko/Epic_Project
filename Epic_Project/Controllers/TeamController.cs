@@ -63,6 +63,7 @@ namespace Epic_Project.Controllers
             if (team != null && ModelState.IsValid)
             {
                 _repository.InsertTeam(team);
+                _repository.GenerateInitialTeamTrackingData(team.TeamId);
             }
 
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
@@ -82,6 +83,17 @@ namespace Epic_Project.Controllers
             }
 
             return Json(new[] { team }.ToDataSourceResult(request, ModelState));
+        }
+
+        [HttpPost]
+        public ActionResult TeamTracking_Update([DataSourceRequest] DataSourceRequest request, TeamProgressTrack track, int year, int month)
+        {
+            if (track != null && ModelState.IsValid)
+            {
+                _repository.UpdateTeamTracking(new TeamTracking() { TeamId = ((List<Team>)(_repository.GetTeamAll(0, track.Team, 0, 0)))[0].TeamId, Year = year, Month = month, CurrentCapacity = track.CurrentCapacity });
+            }
+
+            return Json(new[] { track }.ToDataSourceResult(request, ModelState));
         }
 
         #endregion

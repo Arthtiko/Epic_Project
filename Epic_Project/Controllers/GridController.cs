@@ -39,6 +39,7 @@ namespace EPICProject.Controllers
             PopulateFirstSellableModules();
             PopulateProjectLocations();
             PopulateTeams();
+            PopulateEditModes();
             return View();
         }
 
@@ -200,6 +201,15 @@ namespace EPICProject.Controllers
             teamList = _repository.GetTeamAll(0, null, 0, 0);
             ViewData["teams"] = teamList;
             ViewData["defaultTeam"] = new Team() { TeamId = 0, TeamName = "", ProjectManager = new ProjectManagerViewModel() { ProjectManagerId = 0, ProjectManagerName = "" }, TeamLeader = new TeamLeaderViewModel() { TeamLeaderId = 0, TeamLeaderName = "" } };
+        }
+
+        private void PopulateEditModes()
+        {
+            List<EditModeModel> modeList = new List<EditModeModel>();
+            modeList.Add(new EditModeModel() { Name = "Epic", Value = 1 });
+            modeList.Add(new EditModeModel() { Name = "Feature", Value = 2 });
+            ViewData["editModes"] = modeList;
+            ViewData["defaultEditMode"] = modeList.First();
         }
 
         [HttpPost]

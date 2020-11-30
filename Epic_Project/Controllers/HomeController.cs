@@ -224,6 +224,10 @@ namespace Epic_Project.Controllers
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = _repository.GetEpicWeight("Turkey", null);
             model.Total = (float)Math.Round(model.Total*100, afterComma);
+            if (model.Completed > model.Total)
+            {
+                model.Completed = model.Total;
+            }
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
             {
@@ -244,7 +248,11 @@ namespace Epic_Project.Controllers
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = _repository.GetEpicWeight("Egypt", null);
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
-            
+            if (model.Completed > model.Total)
+            {
+                model.Completed = model.Total;
+            }
+
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
             {
                 model
@@ -263,6 +271,10 @@ namespace Epic_Project.Controllers
             model.ActualEffort = (float)Math.Round(model.ActualEffort, afterComma);
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = 100;
+            if (model.Completed > model.Total)
+            {
+                model.Completed = model.Total;
+            }
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
             {
@@ -283,6 +295,10 @@ namespace Epic_Project.Controllers
             model.Total = _repository.GetEpicWeight("Turkey", "Phase-4");
             //model.Total = TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
+            if (model.Completed > model.Total)
+            {
+                model.Completed = model.Total;
+            }
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
             {
@@ -303,6 +319,10 @@ namespace Epic_Project.Controllers
             model.Variance = (float)Math.Round((float)model.Variance, afterComma);
             model.Total = _repository.GetEpicWeight("Egypt", "Phase-4");
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
+            if (model.Completed > model.Total)
+            {
+                model.Completed = model.Total;
+            }
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
             {
@@ -325,6 +345,10 @@ namespace Epic_Project.Controllers
             //model.Total = _repository.GetEpicWeight("Egypt", "TRUE");
             //model.Total = model.Total + TurkeyFSMTotal;
             model.Total = (float)Math.Round(model.Total * 100, afterComma);
+            if (model.Completed > model.Total)
+            {
+                model.Completed = model.Total;
+            }
 
             IEnumerable<ProgressModel> progressList = new ProgressModel[]
             {

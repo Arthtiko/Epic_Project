@@ -7,9 +7,13 @@
                   columns.Bound(t => t.PreviousMonthProgress).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
                   columns.Bound(t => t.CurrentProgress).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
                   columns.Bound(t => t.TargetProgress).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  columns.Bound(t => t.ExpectedTarget).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  columns.Bound(t => t.CurrentCapacity).ClientFooterTemplate("#= kendo.format('{0:0.00}', sum)#").Format("{0:0.00}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; padding: .786em .6em .786em 1.286em; text-align:center;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
                   columns.Bound(t => t.RealizationRate).ClientFooterTemplate("#=footerRealizationRate()#").Format("{0:0.00 \\'%'}").HtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center;" }).HeaderHtmlAttributes(new { style = "height:auto; white-space:normal; text-align:center; padding: .786em .6em .786em 1.286em;" }).FooterHtmlAttributes(new { style = "text-align:center;" });
+                  if (!Context.User.IsInRole("Other")) { columns.Command(command => { command.Edit(); }).Width(210); }
               })
               .ToolBar(t => t.ClientTemplateId("GridToolbarTemplate"))
+              .Editable(editable => editable.Mode(GridEditMode.InLine))
               .Scrollable()
               .Sortable()
               .Groupable()
@@ -23,14 +27,23 @@
                   .Model(model =>
                   {
                       model.Id(m => m.Team);
+                      model.Field(m => m.Team).Editable(false);
+                      model.Field(m => m.PreviousMonthProgress).Editable(false);
+                      model.Field(m => m.CurrentProgress).Editable(false);
+                      model.Field(m => m.TargetProgress).Editable(false);
+                      model.Field(m => m.ExpectedTarget).Editable(false);
+                      model.Field(m => m.RealizationRate).Editable(false);
                   })
                   .Aggregates(agg =>
                   {
                       agg.Add(t => t.PreviousMonthProgress).Sum();
                       agg.Add(t => t.CurrentProgress).Sum();
                       agg.Add(t => t.TargetProgress).Sum();
+                      agg.Add(t => t.ExpectedTarget).Sum();
+                      agg.Add(t => t.CurrentCapacity).Sum();
                   })
                   .Read(read => read.Action("TeamTracking_Read", "Team").Data("getReadData"))
+                  .Update(update => update.Action("TeamTracking_Update", "Team").Data("getReadData"))
               )
 )
 <script type="text/javascript">

@@ -188,6 +188,7 @@ namespace EPICProject.Controllers
         public ActionResult EditingInLine_Read([DataSourceRequest] DataSourceRequest request, int epicId, int year, int month, string location, string type, string teamName)
         {
             Team team = null;
+            List<Measurement> measurements = new List<Measurement>();
             int id = _repository.GetEmployeeId(UserId);
             if (id != 1001 && id != 1002 && id != 2001 && id != 2002 && id != 1003 && id != 2003)
             {
@@ -195,13 +196,20 @@ namespace EPICProject.Controllers
                 if (employee.EmployeeType.TypeName == "Team Leader")
                 {
                     List<Team> temp = (List<Team>)_repository.GetTeamAll(0, null, employee.EmployeeId, 0);
-                    team = temp[0];
+                    for (int i = 0; i < temp.Count; i++)
+                    {
+                        team = temp[i];
+                        if (team != null)
+                        {
+                            List<Measurement> t = _repository.SearchMeasurement(year, month, location, type, team.TeamName);
+                            measurements.AddRange(t);
+                        }
+                    }
                 }
-            }
-            List<Measurement> measurements;
-            if (team != null)
-            {
-                measurements = _repository.SearchMeasurement(year, month, location, type, team.TeamName);
+                else if (employee.EmployeeType.TypeName == "Project Manager" || employee.EmployeeType.TypeName == "Program Manager" || employee.EmployeeType.TypeName == "Admin")
+                {
+                    measurements = _repository.SearchMeasurement(year, month, location, type, teamName);
+                }
             }
             else
             {
@@ -395,6 +403,7 @@ namespace EPICProject.Controllers
             if (feature != null && ModelState.IsValid)
             {
                 _repository.DeleteFeature(feature);
+                CalculateFeature(feature);
             }
             return Json(new[] { feature }.ToDataSourceResult(request, ModelState));
         }
@@ -411,7 +420,7 @@ namespace EPICProject.Controllers
                 {
                     measurement = temp[0];
                 }
-                if (measurement != null && measurement.EditMode.Name == "EditMode")
+                if (measurement != null && measurement.EditMode.Name == "Feature")
                 {
                     measurement.RequirementProgress = 0;
                     measurement.DesignProgress = 0;
@@ -482,6 +491,8 @@ namespace EPICProject.Controllers
                 Progress = new ProgressViewModel() { ProgressId = 1, ProgressName = "TRUE" },
                 Variance = new VarianceViewModel() { VarianceId = 2, VarianceName = "FALSE" }
             });
+            _repository.GenerateNewMonthTeamTracking(year, month);
+            _repository.GenerateNewMonthSubEpic(year, month);
 
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }
@@ -505,6 +516,8 @@ namespace EPICProject.Controllers
             }
             Date date = _repository.GetDates()[0];
             _repository.DeleteDateControl(date.Year, date.Month);
+            _repository.DeleteTeamTracking(date.Year, date.Month);
+            _repository.DeleteLasMonthFeature(date.Year, date.Month);
 
             return RedirectToAction("Editing_Inline", "MeasurementGrid");
         }

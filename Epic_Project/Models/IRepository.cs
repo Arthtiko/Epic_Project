@@ -14,6 +14,12 @@ namespace Epic_Project.Models
         Team InsertTeam(Team team);
         Team UpdateTeam(Team team);
         IEnumerable<TeamProgressTrack> GetTeamProgressTrack(int year, int month, int isFSM);
+        IEnumerable<TeamTracking> GetTeamTracking(int teamId, int year, int month);
+        void InsertTeamTracking(TeamTracking tracking);
+        void UpdateTeamTracking(TeamTracking tracking);
+        void DeleteTeamTracking(int year, int month);
+        void GenerateNewMonthTeamTracking(int year, int month);
+        void GenerateInitialTeamTrackingData(int teamId);
         #endregion
 
         #region Module
@@ -124,6 +130,8 @@ namespace Epic_Project.Models
         List<Measurement> GenerateMeasurementForNextMonth(int year, int month, string location, string userName, string ipAddress);
         void DeleteLastMonth(int month, int year, string location, string userName, string ipAddress);
         List<Measurement> SearchMeasurement(int year, int month, string location, string type, string teamName);
+        void GenerateNewMonthSubEpic(int year, int month);
+        void DeleteLasMonthFeature(int year, int month);
         #endregion
 
         #region Side Operations

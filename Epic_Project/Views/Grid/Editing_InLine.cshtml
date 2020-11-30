@@ -12,11 +12,14 @@
                 columns.Bound(e => e.Team.TeamName).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Team").EditorTemplateName("ClientTeamEditor").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.IsFirstSellableModule.FirstSellableModuleName).Width(150).Filterable(ftb => ftb.Multi(true).Search(true)).Title("Delivery").EditorTemplateName("ClientFirstSellableModuleEditor").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.FSMPercentage).Filterable(false).Width(120).Format("{0:0.00 \\'%'}").Title("FSM(Ph-4) Percentage").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.Phase5Percentage).Filterable(false).Width(120).Format("{0:0.00 \\'%'}").Title("Ph-5 Percentage").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.Phase6Percentage).Filterable(false).Width(120).Format("{0:0.00 \\'%'}").Title("Ph-6 Percentage").HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.DistributedUnmappedEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.ActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(120).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.TotalActualEffort).ClientFooterTemplate("Total: #= kendo.format('{0:0.00}', sum)#").Filterable(false).Format("{0:0.00}").Width(135).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.Description).Filterable(ftb => ftb.Search(true)).Width(270).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 columns.Bound(e => e.Dependency).Filterable(ftb => ftb.Search(true)).Width(270).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
+                columns.Bound(e => e.EditMode.Name).Filterable(ftb => ftb.Search(true)).EditorTemplateName("ClientEditModeEditor").Width(150).HtmlAttributes(new { @class = "row-style-default" }).HeaderHtmlAttributes(new { style = "text-align:center; height:auto; white-space:normal;" });
                 if (Context.User.IsInRole("Project Manager") || Context.User.IsInRole("Program Manager") || Context.User.IsInRole("Admin")) { columns.Command(command => { command.Edit(); }).Width(125); }
             })
             .ToolBar(t => t.Excel())
@@ -48,6 +51,8 @@
                     {
                         model.Field(e => e.EPICName).Editable(false);
                         model.Field(e => e.FSMPercentage).Editable(false);
+                        model.Field(e => e.Phase5Percentage).Editable(false);
+                        model.Field(e => e.Phase6Percentage).Editable(false);
                     }
                     model.Field(e => e.ModuleName.ModuleName).Editable(false);
                     model.Field(e => e.EpicType.TypeName).Editable(false);
@@ -62,6 +67,7 @@
                     model.Field(e => e.IsFirstSellableModule).DefaultValue(ViewData["defaultFirstSellableModule"] as Epic_Project.Models.IsFirstSellableModuleViewModel);
                     model.Field(e => e.ProjectLocation).DefaultValue(ViewData["defaultLocation"] as Epic_Project.Models.ProjectLocationViewModel);
                     model.Field(e => e.Team).DefaultValue(ViewData["defaultTeam"] as Epic_Project.Models.Team);
+                    model.Field(e => e.EditMode).DefaultValue(ViewData["defaultEditMode"] as Epic_Project.Models.EditModeModel);
                 })
                 .Create(update => update.Action("EditingInLine_Create", "Grid", new { User.Identity.Name }))
                 .Read(read => read.Action("EditingInLine_Read", "Grid"))

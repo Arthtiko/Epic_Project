@@ -29,6 +29,8 @@ namespace Epic_Project.Models
         public ProjectLocationViewModel ProjectLocation { get; set; }
         public float Estimation { get; set; }
         public float FSMPercentage { get; set; }
+        public float Phase5Percentage { get; set; }
+        public float Phase6Percentage { get; set; }
         public float EpicWeight { get; set; }
         [UIHint("ClientTeam")]
         public Team Team { get; set; }

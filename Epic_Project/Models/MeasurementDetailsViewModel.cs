@@ -27,6 +27,8 @@ namespace Epic_Project.Models
         public Team Team { get; set; }
         public string IsFirstSellableModule { get; set; }
         public float FSMPercentage { get; set; }
+        public float Phase5Percentage { get; set; }
+        public float Phase6Percentage { get; set; }
         public float PrevMonthRequirementProgress { get; set; }
         public float PrevMonthDesignProgress { get; set; }
         public float PrevMonthDevelopmentProgress { get; set; }

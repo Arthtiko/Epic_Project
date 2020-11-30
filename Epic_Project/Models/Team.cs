@@ -40,6 +40,17 @@ namespace Epic_Project.Models
         public float PreviousMonthProgress { get; set; }
         public float CurrentProgress { get; set; }
         public float TargetProgress { get; set; }
+        public float CurrentCapacity { get; set; }
+        public float ExpectedTarget { get; set; }
         public float RealizationRate { get; set; }
+    }
+
+    public class TeamTracking
+    {
+        public int TeamId { get; set; }
+        public string TeamName { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public float CurrentCapacity { get; set; }
     }
 }
